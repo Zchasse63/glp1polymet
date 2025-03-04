@@ -22,7 +22,8 @@ import {
   Dialog, 
   DialogContent, 
   DialogHeader, 
-  DialogTitle 
+  DialogTitle,
+  DialogDescription 
 } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -204,40 +205,48 @@ export function UserProfile() {
       </div>
 
       {/* App Integrations Dialog */}
-      <Dialog open={openDialog === "integrations"} onOpenChange={handleCloseDialog}>
+      <Dialog 
+        open={openDialog === "integrations"} 
+        onOpenChange={(open) => {
+          if (!open) handleCloseDialog();
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">App Integrations</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Manage your connected health and fitness applications
+            </DialogDescription>
           </DialogHeader>
           
-          <div className="py-3 space-y-5">
+          <div className="py-2 space-y-4">
             <Card>
-              <CardHeader className="py-4">
-                <CardTitle className="text-lg">Connected Services</CardTitle>
+              <CardHeader className="py-3">
+                <CardTitle className="text-base">Connected Services</CardTitle>
                 <CardDescription className="text-xs">Manage your connected health and fitness apps</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 px-3 pb-4">
-                <ScrollArea className="h-[270px] pr-3">
-                  <div className="space-y-2">
+              <CardContent className="pt-0 px-3 pb-3">
+                <ScrollArea className="h-[200px] pr-3">
+                  <div className="space-y-1">
                     {connectedServices.map((service, index) => (
                       <div
                         key={service.name}
-                        className="flex items-center justify-between py-2 px-3 rounded-lg transition-all hover:bg-gray-100/50 dark:hover:bg-gray-800/30 cursor-pointer"
+                        className="flex items-center justify-between py-1.5 px-2 rounded-lg transition-all hover:bg-gray-100/50 dark:hover:bg-gray-800/30 cursor-pointer"
                       >
                         <div className="flex items-center">
-                          <div className={`w-9 h-9 rounded-full ${service.bgColor} flex items-center justify-center mr-3`}>
+                          <div className={`w-7 h-7 rounded-full ${service.bgColor} flex items-center justify-center mr-2`}>
                             {service.icon}
                           </div>
                           <div>
-                            <h3 className="text-sm font-medium">
+                            <h3 className="text-xs font-medium">
                               {service.name}
                             </h3>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-[10px] text-muted-foreground">
                               Last synced: {service.lastSynced}
                             </p>
                           </div>
                         </div>
-                        <ChevronRightIcon className="h-4 w-4 text-muted-foreground" />
+                        <ChevronRightIcon className="h-3 w-3 text-muted-foreground" />
                       </div>
                     ))}
                   </div>
@@ -245,7 +254,7 @@ export function UserProfile() {
                 
                 <Button
                   variant="outline"
-                  className="w-full mt-4 border-dashed text-sm"
+                  className="w-full mt-3 border-dashed text-xs h-8"
                   onClick={() => toast({
                     title: "Add New Integration",
                     description: "Add new integration clicked",
@@ -257,20 +266,20 @@ export function UserProfile() {
             </Card>
             
             <Card>
-              <CardHeader className="py-4">
-                <CardTitle className="text-lg">API Access</CardTitle>
+              <CardHeader className="py-3">
+                <CardTitle className="text-base">API Access</CardTitle>
                 <CardDescription className="text-xs">Manage developer API keys and access</CardDescription>
               </CardHeader>
               <CardContent className="py-2">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium">Developer API Key</p>
-                    <p className="text-xs text-muted-foreground">For integrating with your own apps</p>
+                    <p className="text-xs font-medium">Developer API Key</p>
+                    <p className="text-[10px] text-muted-foreground">For integrating with your own apps</p>
                   </div>
                   <Button 
                     variant="outline" 
                     size="sm"
-                    className="text-xs"
+                    className="text-xs h-7"
                     onClick={() => toast({
                       title: "API Key Generated",
                       description: "Your new API key has been generated"
@@ -283,20 +292,20 @@ export function UserProfile() {
             </Card>
             
             <Card>
-              <CardHeader className="py-4">
-                <CardTitle className="text-lg">Data Permissions</CardTitle>
+              <CardHeader className="py-3">
+                <CardTitle className="text-base">Data Permissions</CardTitle>
                 <CardDescription className="text-xs">Control what data is shared with connected apps</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 pt-0">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium">Share Weight Data</p>
-                    <p className="text-xs text-muted-foreground">Allow apps to access your weight logs</p>
+                    <p className="text-xs font-medium">Share Weight Data</p>
+                    <p className="text-[10px] text-muted-foreground">Allow apps to access your weight logs</p>
                   </div>
                   <Button 
                     variant="outline" 
                     size="sm"
-                    className="text-xs"
+                    className="text-xs h-7"
                     onClick={() => toast({
                       title: "Permission Updated",
                       description: "Weight data sharing permission updated"
@@ -308,13 +317,13 @@ export function UserProfile() {
                 
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium">Share Medication Data</p>
-                    <p className="text-xs text-muted-foreground">Allow apps to access your medication info</p>
+                    <p className="text-xs font-medium">Share Medication Data</p>
+                    <p className="text-[10px] text-muted-foreground">Allow apps to access your medication info</p>
                   </div>
                   <Button 
                     variant="outline" 
                     size="sm"
-                    className="text-xs"
+                    className="text-xs h-7"
                     onClick={() => toast({
                       title: "Permission Updated",
                       description: "Medication data sharing permission updated"
