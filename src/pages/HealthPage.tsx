@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { WeightEntryForm } from "@/components/WeightEntryForm";
@@ -7,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { format, subDays } from "date-fns";
+import HealthVitalsOverview from "@/components/health/HealthVitalsOverview";
 import { 
   ActivityIcon, 
   HeartIcon, 
@@ -37,7 +37,6 @@ const HealthPage = () => {
     { id: "w7", weight: 179.5, date: format(subDays(new Date(), 1), "yyyy-MM-dd"), unit: "lbs" },
   ]);
 
-  // Sample data for health metrics
   const healthMetrics = {
     activity: [
       { date: format(subDays(new Date(), 6), "MMM dd"), value: 5823 },
@@ -104,7 +103,16 @@ const HealthPage = () => {
     ],
   };
 
-  // Convert weight between units
+  const vitalsData = {
+    heartRate: { current: 72, trend: -2 },
+    bloodPressure: { systolic: 120, diastolic: 80, trend: -1 },
+    steps: { current: 6254, trend: 5 },
+    sleep: { hours: 7, minutes: 32, trend: 3 },
+    water: { current: 1.2, trend: -15 },
+    calories: { current: 1450, trend: -8 },
+    glucose: { current: 98, trend: 0 },
+  };
+
   const convertWeight = (weight: number, fromUnit: string, toUnit: string): number => {
     if (fromUnit === toUnit) return weight;
     if (fromUnit === "lbs" && toUnit === "kg") return weight * 0.45359237;
@@ -112,12 +120,10 @@ const HealthPage = () => {
     return weight;
   };
 
-  // Get weight in the display unit
   const getWeightInDisplayUnit = (weight: number, unit: string): number => {
     return convertWeight(weight, unit, displayUnit);
   };
 
-  // Calculate statistics
   const sortedEntries = [...weightEntries].sort((a, b) => 
     new Date(a.date).getTime() - new Date(b.date).getTime()
   );
@@ -139,7 +145,6 @@ const HealthPage = () => {
         unit,
       };
       
-      // Sort entries by date
       const updatedEntries = [...weightEntries, newEntry].sort((a, b) => 
         new Date(a.date).getTime() - new Date(b.date).getTime()
       );
@@ -150,12 +155,10 @@ const HealthPage = () => {
     }
   };
 
-  // Toggle display unit
   const toggleDisplayUnit = () => {
     setDisplayUnit(prev => prev === "lbs" ? "kg" : "lbs");
   };
 
-  // Format chart data for display
   const chartData = weightEntries.map(entry => ({
     date: format(new Date(entry.date), "MMM dd"),
     weight: getWeightInDisplayUnit(entry.weight, entry.unit),
@@ -167,6 +170,12 @@ const HealthPage = () => {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Health Overview</h1>
         </div>
+        
+        <Card className="bg-white p-4">
+          <CardContent className="p-0">
+            <HealthVitalsOverview vitals={vitalsData} />
+          </CardContent>
+        </Card>
         
         <Tabs defaultValue="weight" className="w-full">
           <TabsList className="grid w-full grid-cols-4 h-auto">
