@@ -28,10 +28,16 @@ interface MedicationSearchProps {
 export function MedicationSearch({ form }: MedicationSearchProps) {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const [filteredMedications, setFilteredMedications] = useState(commonMedications);
+  const [filteredMedications, setFilteredMedications] = useState(commonMedications || []);
 
   // Update filtered medications whenever search value changes
   useEffect(() => {
+    if (!commonMedications || commonMedications.length === 0) {
+      // If no medications data, use empty array to prevent crashes
+      setFilteredMedications([]);
+      return;
+    }
+
     if (searchValue === "") {
       setFilteredMedications(commonMedications);
     } else {
@@ -44,6 +50,8 @@ export function MedicationSearch({ form }: MedicationSearchProps) {
 
   // Function to handle selection from autocomplete
   const handleMedicationSelect = (selectedValue: string) => {
+    if (!commonMedications || commonMedications.length === 0) return;
+    
     const medication = commonMedications.find(med => med.name === selectedValue);
     if (medication) {
       form.setValue("name", medication.name);
@@ -113,26 +121,28 @@ export function MedicationSearch({ form }: MedicationSearchProps) {
                       </button>
                     </div>
                   </CommandEmpty>
-                  <CommandGroup className="max-h-[300px] overflow-auto">
-                    {filteredMedications.map((medication) => (
-                      <CommandItem
-                        key={medication.name}
-                        value={medication.name}
-                        onSelect={handleMedicationSelect}
-                        className="cursor-pointer"
-                      >
-                        <CheckIcon
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            medication.name === field.value
-                              ? "opacity-100"
-                              : "opacity-0"
-                          )}
-                        />
-                        {medication.name}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
+                  {filteredMedications.length > 0 && (
+                    <CommandGroup className="max-h-[300px] overflow-auto">
+                      {filteredMedications.map((medication) => (
+                        <CommandItem
+                          key={medication.name}
+                          value={medication.name}
+                          onSelect={handleMedicationSelect}
+                          className="cursor-pointer"
+                        >
+                          <CheckIcon
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              medication.name === field.value
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {medication.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  )}
                 </Command>
               </PopoverContent>
             </Popover>
