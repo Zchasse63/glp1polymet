@@ -19,6 +19,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Link } from "react-router-dom";
 
 export function UserProfile() {
   const { logout } = useAuth();
@@ -99,26 +100,20 @@ export function UserProfile() {
             <div className="h-px bg-gray-200 dark:bg-gray-700" />
             
             <div className="grid gap-1 p-1">
-              <button
+              <Link
+                to="/profile"
                 className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 w-full text-left"
-                onClick={() => toast({
-                  title: "Profile",
-                  description: "User profile section clicked",
-                })}
               >
                 <UserIcon className="h-4 w-4" />
                 User Profile
-              </button>
-              <button
+              </Link>
+              <Link
+                to="/settings"
                 className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 w-full text-left"
-                onClick={() => toast({
-                  title: "Settings",
-                  description: "App settings section clicked",
-                })}
               >
                 <SettingsIcon className="h-4 w-4" />
                 App Settings
-              </button>
+              </Link>
               <button
                 className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 w-full text-left"
                 onClick={() => handleOpenDialog("integrations")}
@@ -126,16 +121,13 @@ export function UserProfile() {
                 <AppWindowIcon className="h-4 w-4" />
                 App Integrations
               </button>
-              <button
+              <Link
+                to="/subscription"
                 className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 w-full text-left"
-                onClick={() => toast({
-                  title: "Subscription",
-                  description: "Subscription section clicked",
-                })}
               >
                 <CreditCardIcon className="h-4 w-4" />
                 Subscription
-              </button>
+              </Link>
             </div>
             
             <div className="h-px bg-gray-200 dark:bg-gray-700" />
