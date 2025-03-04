@@ -1,10 +1,12 @@
 
-import React, { useEffect } from "react";
-import { MoonIcon, SunIcon, BellIcon, PlusIcon } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { MoonIcon, SunIcon, BellIcon, PlusIcon, LogOutIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Navigation } from "@/components/Navigation";
 import { UserProfile } from "@/components/UserProfile";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/components/ui/use-toast";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -19,22 +21,39 @@ export function Layout({
   currentPage,
   setCurrentPage,
 }: LayoutProps) {
-  const [theme, setTheme] = React.useState<"light" | "dark">("light");
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const { isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
-    // Check system preference on initial load
-    if (
-      window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-    ) {
+    // Get theme from localStorage
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
       setTheme("dark");
       document.documentElement.classList.add("dark");
+    } else {
+      setTheme("light");
+      document.documentElement.classList.remove("dark");
     }
   }, []);
 
   const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-    document.documentElement.classList.toggle("dark");
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out.",
+    });
   };
 
   return (
@@ -73,6 +92,16 @@ export function Layout({
                     className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"
                   ></span>
                 </Button>
+                {isAuthenticated && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleLogout}
+                    className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <LogOutIcon className="h-5 w-5" />
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"

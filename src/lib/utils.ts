@@ -78,3 +78,66 @@ export function truncateText(text: string, length: number): string {
   if (text.length <= length) return text;
   return text.substring(0, length) + "...";
 }
+
+/**
+ * Get authenticated user from localStorage
+ * @returns User object or null
+ */
+export function getAuthenticatedUser() {
+  const userJson = localStorage.getItem("user");
+  if (!userJson) return null;
+  
+  try {
+    return JSON.parse(userJson);
+  } catch (error) {
+    console.error("Error parsing user JSON:", error);
+    return null;
+  }
+}
+
+/**
+ * Set authenticated user in localStorage
+ * @param user User object
+ */
+export function setAuthenticatedUser(user: any) {
+  localStorage.setItem("user", JSON.stringify(user));
+}
+
+/**
+ * Remove authenticated user from localStorage
+ */
+export function removeAuthenticatedUser() {
+  localStorage.removeItem("user");
+}
+
+/**
+ * Check if user is authenticated
+ * @returns Boolean indicating if user is authenticated
+ */
+export function isUserAuthenticated(): boolean {
+  return !!getAuthenticatedUser();
+}
+
+/**
+ * Format error message for display
+ * @param error Error object or string
+ * @returns Formatted error message
+ */
+export function formatErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === "string") {
+    return error;
+  }
+  return "An unknown error occurred";
+}
+
+/**
+ * Delay function for async operations (useful for simulating API calls in development)
+ * @param ms Milliseconds to delay
+ * @returns Promise that resolves after the delay
+ */
+export function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
