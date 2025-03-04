@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { SearchIcon, CheckIcon } from "lucide-react";
@@ -28,10 +28,23 @@ interface MedicationSearchProps {
 export function MedicationSearch({ form }: MedicationSearchProps) {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [filteredMedications, setFilteredMedications] = useState(commonMedications);
+
+  // Update filtered medications whenever search value changes
+  useEffect(() => {
+    if (searchValue === "") {
+      setFilteredMedications(commonMedications);
+    } else {
+      const filtered = commonMedications.filter(med => 
+        med.name.toLowerCase().includes(searchValue.toLowerCase())
+      );
+      setFilteredMedications(filtered);
+    }
+  }, [searchValue]);
 
   // Function to handle selection from autocomplete
-  const handleMedicationSelect = (value: string) => {
-    const medication = commonMedications.find(med => med.name === value);
+  const handleMedicationSelect = (selectedValue: string) => {
+    const medication = commonMedications.find(med => med.name === selectedValue);
     if (medication) {
       form.setValue("name", medication.name);
       form.setValue("dose", medication.dose);
@@ -39,9 +52,17 @@ export function MedicationSearch({ form }: MedicationSearchProps) {
       form.setValue("totalDose", medication.totalDose);
     } else {
       // If it's a custom entry, just set the name
-      form.setValue("name", value);
+      form.setValue("name", selectedValue);
     }
     setOpen(false);
+  };
+
+  // Allow users to add custom entries that don't exist in the list
+  const handleCustomEntry = () => {
+    if (searchValue.trim() !== "") {
+      form.setValue("name", searchValue);
+      setOpen(false);
+    }
   };
 
   return (
@@ -75,36 +96,46 @@ export function MedicationSearch({ form }: MedicationSearchProps) {
                 </Button>
               </FormControl>
             </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0" align="start">
+            <PopoverContent className="w-[300px] p-0" align="start">
               <Command>
                 <CommandInput 
                   placeholder="Search medications..." 
                   value={searchValue}
                   onValueChange={setSearchValue}
+                  className="h-9"
                 />
-                <CommandEmpty>No medication found.</CommandEmpty>
+                <CommandEmpty>
+                  <div className="px-2 py-3 text-sm text-center">
+                    <p>No medication found.</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-2"
+                      onClick={handleCustomEntry}
+                    >
+                      Add "{searchValue}"
+                    </Button>
+                  </div>
+                </CommandEmpty>
                 <CommandGroup className="max-h-[300px] overflow-auto">
-                  {commonMedications
-                    .filter(med => 
-                      med.name.toLowerCase().includes(searchValue.toLowerCase())
-                    )
-                    .map((medication) => (
-                      <CommandItem
-                        key={medication.name}
-                        value={medication.name}
-                        onSelect={handleMedicationSelect}
-                      >
-                        <CheckIcon
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            medication.name === field.value
-                              ? "opacity-100"
-                              : "opacity-0"
-                          )}
-                        />
-                        {medication.name}
-                      </CommandItem>
-                    ))}
+                  {filteredMedications.map((medication) => (
+                    <CommandItem
+                      key={medication.name}
+                      value={medication.name}
+                      onSelect={handleMedicationSelect}
+                      className="cursor-pointer"
+                    >
+                      <CheckIcon
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          medication.name === field.value
+                            ? "opacity-100"
+                            : "opacity-0"
+                        )}
+                      />
+                      {medication.name}
+                    </CommandItem>
+                  ))}
                 </CommandGroup>
               </Command>
             </PopoverContent>
