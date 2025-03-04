@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginForm } from "@/components/LoginForm";
 import { RegisterForm } from "@/components/RegisterForm";
+import { SSOButtons } from "@/components/SSOButtons";
 import { Layout } from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
@@ -36,9 +37,15 @@ const AuthPage = () => {
             </TabsList>
             <TabsContent value="login" className="mt-6">
               <LoginForm />
+              <div className="mt-6">
+                <SSOButtons />
+              </div>
             </TabsContent>
             <TabsContent value="register" className="mt-6">
               <RegisterForm />
+              <div className="mt-6">
+                <SSOButtons />
+              </div>
             </TabsContent>
           </Tabs>
         </div>

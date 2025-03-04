@@ -7,6 +7,7 @@ export interface User {
   username: string;
   email: string;
   avatar?: string;
+  provider?: string;
 }
 
 interface AuthContextType {
@@ -14,6 +15,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithSSO: (provider: string) => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   error: string | null;
@@ -65,6 +67,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
       console.error("Login error:", err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginWithSSO = async (provider: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // In a real app, this would redirect to the provider's OAuth flow
+      // For demo purposes, we'll just create a mock user with the provider info
+      const mockEmail = `user_${generateId()}@example.com`;
+      const mockUser: User = {
+        id: generateId(),
+        username: `user_${generateId()}`,
+        email: mockEmail,
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${mockEmail}`,
+        provider
+      };
+      
+      setUser(mockUser);
+      localStorage.setItem("user", JSON.stringify(mockUser));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unknown error occurred");
+      console.error(`${provider} login error:`, err);
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -109,6 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: !!user,
         isLoading,
         login,
+        loginWithSSO,
         register,
         logout,
         error
