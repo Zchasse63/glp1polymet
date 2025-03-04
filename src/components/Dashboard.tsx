@@ -15,6 +15,9 @@ import {
   CalendarIcon,
   ClockIcon,
   MoonIcon,
+  Droplet as DropletIcon,
+  Utensils as UtensilsIcon, 
+  Brain as BrainIcon
 } from "lucide-react";
 
 const Dashboard = () => {
