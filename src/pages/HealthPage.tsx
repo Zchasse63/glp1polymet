@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { WeightEntryForm } from "@/components/WeightEntryForm";
@@ -118,6 +117,7 @@ const HealthPage = () => {
     water: { current: 1.2, trend: -15 },
     calories: { current: 1450, trend: -8 },
     glucose: { current: 98, trend: 0 },
+    hrv: { current: 58, trend: 2 },
   };
 
   const convertWeight = (weight: number, fromUnit: string, toUnit: string): number => {
