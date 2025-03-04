@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -25,6 +26,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const { login, error } = useAuth();
+  const navigate = useNavigate();
   
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -41,6 +43,10 @@ export function LoginForm() {
         title: "Login successful",
         description: "Welcome back!",
       });
+      // Add a slight delay before navigation to ensure state updates
+      setTimeout(() => {
+        navigate("/");
+      }, 100);
     } catch (err) {
       toast({
         variant: "destructive",

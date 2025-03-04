@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
 import { Github, Mail } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function SSOButtons() {
   const { loginWithSSO, error } = useAuth();
+  const navigate = useNavigate();
   
   const handleSSOLogin = async (provider: string) => {
     try {
@@ -15,6 +17,10 @@ export function SSOButtons() {
         title: "Login successful",
         description: `Logged in with ${provider}`,
       });
+      // Add a slight delay before navigation to ensure state updates
+      setTimeout(() => {
+        navigate("/");
+      }, 100);
     } catch (err) {
       toast({
         variant: "destructive",

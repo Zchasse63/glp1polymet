@@ -61,6 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         setUser(mockUser);
         localStorage.setItem("user", JSON.stringify(mockUser));
+        return mockUser; // Return the user to help with navigation
       } else {
         throw new Error("Invalid credentials");
       }
@@ -94,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       setUser(mockUser);
       localStorage.setItem("user", JSON.stringify(mockUser));
+      return mockUser; // Return the user to help with navigation
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
       console.error(`${provider} login error:`, err);
@@ -122,9 +124,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       setUser(mockUser);
       localStorage.setItem("user", JSON.stringify(mockUser));
+      return mockUser; // Return the user to help with navigation
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
       console.error("Registration error:", err);
+      throw err;
     } finally {
       setIsLoading(false);
     }
