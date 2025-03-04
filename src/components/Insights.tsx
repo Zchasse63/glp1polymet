@@ -3,9 +3,6 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChartContainer } from "@/components/ui/chart";
-import { Line, LineChart, XAxis, CartesianGrid } from "recharts";
-import { ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import {
   TrendingUpIcon,
   ZapIcon,
@@ -24,18 +21,6 @@ const Insights = () => {
     { factor: "Step Count", correlation: 0.65 },
     { factor: "Stress Level", correlation: -0.58 },
     { factor: "Carb Intake", correlation: -0.45 },
-  ];
-
-  // Sample trend data
-  const trendData = [
-    { date: "Week 1", weight: 210, medication: 80 },
-    { date: "Week 2", weight: 208, medication: 85 },
-    { date: "Week 3", weight: 207, medication: 90 },
-    { date: "Week 4", weight: 205, medication: 85 },
-    { date: "Week 5", weight: 203, medication: 90 },
-    { date: "Week 6", weight: 200, medication: 95 },
-    { date: "Week 7", weight: 198, medication: 90 },
-    { date: "Week 8", weight: 195, medication: 95 },
   ];
 
   return (
@@ -147,77 +132,6 @@ const Insights = () => {
               </span>{" "}
               Your weight loss is most strongly correlated with medication
               adherence and protein intake.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="border border-gray-200 dark:border-gray-700">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">
-            Medication Effectiveness
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-2">
-          <div className="h-[250px] w-full">
-            <ChartContainer
-              config={{}}
-              className="aspect-[none] h-[250px]"
-            >
-              <LineChart
-                data={trendData}
-                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-              >
-                <ChartTooltip
-                  content={<ChartTooltipContent />}
-                />
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="date"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 12 }}
-                  tickMargin={10}
-                />
-
-                <Line
-                  type="monotone"
-                  dataKey="weight"
-                  stroke="hsl(var(--chart-1))"
-                  strokeWidth={2}
-                  dot={{ r: 4, fill: "hsl(var(--chart-1))" }}
-                  activeDot={{ r: 6 }}
-                  name="Weight (lbs)"
-                  radius={4}
-                />
-
-                <Line
-                  type="monotone"
-                  dataKey="medication"
-                  stroke="hsl(var(--chart-2))"
-                  strokeWidth={2}
-                  dot={{ r: 4, fill: "hsl(var(--chart-2))" }}
-                  activeDot={{ r: 6 }}
-                  name="Medication Level (%)"
-                  radius={4}
-                />
-              </LineChart>
-            </ChartContainer>
-          </div>
-
-          <div className="mt-4 text-sm">
-            <p
-              className="font-medium text-gray-700 dark:text-gray-300"
-            >
-              Analysis:
-            </p>
-            <p className="text-gray-500 dark:text-gray-400">
-              Your weight loss shows a strong correlation with medication
-              levels. Periods with higher medication adherence show accelerated
-              weight loss.
             </p>
           </div>
         </CardContent>
