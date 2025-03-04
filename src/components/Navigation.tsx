@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { HomeIcon, PillIcon, BarChartIcon, ZapIcon } from "lucide-react";
+import { HomeIcon, PillIcon, HeartPulseIcon, ZapIcon } from "lucide-react";
 
 interface NavigationProps {
   currentPage: string;
@@ -12,7 +12,7 @@ export function Navigation({ currentPage, setCurrentPage }: NavigationProps) {
   const navItems = [
     { id: "dashboard", label: "Home", icon: HomeIcon, path: "/" },
     { id: "medication", label: "Medication", icon: PillIcon, path: "/medications" },
-    { id: "progress", label: "Progress", icon: BarChartIcon, path: "/progress" },
+    { id: "health", label: "Health", icon: HeartPulseIcon, path: "/health" },
     { id: "insights", label: "Insights", icon: ZapIcon, path: "/insights" },
   ];
 

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,10 +14,7 @@ import {
   PillIcon,
   CalendarIcon,
   ClockIcon,
-  DropletIcon,
-  UtensilsIcon,
   MoonIcon,
-  BrainIcon,
 } from "lucide-react";
 
 const Dashboard = () => {
@@ -81,12 +77,12 @@ const Dashboard = () => {
     navigate("/medications");
   };
   
-  const handleNavigateToProgress = () => {
-    navigate("/progress");
+  const handleNavigateToHealth = () => {
+    navigate("/health");
   };
   
   const handleViewDetails = () => {
-    navigate("/progress");
+    navigate("/health");
   };
 
   return (
@@ -207,7 +203,7 @@ const Dashboard = () => {
             variant="ghost"
             size="sm"
             className="text-primary flex items-center hover:bg-primary/5"
-            onClick={handleNavigateToProgress}
+            onClick={handleNavigateToHealth}
           >
             View all <ChevronRightIcon className="h-4 w-4 ml-1" />
           </Button>
