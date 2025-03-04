@@ -1,10 +1,11 @@
+
 import React, { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { WeightEntryForm } from "@/components/WeightEntryForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from "recharts";
 import { format, subDays } from "date-fns";
 import HealthVitalsOverview from "@/components/health/HealthVitalsOverview";
 import { 
@@ -200,32 +201,26 @@ const HealthPage = () => {
               </Button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base text-gray-500">Starting Weight</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-2xl font-bold">{startWeight.toFixed(1)} {displayUnit}</p>
-                </CardContent>
+            <div className="grid grid-cols-3 md:grid-cols-3 gap-3">
+              <Card className="p-3">
+                <div className="space-y-1">
+                  <p className="text-xs text-gray-500 font-medium">Starting Weight</p>
+                  <p className="text-xl font-bold">{startWeight.toFixed(1)} {displayUnit}</p>
+                </div>
               </Card>
               
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base text-gray-500">Current Weight</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-2xl font-bold">{currentWeight.toFixed(1)} {displayUnit}</p>
-                </CardContent>
+              <Card className="p-3">
+                <div className="space-y-1">
+                  <p className="text-xs text-gray-500 font-medium">Current Weight</p>
+                  <p className="text-xl font-bold">{currentWeight.toFixed(1)} {displayUnit}</p>
+                </div>
               </Card>
               
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base text-gray-500">Weight Loss</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-2xl font-bold">{weightLoss.toFixed(1)} {displayUnit} ({percentageLoss.toFixed(1)}%)</p>
-                </CardContent>
+              <Card className="p-3">
+                <div className="space-y-1">
+                  <p className="text-xs text-gray-500 font-medium">Weight Loss</p>
+                  <p className="text-xl font-bold">{weightLoss.toFixed(1)} {displayUnit} <span className="text-sm text-green-600">({percentageLoss.toFixed(1)}%)</span></p>
+                </div>
               </Card>
             </div>
             
@@ -264,6 +259,20 @@ const HealthPage = () => {
                         tickFormatter={(value) => `${value} ${displayUnit}`}
                       />
                       <Tooltip formatter={(value) => [`${value} ${displayUnit}`, 'Weight']} />
+                      <defs>
+                        <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#4f46e5" stopOpacity={0.1}/>
+                        </linearGradient>
+                      </defs>
+                      <Area 
+                        type="monotone" 
+                        dataKey="weight" 
+                        stroke="#4f46e5" 
+                        strokeWidth={2}
+                        fill="url(#weightGradient)"
+                        fillOpacity={1}
+                      />
                       <Line 
                         type="monotone" 
                         dataKey="weight" 
@@ -301,6 +310,20 @@ const HealthPage = () => {
                       <XAxis dataKey="date" />
                       <YAxis />
                       <Tooltip formatter={(value) => [`${value} steps`, 'Activity']} />
+                      <defs>
+                        <linearGradient id="stepsGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#4f46e5" stopOpacity={0.1}/>
+                        </linearGradient>
+                      </defs>
+                      <Area 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke="#4f46e5" 
+                        strokeWidth={2}
+                        fill="url(#stepsGradient)"
+                        fillOpacity={1}
+                      />
                       <Line 
                         type="monotone" 
                         dataKey="value" 
@@ -337,6 +360,20 @@ const HealthPage = () => {
                       <XAxis dataKey="date" />
                       <YAxis />
                       <Tooltip formatter={(value) => [`${value} hours`, 'Sleep']} />
+                      <defs>
+                        <linearGradient id="sleepGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1}/>
+                        </linearGradient>
+                      </defs>
+                      <Area 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke="#8b5cf6" 
+                        strokeWidth={2}
+                        fill="url(#sleepGradient)"
+                        fillOpacity={1}
+                      />
                       <Line 
                         type="monotone" 
                         dataKey="value" 
@@ -375,6 +412,20 @@ const HealthPage = () => {
                       <XAxis dataKey="date" />
                       <YAxis />
                       <Tooltip formatter={(value) => [`${value} bpm`, 'Heart Rate']} />
+                      <defs>
+                        <linearGradient id="heartRateGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#ef4444" stopOpacity={0.1}/>
+                        </linearGradient>
+                      </defs>
+                      <Area 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke="#ef4444" 
+                        strokeWidth={2}
+                        fill="url(#heartRateGradient)"
+                        fillOpacity={1}
+                      />
                       <Line 
                         type="monotone" 
                         dataKey="value" 
@@ -414,6 +465,32 @@ const HealthPage = () => {
                         formatter={(value, name) => {
                           return [`${value} mmHg`, name === "systolic" ? "Systolic" : "Diastolic"];
                         }} 
+                      />
+                      <defs>
+                        <linearGradient id="systolicGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.1}/>
+                        </linearGradient>
+                        <linearGradient id="diastolicGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#0891b2" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#0891b2" stopOpacity={0.1}/>
+                        </linearGradient>
+                      </defs>
+                      <Area 
+                        type="monotone" 
+                        dataKey="systolic" 
+                        stroke="#06b6d4" 
+                        fill="url(#systolicGradient)"
+                        fillOpacity={0.5}
+                        strokeWidth={2}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="diastolic" 
+                        stroke="#0891b2" 
+                        fill="url(#diastolicGradient)"
+                        fillOpacity={0.5}
+                        strokeWidth={2}
                       />
                       <Line 
                         type="monotone" 
@@ -460,6 +537,20 @@ const HealthPage = () => {
                       <XAxis dataKey="date" />
                       <YAxis />
                       <Tooltip formatter={(value) => [`${value} mg/dL`, 'Glucose']} />
+                      <defs>
+                        <linearGradient id="glucoseGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.1}/>
+                        </linearGradient>
+                      </defs>
+                      <Area 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke="#f59e0b" 
+                        strokeWidth={2}
+                        fill="url(#glucoseGradient)"
+                        fillOpacity={1}
+                      />
                       <Line 
                         type="monotone" 
                         dataKey="value" 
@@ -498,6 +589,20 @@ const HealthPage = () => {
                       <XAxis dataKey="date" />
                       <YAxis />
                       <Tooltip formatter={(value) => [`${value} kcal`, 'Calories']} />
+                      <defs>
+                        <linearGradient id="caloriesGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
+                        </linearGradient>
+                      </defs>
+                      <Area 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke="#10b981" 
+                        strokeWidth={2}
+                        fill="url(#caloriesGradient)"
+                        fillOpacity={1}
+                      />
                       <Line 
                         type="monotone" 
                         dataKey="value" 
@@ -534,6 +639,20 @@ const HealthPage = () => {
                       <XAxis dataKey="date" />
                       <YAxis />
                       <Tooltip formatter={(value) => [`${value} L`, 'Hydration']} />
+                      <defs>
+                        <linearGradient id="hydrationGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                        </linearGradient>
+                      </defs>
+                      <Area 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke="#3b82f6" 
+                        strokeWidth={2}
+                        fill="url(#hydrationGradient)"
+                        fillOpacity={1}
+                      />
                       <Line 
                         type="monotone" 
                         dataKey="value" 
