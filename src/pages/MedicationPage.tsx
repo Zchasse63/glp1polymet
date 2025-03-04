@@ -23,6 +23,8 @@ export interface Medication {
   lastTaken: string;
   nextDose: string;
   level: number;
+  totalDose?: number;
+  unit?: string;
   color: string;
 }
 
@@ -43,6 +45,8 @@ const MedicationPage = () => {
       lastTaken: "Today",
       nextDose: "In 7 days",
       level: 95,
+      totalDose: 0.5,
+      unit: "mg",
       color: "#4f46e5",
     },
     {
@@ -53,6 +57,8 @@ const MedicationPage = () => {
       lastTaken: "4 hours ago",
       nextDose: "In 8 hours",
       level: 80,
+      totalDose: 500,
+      unit: "mg",
       color: "#0ea5e9",
     },
     {
@@ -63,12 +69,14 @@ const MedicationPage = () => {
       lastTaken: "Yesterday",
       nextDose: "Today",
       level: 60,
+      totalDose: 2000,
+      unit: "IU",
       color: "#f59e0b",
     },
   ]);
   const { toast } = useToast();
 
-  const handleAddMedication = (data: { name: string; dose: string; frequency: string }) => {
+  const handleAddMedication = (data: { name: string; dose: string; frequency: string; unit?: string; totalDose?: number }) => {
     try {
       const newMedication: Medication = {
         id: `med${medications.length + 1}`,
@@ -78,6 +86,8 @@ const MedicationPage = () => {
         lastTaken: "Not taken yet",
         nextDose: "Take now",
         level: 100,
+        totalDose: data.totalDose || parseInt(data.dose) || 100,
+        unit: data.unit || (data.dose.includes("mg") ? "mg" : "units"),
         color: generateRandomColor(),
       };
 
@@ -133,12 +143,12 @@ const MedicationPage = () => {
         {medications.length > 0 ? (
           <div className="space-y-3">
             {medications.map((medication) => (
-              <div key={medication.id} className="relative">
+              <div key={medication.id} className="relative group">
                 <MedicationCard medication={medication} />
                 <Button
-                  variant="ghost"
+                  variant="destructive"
                   size="icon"
-                  className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white/80 hover:bg-white"
+                  className="absolute -top-2 -right-2 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
                   onClick={() => handleDeleteMedication(medication.id)}
                 >
                   <XIcon className="h-4 w-4" />

@@ -13,11 +13,18 @@ interface MedicationProps {
     lastTaken: string;
     nextDose: string;
     level: number;
+    totalDose?: number; // Optional total dose for calculation
+    unit?: string; // Optional unit (mg, ml, etc)
     color: string;
   };
 }
 
 export function MedicationCard({ medication }: MedicationProps) {
+  // Calculate the remaining amount in proper units
+  const unit = medication.unit || "mg";
+  const totalDose = medication.totalDose || 100;
+  const remainingAmount = Math.round((medication.level / 100) * totalDose);
+
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-4">
@@ -45,10 +52,10 @@ export function MedicationCard({ medication }: MedicationProps) {
           </div>
           <div className="text-right">
             <div className="text-sm font-medium">
-              {medication.level}%
+              {remainingAmount} {unit}
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Current level
+              Remaining
             </p>
           </div>
         </div>
