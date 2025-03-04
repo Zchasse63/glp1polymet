@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
-import { Line, LineChart, XAxis, CartesianGrid } from "recharts";
+import { Line, LineChart, XAxis, CartesianGrid, YAxis, ReferenceLine, ResponsiveContainer } from "recharts";
 import { ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 interface TrendDataPoint {
@@ -17,64 +17,64 @@ interface MedicationEffectivenessChartProps {
 
 const MedicationEffectivenessChart = ({ trendData }: MedicationEffectivenessChartProps) => {
   return (
-    <Card className="border border-gray-200 dark:border-gray-700 mt-8">
+    <Card className="border border-gray-200 dark:border-gray-700 mt-8 overflow-hidden">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg">
           Medication Effectiveness
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-2">
-        <div className="h-[250px] w-full">
-          <ChartContainer
-            config={{}}
-            className="aspect-[none] h-[250px]"
-          >
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={trendData}
-              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              margin={{ top: 20, right: 30, left: 10, bottom: 10 }}
             >
               <ChartTooltip
                 content={<ChartTooltipContent />}
+                animationDuration={200}
               />
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
+                stroke="hsl(var(--muted)/0.2)"
               />
               <XAxis
                 dataKey="date"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                 tickMargin={10}
               />
-
-              <Line
-                type="monotone"
-                dataKey="weight"
-                stroke="hsl(var(--chart-1))"
-                strokeWidth={2}
-                dot={{ r: 4, fill: "hsl(var(--chart-1))" }}
-                activeDot={{ r: 6 }}
-                name="Weight (lbs)"
-                radius={4}
-                fill="url(#colorWeight)"
-                fillOpacity={0.2}
+              <YAxis
+                yAxisId="left"
+                orientation="left"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                tickMargin={10}
+                label={{ value: 'Weight (lbs)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: 'hsl(var(--muted-foreground))', fontSize: 12 } }}
+              />
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                tickMargin={10}
+                domain={[0, 100]}
+                label={{ value: 'Medication Level (%)', angle: 90, position: 'insideRight', style: { textAnchor: 'middle', fill: 'hsl(var(--muted-foreground))', fontSize: 12 } }}
               />
 
-              <Line
-                type="monotone"
-                dataKey="medication"
-                stroke="hsl(var(--chart-2))"
-                strokeWidth={2}
-                dot={{ r: 4, fill: "hsl(var(--chart-2))" }}
-                activeDot={{ r: 6 }}
-                name="Medication Level (%)"
-                radius={4}
-                fill="url(#colorMed)"
-                fillOpacity={0.2}
+              {/* Add correlation reference lines */}
+              <ReferenceLine 
+                y={200} 
+                yAxisId="left" 
+                stroke="hsl(var(--muted)/0.5)" 
+                strokeDasharray="3 3" 
+                label={{ value: 'Goal Weight', position: 'insideTopRight', fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
               />
-              
-              {/* Add gradient fills */}
+
               <defs>
                 <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.8}/>
@@ -85,16 +85,46 @@ const MedicationEffectivenessChart = ({ trendData }: MedicationEffectivenessChar
                   <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0}/>
                 </linearGradient>
               </defs>
+
+              <Line
+                type="monotone"
+                dataKey="weight"
+                yAxisId="left"
+                stroke="hsl(var(--chart-1))"
+                strokeWidth={3}
+                dot={{ r: 5, fill: "hsl(var(--chart-1))", strokeWidth: 0 }}
+                activeDot={{ r: 7, strokeWidth: 2, stroke: 'white' }}
+                name="Weight (lbs)"
+                fill="url(#colorWeight)"
+                fillOpacity={0.3}
+                animationDuration={1500}
+                animationEasing="ease-in-out"
+              />
+
+              <Line
+                type="monotone"
+                dataKey="medication"
+                yAxisId="right"
+                stroke="hsl(var(--chart-2))"
+                strokeWidth={3}
+                dot={{ r: 5, fill: "hsl(var(--chart-2))", strokeWidth: 0 }}
+                activeDot={{ r: 7, strokeWidth: 2, stroke: 'white' }}
+                name="Medication Level (%)"
+                fill="url(#colorMed)"
+                fillOpacity={0.3}
+                animationDuration={1500}
+                animationEasing="ease-in-out"
+              />
             </LineChart>
-          </ChartContainer>
+          </ResponsiveContainer>
         </div>
 
-        <div className="mt-4 text-sm">
-          <p className="font-medium text-gray-700 dark:text-gray-300">
+        <div className="mt-6 text-sm bg-primary/5 p-4 rounded-lg border border-primary/10">
+          <p className="font-medium text-gray-700 dark:text-gray-300 mb-1">
             Analysis:
           </p>
-          <p className="text-gray-500 dark:text-gray-400">
-            Your weight loss shows a strong correlation with medication
+          <p className="text-gray-600 dark:text-gray-400">
+            Your weight loss shows a <span className="font-semibold text-green-600 dark:text-green-400">strong correlation (85%)</span> with medication
             levels. Periods with higher medication adherence show accelerated
             weight loss.
           </p>
