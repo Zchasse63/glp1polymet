@@ -123,7 +123,7 @@ export function MedicationSearch({ form }: MedicationSearchProps) {
                         <CommandItem
                           key={medication.name}
                           value={medication.name}
-                          onSelect={handleMedicationSelect}
+                          onSelect={(value) => handleMedicationSelect(value)}
                           className="cursor-pointer"
                         >
                           <CheckIcon
