@@ -1,10 +1,7 @@
 
 import React, { useState } from "react";
 import { Layout } from "@/components/Layout";
-import { MedicationCard } from "@/components/MedicationCard";
-import { Button } from "@/components/ui/button";
-import { PlusIcon, XIcon, BarChart } from "lucide-react";
-import { AddMedicationForm } from "@/components/AddMedicationForm";
+import { useToast } from "@/components/ui/use-toast";
 import { 
   Dialog,
   DialogContent,
@@ -12,11 +9,10 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { useToast } from "@/components/ui/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer } from "@/components/ui/chart";
-import { Line, LineChart, XAxis, CartesianGrid } from "recharts";
-import { ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { AddMedicationForm } from "@/components/AddMedicationForm";
+import MedicationHeader from "@/components/medication/MedicationHeader";
+import MedicationList from "@/components/medication/MedicationList";
+import MedicationEffectivenessChart from "@/components/medication/MedicationEffectivenessChart";
 
 // Define the medication type
 export interface Medication {
@@ -146,129 +142,15 @@ const MedicationPage = () => {
   return (
     <Layout currentPage={currentPage} setCurrentPage={setCurrentPage}>
       <div className="p-5 space-y-5">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Medications</h1>
-          <Button 
-            className="rounded-full" 
-            onClick={() => setIsAddingMedication(true)}
-          >
-            <PlusIcon className="h-5 w-5 mr-1" /> Add New
-          </Button>
-        </div>
-
-        {medications.length > 0 ? (
-          <div className="space-y-3">
-            {medications.map((medication) => (
-              <div key={medication.id} className="relative group">
-                <MedicationCard medication={medication} />
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="absolute -top-2 -right-2 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
-                  onClick={() => handleDeleteMedication(medication.id)}
-                >
-                  <XIcon className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-10">
-            <p className="text-gray-500">No medications added yet.</p>
-            <Button 
-              className="mt-4" 
-              onClick={() => setIsAddingMedication(true)}
-            >
-              Add Your First Medication
-            </Button>
-          </div>
-        )}
-
-        {/* Medication Effectiveness Chart */}
-        <Card className="border border-gray-200 dark:border-gray-700 mt-8">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">
-              Medication Effectiveness
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-2">
-            <div className="h-[250px] w-full">
-              <ChartContainer
-                config={{}}
-                className="aspect-[none] h-[250px]"
-              >
-                <LineChart
-                  data={trendData}
-                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                >
-                  <ChartTooltip
-                    content={<ChartTooltipContent />}
-                  />
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                  />
-                  <XAxis
-                    dataKey="date"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12 }}
-                    tickMargin={10}
-                  />
-
-                  <Line
-                    type="monotone"
-                    dataKey="weight"
-                    stroke="hsl(var(--chart-1))"
-                    strokeWidth={2}
-                    dot={{ r: 4, fill: "hsl(var(--chart-1))" }}
-                    activeDot={{ r: 6 }}
-                    name="Weight (lbs)"
-                    radius={4}
-                    fill="url(#colorWeight)"
-                    fillOpacity={0.2}
-                  />
-
-                  <Line
-                    type="monotone"
-                    dataKey="medication"
-                    stroke="hsl(var(--chart-2))"
-                    strokeWidth={2}
-                    dot={{ r: 4, fill: "hsl(var(--chart-2))" }}
-                    activeDot={{ r: 6 }}
-                    name="Medication Level (%)"
-                    radius={4}
-                    fill="url(#colorMed)"
-                    fillOpacity={0.2}
-                  />
-                  
-                  {/* Add gradient fills */}
-                  <defs>
-                    <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorMed" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                </LineChart>
-              </ChartContainer>
-            </div>
-
-            <div className="mt-4 text-sm">
-              <p className="font-medium text-gray-700 dark:text-gray-300">
-                Analysis:
-              </p>
-              <p className="text-gray-500 dark:text-gray-400">
-                Your weight loss shows a strong correlation with medication
-                levels. Periods with higher medication adherence show accelerated
-                weight loss.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <MedicationHeader onAddClick={() => setIsAddingMedication(true)} />
+        
+        <MedicationList 
+          medications={medications} 
+          onDelete={handleDeleteMedication} 
+          onAdd={() => setIsAddingMedication(true)} 
+        />
+        
+        <MedicationEffectivenessChart trendData={trendData} />
 
         <Dialog open={isAddingMedication} onOpenChange={setIsAddingMedication}>
           <DialogContent>
