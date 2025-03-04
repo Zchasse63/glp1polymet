@@ -20,14 +20,14 @@ const WeightLossCorrelations = () => {
   // Format data for horizontal bar chart
   const formattedData = sortedData.map(item => ({
     ...item,
-    absValue: Math.abs(item.correlation),
+    absValue: Math.abs(item.correlation) * 100,
     formattedValue: Math.round(item.correlation * 100)
   }));
   
   return (
-    <Card className="border border-gray-200 dark:border-gray-700">
+    <Card className="border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg">
+        <CardTitle className="text-lg font-medium">
           Weight Loss Correlations
         </CardTitle>
       </CardHeader>
@@ -42,7 +42,7 @@ const WeightLossCorrelations = () => {
               data={formattedData}
               layout="vertical"
               margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              barSize={20}
+              barSize={16}
               barGap={2}
             >
               <XAxis 
@@ -52,14 +52,16 @@ const WeightLossCorrelations = () => {
                 tickLine={false}
                 tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                 tickFormatter={value => `${value}%`}
+                tickCount={6}
               />
               <YAxis 
                 type="category" 
                 dataKey="factor" 
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: 'hsl(var(--foreground))' }}
-                width={120}
+                tick={{ fontSize: 12, fill: 'hsl(var(--foreground))', fontWeight: 500 }}
+                width={130}
+                tickMargin={8}
               />
               <Tooltip
                 formatter={(value, name, props) => {
@@ -71,20 +73,27 @@ const WeightLossCorrelations = () => {
                   backgroundColor: 'hsl(var(--card))',
                   borderColor: 'hsl(var(--border))',
                   borderRadius: '0.5rem',
-                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                  padding: '8px 12px',
+                  fontSize: '12px',
                 }}
+                wrapperStyle={{
+                  outline: 'none',
+                }}
+                cursor={{ fill: 'hsl(var(--muted)/0.15)' }}
               />
               <Bar 
                 dataKey="absValue" 
-                background={{ fill: 'hsl(var(--accent))' }}
+                background={{ fill: 'hsl(var(--accent)/0.4)', radius: [0, 4, 4, 0] }}
                 radius={[0, 4, 4, 0]}
                 animationDuration={1500}
-                animationEasing="ease-in-out"
+                animationEasing="ease-out"
               >
                 {formattedData.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
-                    fill={entry.color} 
+                    fill={entry.color}
+                    style={{ filter: 'brightness(1.05)' }}
                   />
                 ))}
                 <LabelList 
@@ -95,7 +104,13 @@ const WeightLossCorrelations = () => {
                     const sign = item.correlation > 0 ? '+' : '';
                     return `${sign}${value}%`;
                   }}
-                  style={{ fill: 'hsl(var(--foreground))', fontWeight: 'bold', fontSize: 12 }}
+                  style={{ 
+                    fill: 'hsl(var(--foreground))', 
+                    fontWeight: 'bold', 
+                    fontSize: 12,
+                    filter: 'drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.1))'
+                  }}
+                  offset={8}
                 />
               </Bar>
             </BarChart>
