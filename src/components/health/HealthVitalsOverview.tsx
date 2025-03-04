@@ -9,7 +9,8 @@ import {
   Brain, 
   Moon, 
   TrendingUp, 
-  TrendingDown
+  TrendingDown,
+  HeartPulse
 } from "lucide-react";
 import MetricCard from "@/components/dashboard/MetricCard";
 
@@ -22,6 +23,7 @@ interface HealthVitalsOverviewProps {
     water: { current: number; trend: number };
     calories: { current: number; trend: number };
     glucose: { current: number; trend: number };
+    hrv: { current: number; trend: number };
   };
 }
 
@@ -43,6 +45,22 @@ export const HealthVitalsOverview = ({ vitals }: HealthVitalsOverviewProps) => {
       trendColor: vitals.heartRate.trend > 0 
         ? "text-red-500" 
         : "text-green-500",
+    },
+    {
+      title: "HRV",
+      value: vitals.hrv.current.toString(),
+      unit: "ms",
+      icon: <HeartPulse className="w-4 h-4 text-white" />,
+      iconBgColor: "rgba(216, 80, 188, 0.8)",
+      trend: vitals.hrv.trend > 0 
+        ? `+${vitals.hrv.trend}%` 
+        : `${vitals.hrv.trend}%`,
+      trendIcon: vitals.hrv.trend > 0 
+        ? <TrendingUp className="w-3 h-3 mr-1" /> 
+        : <TrendingDown className="w-3 h-3 mr-1" />,
+      trendColor: vitals.hrv.trend > 0 
+        ? "text-green-500" 
+        : "text-red-500",
     },
     {
       title: "Blood Pressure",
