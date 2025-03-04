@@ -105,7 +105,7 @@ export function MedicationSearch({ form }: MedicationSearchProps) {
                     }}
                     className="h-9"
                   />
-                  <CommandList>
+                  <CommandList className="max-h-[300px] overflow-auto animate-in fade-in-0 duration-200 ease-in-out">
                     <CommandEmpty>
                       <div className="px-2 py-3 text-sm text-center">
                         <p>No medication found.</p>
