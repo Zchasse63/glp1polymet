@@ -68,6 +68,7 @@ interface AddMedicationFormProps {
 
 export function AddMedicationForm({ onSubmit, onCancel }: AddMedicationFormProps) {
   const [open, setOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
   
   const form = useForm<MedicationFormValues>({
     resolver: zodResolver(medicationSchema),
@@ -98,11 +99,17 @@ export function AddMedicationForm({ onSubmit, onCancel }: AddMedicationFormProps
   };
 
   // Function to handle selection from autocomplete
-  const handleMedicationSelect = (medication: typeof commonMedications[0]) => {
-    form.setValue("name", medication.name);
-    form.setValue("dose", medication.dose);
-    form.setValue("unit", medication.unit);
-    form.setValue("totalDose", medication.totalDose);
+  const handleMedicationSelect = (value: string) => {
+    const medication = commonMedications.find(med => med.name === value);
+    if (medication) {
+      form.setValue("name", medication.name);
+      form.setValue("dose", medication.dose);
+      form.setValue("unit", medication.unit);
+      form.setValue("totalDose", medication.totalDose);
+    } else {
+      // If it's a custom entry, just set the name
+      form.setValue("name", value);
+    }
     setOpen(false);
   };
 
@@ -126,11 +133,14 @@ export function AddMedicationForm({ onSubmit, onCancel }: AddMedicationFormProps
                         "w-full justify-between",
                         !field.value && "text-muted-foreground"
                       )}
+                      type="button" // Add type="button" to prevent form submission
+                      onClick={(e) => {
+                        e.preventDefault(); // Prevent default to avoid any navigation
+                        setOpen(true);
+                      }}
                     >
                       {field.value
-                        ? commonMedications.find(
-                            (medication) => medication.name === field.value
-                          )?.name || field.value
+                        ? field.value
                         : "Search medications..."}
                       <SearchIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
@@ -138,26 +148,34 @@ export function AddMedicationForm({ onSubmit, onCancel }: AddMedicationFormProps
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0" align="start">
                   <Command>
-                    <CommandInput placeholder="Search medications..." />
+                    <CommandInput 
+                      placeholder="Search medications..." 
+                      value={searchValue}
+                      onValueChange={setSearchValue}
+                    />
                     <CommandEmpty>No medication found.</CommandEmpty>
                     <CommandGroup className="max-h-[300px] overflow-auto">
-                      {commonMedications.map((medication) => (
-                        <CommandItem
-                          key={medication.name}
-                          value={medication.name}
-                          onSelect={() => handleMedicationSelect(medication)}
-                        >
-                          <CheckIcon
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              medication.name === field.value
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          {medication.name}
-                        </CommandItem>
-                      ))}
+                      {commonMedications
+                        .filter(med => 
+                          med.name.toLowerCase().includes(searchValue.toLowerCase())
+                        )
+                        .map((medication) => (
+                          <CommandItem
+                            key={medication.name}
+                            value={medication.name}
+                            onSelect={handleMedicationSelect}
+                          >
+                            <CheckIcon
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                medication.name === field.value
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {medication.name}
+                          </CommandItem>
+                        ))}
                     </CommandGroup>
                   </Command>
                 </PopoverContent>
