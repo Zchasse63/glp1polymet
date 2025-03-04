@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -14,6 +14,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { format } from "date-fns";
 
 // Define the validation schema
@@ -28,12 +35,13 @@ const weightEntrySchema = z.object({
       },
       { message: "Weight must be a valid number between 0 and 1000" }
     ),
+  unit: z.enum(["lbs", "kg"]).default("lbs"),
 });
 
 type WeightFormValues = z.infer<typeof weightEntrySchema>;
 
 interface WeightEntryFormProps {
-  onSubmit: (data: { weight: number; date: string }) => void;
+  onSubmit: (data: { weight: number; date: string; unit: string }) => void;
 }
 
 export function WeightEntryForm({ onSubmit }: WeightEntryFormProps) {
@@ -41,6 +49,7 @@ export function WeightEntryForm({ onSubmit }: WeightEntryFormProps) {
     resolver: zodResolver(weightEntrySchema),
     defaultValues: {
       weight: "",
+      unit: "lbs",
     },
   });
 
@@ -52,7 +61,7 @@ export function WeightEntryForm({ onSubmit }: WeightEntryFormProps) {
       }
       
       const today = format(new Date(), "yyyy-MM-dd");
-      onSubmit({ weight, date: today });
+      onSubmit({ weight, date: today, unit: data.unit });
       form.reset();
       
       toast({
@@ -72,26 +81,53 @@ export function WeightEntryForm({ onSubmit }: WeightEntryFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="weight"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Weight (lbs)</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number" 
-                  placeholder="Enter your weight" 
-                  {...field} 
-                  step="0.1"
-                  min="0"
-                  max="999.9"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="flex gap-4">
+          <FormField
+            control={form.control}
+            name="weight"
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormLabel>Weight</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    placeholder="Enter your weight" 
+                    {...field} 
+                    step="0.1"
+                    min="0"
+                    max="999.9"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="unit"
+            render={({ field }) => (
+              <FormItem className="w-24">
+                <FormLabel>Unit</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Unit" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="lbs">lbs</SelectItem>
+                    <SelectItem value="kg">kg</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <Button type="submit" className="w-full">Record Weight</Button>
       </form>
