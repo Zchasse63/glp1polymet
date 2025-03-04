@@ -1,9 +1,7 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer } from "@/components/ui/chart";
 import { Line, LineChart, XAxis, CartesianGrid, YAxis, ReferenceLine, ResponsiveContainer } from "recharts";
-import { ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 interface TrendDataPoint {
   date: string;
@@ -66,7 +64,6 @@ const MedicationEffectivenessChart = ({ trendData }: MedicationEffectivenessChar
                 label={{ value: 'Medication Level (%)', angle: 90, position: 'insideRight', style: { textAnchor: 'middle', fill: 'hsl(var(--muted-foreground))', fontSize: 12 } }}
               />
 
-              {/* Add correlation reference lines */}
               <ReferenceLine 
                 y={200} 
                 yAxisId="left" 
