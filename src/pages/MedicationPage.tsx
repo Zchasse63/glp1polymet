@@ -1,10 +1,13 @@
 
-import React from "react";
+import React, { useState } from "react";
+import { Layout } from "@/components/Layout";
 import { MedicationCard } from "@/components/MedicationCard";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 
 const MedicationPage = () => {
+  const [currentPage, setCurrentPage] = useState("medication");
+  
   const medications = [
     {
       id: "med1",
@@ -39,20 +42,22 @@ const MedicationPage = () => {
   ];
 
   return (
-    <div className="p-5 space-y-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Medications</h1>
-        <Button className="rounded-full">
-          <PlusIcon className="h-5 w-5 mr-1" /> Add New
-        </Button>
-      </div>
+    <Layout currentPage={currentPage} setCurrentPage={setCurrentPage}>
+      <div className="p-5 space-y-5">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Medications</h1>
+          <Button className="rounded-full">
+            <PlusIcon className="h-5 w-5 mr-1" /> Add New
+          </Button>
+        </div>
 
-      <div className="space-y-3">
-        {medications.map((medication) => (
-          <MedicationCard key={medication.id} medication={medication} />
-        ))}
+        <div className="space-y-3">
+          {medications.map((medication) => (
+            <MedicationCard key={medication.id} medication={medication} />
+          ))}
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 
