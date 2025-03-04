@@ -34,11 +34,15 @@ export function Layout({
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
-    document.documentElement.classList.toggle("dark");
+    if (theme === "light") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   };
 
   return (
-    <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 ${theme}`}>
+    <div className={cn("min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100")}>
       <div className="max-w-md mx-auto bg-white dark:bg-gray-800 min-h-screen flex flex-col shadow-lg">
         <header className="p-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700 sticky top-0 z-20 bg-white dark:bg-gray-800">
           <UserProfile />
