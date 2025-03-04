@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { MedicationCard } from "@/components/MedicationCard";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, XIcon, ChartIcon } from "lucide-react";
+import { PlusIcon, XIcon, BarChart } from "lucide-react";
 import { AddMedicationForm } from "@/components/AddMedicationForm";
 import { 
   Dialog,
