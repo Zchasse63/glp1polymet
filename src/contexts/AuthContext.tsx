@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setError(null);
       
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       // For demo purposes, just check if email contains "test" and password is "password"
       if (email.includes("test") && password === "password") {
@@ -59,8 +59,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`
         };
         
-        setUser(mockUser);
         localStorage.setItem("user", JSON.stringify(mockUser));
+        setUser(mockUser);
         return mockUser; // Return the user to help with navigation
       } else {
         throw new Error("Invalid credentials");
@@ -80,7 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setError(null);
       
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       // In a real app, this would redirect to the provider's OAuth flow
       // For demo purposes, we'll just create a mock user with the provider info
@@ -93,8 +93,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         provider
       };
       
-      setUser(mockUser);
       localStorage.setItem("user", JSON.stringify(mockUser));
+      setUser(mockUser);
       return mockUser; // Return the user to help with navigation
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
@@ -111,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setError(null);
       
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       // In a real app, this would be an API call to register the user
       // For demo purposes, just create a mock user
@@ -122,8 +122,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`
       };
       
-      setUser(mockUser);
       localStorage.setItem("user", JSON.stringify(mockUser));
+      setUser(mockUser);
       return mockUser; // Return the user to help with navigation
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");

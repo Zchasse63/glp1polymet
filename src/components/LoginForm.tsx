@@ -43,10 +43,8 @@ export function LoginForm() {
         title: "Login successful",
         description: "Welcome back!",
       });
-      // Add a slight delay before navigation to ensure state updates
-      setTimeout(() => {
-        navigate("/");
-      }, 100);
+      // Navigate immediately without setTimeout
+      navigate("/");
     } catch (err) {
       toast({
         variant: "destructive",

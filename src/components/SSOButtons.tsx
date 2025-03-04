@@ -17,10 +17,8 @@ export function SSOButtons() {
         title: "Login successful",
         description: `Logged in with ${provider}`,
       });
-      // Add a slight delay before navigation to ensure state updates
-      setTimeout(() => {
-        navigate("/");
-      }, 100);
+      // Navigate immediately without setTimeout
+      navigate("/");
     } catch (err) {
       toast({
         variant: "destructive",
