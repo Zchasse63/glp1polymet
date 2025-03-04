@@ -7,7 +7,10 @@ import { Link } from "react-router-dom";
 const Index = () => {
   return (
     <Layout>
-      <div className="flex justify-end p-4">
+      <div className="flex justify-end p-4 gap-2">
+        <Button asChild className="mb-4" variant="outline">
+          <Link to="/medications">Medication Tracker</Link>
+        </Button>
         <Button asChild className="mb-4">
           <Link to="/progress">View Progress Journey</Link>
         </Button>
