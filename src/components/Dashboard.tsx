@@ -213,287 +213,106 @@ const Dashboard = () => {
           </Button>
         </div>
 
-        {/* First row of metrics */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Card 
-            className={`overflow-hidden card-hover opacity-0 ${isLoaded ? "animate-scale-in opacity-100" : ""}`}
-            style={{ animationDelay: "0.35s", animationFillMode: "forwards" }}
-          >
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-xs text-muted-foreground">
-                    Weight
-                  </p>
-                  <div className="flex items-baseline mt-1">
-                    <span className="text-xl font-bold">
-                      185.6
-                    </span>
-                    <span className="text-xs ml-1 text-muted-foreground">
-                      lbs
-                    </span>
-                  </div>
-                </div>
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "hsl(var(--chart-3)/15)" }}
-                >
-                  <TrendingUpIcon className="h-4 w-4 text-green-500" />
-                </div>
-              </div>
-
-              <div className="mt-2">
-                <div className="flex items-center text-xs text-green-600 dark:text-green-400">
-                  <TrendingUpIcon className="h-3 w-3 mr-1" />
-                  -0.8%
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className={`overflow-hidden card-hover opacity-0 ${isLoaded ? "animate-scale-in opacity-100" : ""}`}
-            style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}
-          >
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-xs text-muted-foreground">
-                    Activity
-                  </p>
-                  <div className="flex items-baseline mt-1">
-                    <span className="text-xl font-bold">
-                      6,254
-                    </span>
-                    <span className="text-xs ml-1 text-muted-foreground">
-                      steps
-                    </span>
-                  </div>
-                </div>
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "hsl(var(--chart-1)/15)" }}
-                >
-                  <ActivityIcon className="h-4 w-4 text-primary" />
-                </div>
-              </div>
-
-              <div className="mt-2">
-                <div className="flex items-center text-xs text-primary">
-                  <TrendingUpIcon className="h-3 w-3 mr-1" />
-                  +12%
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className={`overflow-hidden card-hover opacity-0 ${isLoaded ? "animate-scale-in opacity-100" : ""}`}
-            style={{ animationDelay: "0.45s", animationFillMode: "forwards" }}
-          >
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-xs text-muted-foreground">
-                    Heart Rate
-                  </p>
-                  <div className="flex items-baseline mt-1">
-                    <span className="text-xl font-bold">
-                      72
-                    </span>
-                    <span className="text-xs ml-1 text-muted-foreground">
-                      bpm
-                    </span>
-                  </div>
-                </div>
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "hsl(var(--chart-4)/15)" }}
-                >
-                  <HeartIcon className="h-4 w-4 text-rose-500 animate-pulse-subtle" />
-                </div>
-              </div>
-
-              <div className="mt-2">
-                <div className="text-xs font-medium text-green-600 dark:text-green-400">
-                  Normal
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className={`overflow-hidden card-hover opacity-0 ${isLoaded ? "animate-scale-in opacity-100" : ""}`}
-            style={{ animationDelay: "0.5s", animationFillMode: "forwards" }}
-          >
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-xs text-muted-foreground">
-                    Sleep
-                  </p>
-                  <div className="flex items-baseline mt-1">
-                    <span className="text-xl font-bold">
-                      7h 32m
-                    </span>
-                  </div>
-                </div>
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "hsl(var(--chart-2)/15)" }}
-                >
-                  <MoonIcon className="h-4 w-4 text-indigo-500" />
-                </div>
-              </div>
-
-              <div className="mt-2">
-                <div className="flex items-center text-xs text-green-600 dark:text-green-400">
-                  <TrendingUpIcon className="h-3 w-3 mr-1" />
-                  +8%
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        {/* Second row of metrics */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Card 
-            className={`overflow-hidden card-hover opacity-0 ${isLoaded ? "animate-scale-in opacity-100" : ""}`}
-            style={{ animationDelay: "0.55s", animationFillMode: "forwards" }}
-          >
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-xs text-muted-foreground">
-                    Hydration
-                  </p>
-                  <div className="flex items-baseline mt-1">
-                    <span className="text-xl font-bold">
-                      1.2
-                    </span>
-                    <span className="text-xs ml-1 text-muted-foreground">
-                      L
-                    </span>
-                  </div>
-                </div>
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "hsl(var(--blue-6)/15)" }}
-                >
-                  <DropletIcon className="h-4 w-4 text-blue-500" />
-                </div>
-              </div>
-
-              <div className="mt-2">
-                <div className="text-xs text-muted-foreground">
-                  Goal: 2L
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className={`overflow-hidden card-hover opacity-0 ${isLoaded ? "animate-scale-in opacity-100" : ""}`}
-            style={{ animationDelay: "0.6s", animationFillMode: "forwards" }}
-          >
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-xs text-muted-foreground">
-                    Calories
-                  </p>
-                  <div className="flex items-baseline mt-1">
-                    <span className="text-xl font-bold">
-                      1,450
-                    </span>
-                    <span className="text-xs ml-1 text-muted-foreground">
-                      kcal
-                    </span>
-                  </div>
-                </div>
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "hsl(var(--green-6)/15)" }}
-                >
-                  <UtensilsIcon className="h-4 w-4 text-green-500" />
-                </div>
-              </div>
-
-              <div className="mt-2">
-                <div className="text-xs text-amber-600 dark:text-amber-400">
-                  -350 deficit
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className={`overflow-hidden card-hover opacity-0 ${isLoaded ? "animate-scale-in opacity-100" : ""}`}
-            style={{ animationDelay: "0.65s", animationFillMode: "forwards" }}
-          >
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-xs text-muted-foreground">
-                    Glucose
-                  </p>
-                  <div className="flex items-baseline mt-1">
-                    <span className="text-xl font-bold">
-                      98
-                    </span>
-                    <span className="text-xs ml-1 text-muted-foreground">
-                      mg/dL
-                    </span>
-                  </div>
-                </div>
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "hsl(var(--yellow-6)/15)" }}
-                >
-                  <BrainIcon className="h-4 w-4 text-amber-500" />
-                </div>
-              </div>
-
-              <div className="mt-2">
-                <div className="text-xs font-medium text-green-600 dark:text-green-400">
-                  Stable
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className={`overflow-hidden card-hover opacity-0 ${isLoaded ? "animate-scale-in opacity-100" : ""}`}
-            style={{ animationDelay: "0.7s", animationFillMode: "forwards" }}
-          >
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-xs text-muted-foreground">
-                    Blood Pressure
-                  </p>
-                  <div className="flex items-baseline mt-1">
-                    <span className="text-xl font-bold">
-                      120/80
-                    </span>
-                  </div>
-                </div>
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "hsl(var(--cyan-6)/15)" }}
-                >
-                  <ActivityIcon className="h-4 w-4 text-cyan-500" />
-                </div>
-              </div>
-
-              <div className="mt-2">
-                <div className="text-xs font-medium text-green-600 dark:text-green-400">
-                  Normal
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Health Metrics in a cleaner, more organized grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {/* Row 1 */}
+          <MetricCard
+            title="Weight"
+            value="185.6"
+            unit="lbs"
+            icon={<TrendingUpIcon className="h-4 w-4 text-green-500" />}
+            iconBgColor="hsl(var(--chart-3)/15)"
+            trend="-0.8%"
+            trendIcon={<TrendingUpIcon className="h-3 w-3 mr-1" />}
+            trendColor="text-green-600 dark:text-green-400"
+            animationDelay="0.35s"
+            isLoaded={isLoaded}
+          />
+          
+          <MetricCard
+            title="Activity"
+            value="6,254"
+            unit="steps"
+            icon={<ActivityIcon className="h-4 w-4 text-primary" />}
+            iconBgColor="hsl(var(--chart-1)/15)"
+            trend="+12%"
+            trendIcon={<TrendingUpIcon className="h-3 w-3 mr-1" />}
+            trendColor="text-primary"
+            animationDelay="0.4s"
+            isLoaded={isLoaded}
+          />
+          
+          <MetricCard
+            title="Heart Rate"
+            value="72"
+            unit="bpm"
+            icon={<HeartIcon className="h-4 w-4 text-rose-500 animate-pulse-subtle" />}
+            iconBgColor="hsl(var(--chart-4)/15)"
+            status="Normal"
+            statusColor="text-green-600 dark:text-green-400"
+            animationDelay="0.45s"
+            isLoaded={isLoaded}
+          />
+          
+          <MetricCard
+            title="Sleep"
+            value="7h 32m"
+            icon={<MoonIcon className="h-4 w-4 text-indigo-500" />}
+            iconBgColor="hsl(var(--chart-2)/15)"
+            trend="+8%"
+            trendIcon={<TrendingUpIcon className="h-3 w-3 mr-1" />}
+            trendColor="text-green-600 dark:text-green-400"
+            animationDelay="0.5s"
+            isLoaded={isLoaded}
+          />
+          
+          {/* Row 2 */}
+          <MetricCard
+            title="Hydration"
+            value="1.2"
+            unit="L"
+            icon={<DropletIcon className="h-4 w-4 text-blue-500" />}
+            iconBgColor="hsl(var(--blue-6)/15)"
+            status="Goal: 2L"
+            statusColor="text-muted-foreground"
+            animationDelay="0.55s"
+            isLoaded={isLoaded}
+          />
+          
+          <MetricCard
+            title="Calories"
+            value="1,450"
+            unit="kcal"
+            icon={<UtensilsIcon className="h-4 w-4 text-green-500" />}
+            iconBgColor="hsl(var(--green-6)/15)"
+            status="-350 deficit"
+            statusColor="text-amber-600 dark:text-amber-400"
+            animationDelay="0.6s"
+            isLoaded={isLoaded}
+          />
+          
+          <MetricCard
+            title="Glucose"
+            value="98"
+            unit="mg/dL"
+            icon={<BrainIcon className="h-4 w-4 text-amber-500" />}
+            iconBgColor="hsl(var(--yellow-6)/15)"
+            status="Stable"
+            statusColor="text-green-600 dark:text-green-400"
+            animationDelay="0.65s"
+            isLoaded={isLoaded}
+          />
+          
+          <MetricCard
+            title="Blood Pressure"
+            value="120/80"
+            icon={<ActivityIcon className="h-4 w-4 text-cyan-500" />}
+            iconBgColor="hsl(var(--cyan-6)/15)"
+            status="Normal"
+            statusColor="text-green-600 dark:text-green-400"
+            animationDelay="0.7s"
+            isLoaded={isLoaded}
+          />
         </div>
       </section>
 
@@ -585,93 +404,85 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </section>
+    </div>
+  );
+};
 
-      {/* Connected Services */}
-      <section 
-        className={`space-y-5 opacity-0 ${isLoaded ? "animate-slide-up opacity-100" : ""}`}
-        style={{ animationDelay: "0.5s", animationFillMode: "forwards" }}
-      >
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">
-            Connected Services
-          </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-primary flex items-center hover:bg-primary/5"
-            onClick={() => toast({
-              title: "Connected Services",
-              description: "View all connected services",
-            })}
+// Metric Card Component to clean up the metrics section
+type MetricCardProps = {
+  title: string;
+  value: string;
+  unit?: string;
+  icon: React.ReactNode;
+  iconBgColor: string;
+  trend?: string;
+  trendIcon?: React.ReactNode;
+  trendColor?: string;
+  status?: string;
+  statusColor?: string;
+  animationDelay: string;
+  isLoaded: boolean;
+};
+
+const MetricCard = ({
+  title,
+  value,
+  unit,
+  icon,
+  iconBgColor,
+  trend,
+  trendIcon,
+  trendColor,
+  status,
+  statusColor,
+  animationDelay,
+  isLoaded
+}: MetricCardProps) => {
+  return (
+    <Card 
+      className={`overflow-hidden card-hover opacity-0 ${isLoaded ? "animate-scale-in opacity-100" : ""}`}
+      style={{ animationDelay, animationFillMode: "forwards" }}
+    >
+      <CardContent className="p-3">
+        <div className="flex justify-between items-start">
+          <div>
+            <p className="text-xs text-muted-foreground">
+              {title}
+            </p>
+            <div className="flex items-baseline mt-1">
+              <span className="text-lg font-bold">
+                {value}
+              </span>
+              {unit && (
+                <span className="text-xs ml-1 text-muted-foreground">
+                  {unit}
+                </span>
+              )}
+            </div>
+          </div>
+          <div 
+            className="w-8 h-8 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: iconBgColor }}
           >
-            Manage <ChevronRightIcon className="h-4 w-4 ml-1" />
-          </Button>
+            {icon}
+          </div>
         </div>
 
-        <Card
-          className="overflow-hidden backdrop-blur-sm bg-gradient-to-br from-white to-gray-50 dark:from-gray-800/50 dark:to-gray-900/50 border border-gray-100 dark:border-gray-700 card-hover"
-        >
-          <CardContent className="p-5 space-y-4">
-            {[
-              {
-                name: "MyFitnessPal",
-                icon: (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 11.5C21 17.0228 16.5228 21.5 11 21.5C5.47715 21.5 1 17.0228 1 11.5C1 5.97715 5.47715 1.5 11 1.5C16.5228 1.5 21 5.97715 21 11.5Z" stroke="#22C55E" strokeWidth="2" />
-                    <path d="M21.5 12C21.5 17.2467 17.2467 21.5 12 21.5C6.75329 21.5 2.5 17.2467 2.5 12C2.5 6.75329 6.75329 2.5 12 2.5C17.2467 2.5 21.5 6.75329 21.5 12Z" stroke="#22C55E" strokeWidth="2" />
-                    <path d="M8.5 11.5L10.5 13.5L15.5 8.5" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                ),
-                lastSynced: "Today, 9:41 AM",
-                bgColor: "bg-green-100 dark:bg-green-900/40"
-              },
-              {
-                name: "Withings Scale",
-                icon: (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="hsl(var(--chart-1))" strokeWidth="2" />
-                    <path d="M12 6V12L16 14" stroke="hsl(var(--chart-1))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                ),
-                lastSynced: "Today, 7:15 AM",
-                bgColor: "bg-blue-100 dark:bg-blue-900/40"
-              },
-              {
-                name: "Whoop",
-                icon: (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M22 12H18L15 21L9 3L6 12H2" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                ),
-                lastSynced: "Yesterday, 11:30 PM",
-                bgColor: "bg-purple-100 dark:bg-purple-900/40"
-              }
-            ].map((service, index) => (
-              <div 
-                key={service.name}
-                className={`flex items-center justify-between py-3 px-2 rounded-xl transition-all hover:bg-gray-100/50 dark:hover:bg-gray-800/30 cursor-pointer opacity-0 ${isLoaded ? "animate-slide-in-right opacity-100" : ""}`}
-                style={{ animationDelay: `${0.5 + (index * 0.1)}s`, animationFillMode: "forwards" }}
-              >
-                <div className="flex items-center">
-                  <div className={`w-12 h-12 rounded-full ${service.bgColor} flex items-center justify-center mr-4`}>
-                    {service.icon}
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-lg">
-                      {service.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Last synced: {service.lastSynced}
-                    </p>
-                  </div>
-                </div>
-                <ChevronRightIcon className="h-5 w-5 text-muted-foreground" />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </section>
-    </div>
+        <div className="mt-2">
+          {trend && trendIcon && (
+            <div className={`flex items-center text-xs ${trendColor}`}>
+              {trendIcon}
+              {trend}
+            </div>
+          )}
+          {status && (
+            <div className={`text-xs font-medium ${statusColor}`}>
+              {status}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
