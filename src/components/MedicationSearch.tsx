@@ -83,7 +83,7 @@ export function MedicationSearch({ form }: MedicationSearchProps) {
                     "w-full justify-between",
                     !field.value && "text-muted-foreground"
                   )}
-                  type="button" // Add type="button" to prevent form submission
+                  type="button" // Prevent form submission
                   onClick={(e) => {
                     e.preventDefault(); // Prevent default to avoid any navigation
                     setOpen(true);
@@ -96,7 +96,7 @@ export function MedicationSearch({ form }: MedicationSearchProps) {
                 </Button>
               </FormControl>
             </PopoverTrigger>
-            <PopoverContent className="w-[300px] p-0" align="start">
+            <PopoverContent className="w-[300px] p-0 shadow-[0_0_15px_rgba(0,0,0,0.1)]" align="start">
               <Command>
                 <CommandInput 
                   placeholder="Search medications..." 
