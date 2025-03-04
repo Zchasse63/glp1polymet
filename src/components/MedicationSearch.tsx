@@ -17,7 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { commonMedications } from "@/data/commonMedications";
 import { MedicationFormValues } from "@/schemas/medicationSchema";
 
@@ -28,17 +28,11 @@ interface MedicationSearchProps {
 export function MedicationSearch({ form }: MedicationSearchProps) {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const [filteredMedications, setFilteredMedications] = useState(commonMedications || []);
+  const [filteredMedications, setFilteredMedications] = useState(commonMedications);
 
   // Update filtered medications whenever search value changes
   useEffect(() => {
-    if (!commonMedications || commonMedications.length === 0) {
-      // If no medications data, use empty array to prevent crashes
-      setFilteredMedications([]);
-      return;
-    }
-
-    if (searchValue === "") {
+    if (!searchValue) {
       setFilteredMedications(commonMedications);
     } else {
       const filtered = commonMedications.filter(med => 
@@ -50,8 +44,6 @@ export function MedicationSearch({ form }: MedicationSearchProps) {
 
   // Function to handle selection from autocomplete
   const handleMedicationSelect = (selectedValue: string) => {
-    if (!commonMedications || commonMedications.length === 0) return;
-    
     const medication = commonMedications.find(med => med.name === selectedValue);
     if (medication) {
       form.setValue("name", medication.name);
@@ -109,19 +101,19 @@ export function MedicationSearch({ form }: MedicationSearchProps) {
                     }}
                     className="h-9"
                   />
-                  <CommandEmpty>
-                    <div className="px-2 py-3 text-sm text-center">
-                      <p>No medication found.</p>
-                      <button
-                        type="button"
-                        onClick={handleCustomEntry}
-                        className="mt-2 text-sm text-blue-500 hover:underline"
-                      >
-                        Add "{searchValue}"
-                      </button>
-                    </div>
-                  </CommandEmpty>
-                  {filteredMedications.length > 0 && (
+                  <CommandList>
+                    <CommandEmpty>
+                      <div className="px-2 py-3 text-sm text-center">
+                        <p>No medication found.</p>
+                        <button
+                          type="button"
+                          onClick={handleCustomEntry}
+                          className="mt-2 text-sm text-blue-500 hover:underline"
+                        >
+                          Add "{searchValue}"
+                        </button>
+                      </div>
+                    </CommandEmpty>
                     <CommandGroup className="max-h-[300px] overflow-auto">
                       {filteredMedications.map((medication) => (
                         <CommandItem
@@ -142,7 +134,7 @@ export function MedicationSearch({ form }: MedicationSearchProps) {
                         </CommandItem>
                       ))}
                     </CommandGroup>
-                  )}
+                  </CommandList>
                 </Command>
               </PopoverContent>
             </Popover>
