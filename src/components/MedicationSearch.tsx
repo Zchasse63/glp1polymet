@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { SearchIcon, CheckIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { SearchIcon, CheckIcon, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   FormControl,
@@ -72,74 +72,71 @@ export function MedicationSearch({ form }: MedicationSearchProps) {
       render={({ field }) => (
         <FormItem className="flex flex-col">
           <FormLabel>Medication Name</FormLabel>
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <FormControl>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={open}
-                  className={cn(
-                    "w-full justify-between",
-                    !field.value && "text-muted-foreground"
-                  )}
-                  type="button" // Prevent form submission
-                  onClick={(e) => {
-                    e.preventDefault(); // Prevent default to avoid any navigation
-                    setOpen(true);
-                  }}
-                >
-                  {field.value
-                    ? field.value
-                    : "Search medications..."}
-                  <SearchIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </FormControl>
-            </PopoverTrigger>
-            <PopoverContent className="w-[300px] p-0 shadow-[0_0_15px_rgba(0,0,0,0.1)]" align="start">
-              <Command>
-                <CommandInput 
-                  placeholder="Search medications..." 
-                  value={searchValue}
-                  onValueChange={setSearchValue}
-                  className="h-9"
-                />
-                <CommandEmpty>
-                  <div className="px-2 py-3 text-sm text-center">
-                    <p>No medication found.</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="mt-2"
-                      onClick={handleCustomEntry}
-                    >
-                      Add "{searchValue}"
-                    </Button>
+          <div className="relative w-full">
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <FormControl>
+                  <div className="relative flex items-center w-full">
+                    <Input
+                      placeholder="Search medications..."
+                      value={field.value || searchValue}
+                      onChange={(e) => {
+                        setSearchValue(e.target.value);
+                        if (!open) setOpen(true);
+                      }}
+                      onClick={() => setOpen(true)}
+                      className="pr-10"
+                    />
+                    <ChevronDown className="absolute right-3 h-4 w-4 opacity-50" />
                   </div>
-                </CommandEmpty>
-                <CommandGroup className="max-h-[300px] overflow-auto">
-                  {filteredMedications.map((medication) => (
-                    <CommandItem
-                      key={medication.name}
-                      value={medication.name}
-                      onSelect={handleMedicationSelect}
-                      className="cursor-pointer"
-                    >
-                      <CheckIcon
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          medication.name === field.value
-                            ? "opacity-100"
-                            : "opacity-0"
-                        )}
-                      />
-                      {medication.name}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
+                </FormControl>
+              </PopoverTrigger>
+              <PopoverContent className="w-[300px] p-0 shadow-[0_0_15px_rgba(0,0,0,0.1)]" align="start">
+                <Command>
+                  <CommandInput 
+                    placeholder="Search medications..." 
+                    value={searchValue}
+                    onValueChange={(value) => {
+                      setSearchValue(value);
+                    }}
+                    className="h-9"
+                  />
+                  <CommandEmpty>
+                    <div className="px-2 py-3 text-sm text-center">
+                      <p>No medication found.</p>
+                      <button
+                        type="button"
+                        onClick={handleCustomEntry}
+                        className="mt-2 text-sm text-blue-500 hover:underline"
+                      >
+                        Add "{searchValue}"
+                      </button>
+                    </div>
+                  </CommandEmpty>
+                  <CommandGroup className="max-h-[300px] overflow-auto">
+                    {filteredMedications.map((medication) => (
+                      <CommandItem
+                        key={medication.name}
+                        value={medication.name}
+                        onSelect={handleMedicationSelect}
+                        className="cursor-pointer"
+                      >
+                        <CheckIcon
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            medication.name === field.value
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                        {medication.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
           <FormDescription>
             Select from common medications or type your own
           </FormDescription>
