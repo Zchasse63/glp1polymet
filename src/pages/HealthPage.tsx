@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { WeightEntryForm } from "@/components/WeightEntryForm";
@@ -14,8 +15,14 @@ import {
   DropletIcon, 
   UtensilsIcon, 
   BrainIcon,
-  WeightIcon
+  WeightIcon,
+  Plus
 } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface WeightEntry {
   id: string;
@@ -224,7 +231,27 @@ const HealthPage = () => {
             
             <Card className="bg-white">
               <CardHeader>
-                <CardTitle>Weight Trend</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Weight Trend</CardTitle>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="h-8 w-8 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+                      >
+                        <Plus className="h-4 w-4" />
+                        <span className="sr-only">Add Weight Entry</span>
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80">
+                      <div className="space-y-2">
+                        <h3 className="font-medium">Record Today's Weight</h3>
+                        <WeightEntryForm onSubmit={handleAddWeightEntry} />
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="h-72">
@@ -248,15 +275,6 @@ const HealthPage = () => {
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Record Today's Weight</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <WeightEntryForm onSubmit={handleAddWeightEntry} />
               </CardContent>
             </Card>
           </TabsContent>
