@@ -1,3 +1,4 @@
+
 /**
  * Error Logger Service
  * 
@@ -62,7 +63,7 @@ export const ErrorLogger = {
         console.error(`[CRITICAL] ${error.code || 'CRITICAL'}: ${error.message}`, context, error.originalError);
         break;
       default:
-        console.error(`[${error.severity.toUpperCase()}] ${error.code || 'UNKNOWN'}: ${error.message}`, context);
+        console.error(`[${error.severity}] ${error.code || 'UNKNOWN'}: ${error.message}`, context);
     }
     
     // Track error in analytics for high-severity issues

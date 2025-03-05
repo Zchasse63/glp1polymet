@@ -1,7 +1,5 @@
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { ChevronRightIcon } from "lucide-react";
 import { useRecommendations } from "@/hooks/useRecommendations";
 import { RecommendationFilterType } from "@/types/insightTypes";
 import RecommendationsLoadingState from "./RecommendationsLoadingState";
@@ -70,6 +68,7 @@ const PersonalizedRecommendations: React.FC = () => {
   }
 
   // Get unique recommendation types for filtering
+  // Fix: Extract the type property from each recommendation object
   const recommendationTypes = [...new Set(recommendations.map(rec => rec.type))];
   
   // Filter recommendations based on active filter

@@ -92,6 +92,11 @@ export interface Recommendation {
 }
 
 /**
+ * All possible filter types for recommendations
+ */
+export type RecommendationFilterType = 'all' | RecommendationType | 'bookmarked';
+
+/**
  * Weekly progress achievement badge
  */
 export interface ProgressBadge {
@@ -116,8 +121,3 @@ export interface WeeklyProgressData {
   /** Optional additional metadata */
   metadata?: Record<string, any>;
 }
-
-/**
- * All possible filter types for recommendations
- */
-export type RecommendationFilterType = 'all' | RecommendationType | 'bookmarked';

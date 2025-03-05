@@ -1,15 +1,14 @@
 
 import React from "react";
-import { RecommendationType } from "@/types/insightTypes";
+import { Recommendation } from "@/types/insightTypes";
 import RecommendationCard from "./RecommendationCard";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { toast } from "@/components/ui/use-toast";
 import { ErrorLogger } from "@/utils/errorHandling";
 import { useComponentPerformance } from "@/utils/performance";
-import { ErrorGroup } from "@/utils/errorHandling/types";
 
 interface RecommendationListProps {
-  recommendations: RecommendationType[];
+  recommendations: Recommendation[];
 }
 
 /**
