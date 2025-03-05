@@ -9,10 +9,20 @@
  */
 
 // Export all types
-export { EventCategory, EventPriority, type TrackingEvent, type AnalyticsProvider } from './types';
+export { 
+  EventCategory, 
+  EventPriority, 
+  type TrackingEvent, 
+  type AnalyticsProvider 
+} from './types';
 
 // Export helper functions
-export { trackFeatureUsage, trackError, trackHealthMetricViewed, trackInsightViewed } from './eventHelpers';
+export { 
+  trackFeatureUsage, 
+  trackError, 
+  trackHealthMetricViewed, 
+  trackInsightViewed 
+} from './eventHelpers';
 
 // Export core analytics manager
 import analytics from './AnalyticsManager';

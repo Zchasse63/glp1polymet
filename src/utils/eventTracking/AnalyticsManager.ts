@@ -4,7 +4,7 @@
  * 
  * Core engine for tracking events across multiple providers
  */
-import { AnalyticsProvider, TrackingEvent } from './types';
+import { AnalyticsProvider, TrackingEvent, EventPriority } from './types';
 
 class AnalyticsManager {
   private providers: AnalyticsProvider[] = [];
@@ -45,7 +45,7 @@ class AnalyticsManager {
     const enrichedEvent = {
       ...event,
       timestamp: event.timestamp || Date.now(),
-      priority: event.priority || 'medium'
+      priority: event.priority || EventPriority.MEDIUM
     };
     
     if (!this.initialized) {
