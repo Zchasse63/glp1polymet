@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -32,10 +31,10 @@ export const AppRoutes = () => {
   return (
     <>
       {/* Announce page changes to screen readers */}
-      <ScreenReaderAnnouncement message={pageChangeInfo?.pageAnnouncement || ''} />
+      <ScreenReaderAnnouncement message={pageChangeInfo.pageAnnouncement || ''} />
       
       {/* Update document title when it changes */}
-      {pageChangeInfo?.pageTitle && <title>{pageChangeInfo.pageTitle}</title>}
+      {pageChangeInfo.pageTitle && <title>{pageChangeInfo.pageTitle}</title>}
       
       <ErrorBoundary>
         <Routes>
@@ -51,6 +50,8 @@ export const AppRoutes = () => {
               </ProtectedRoute>
             } 
           />
+          
+          {/* Protected routes */}
           <Route 
             path="/health" 
             element={

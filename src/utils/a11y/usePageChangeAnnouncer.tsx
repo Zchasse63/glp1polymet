@@ -1,11 +1,15 @@
 
-import React, { useState, useEffect } from 'react';
-import { AriaLive } from './AriaLive';
+import { useState, useEffect } from 'react';
+
+interface PageChangeInfo {
+  pageTitle: string | null;
+  pageAnnouncement: string;
+}
 
 /**
  * Announce page changes for screen readers
  */
-export function usePageChangeAnnouncer() {
+export function usePageChangeAnnouncer(): PageChangeInfo {
   const [pageTitle, setPageTitle] = useState<string | null>(null);
   
   useEffect(() => {
@@ -19,11 +23,13 @@ export function usePageChangeAnnouncer() {
     });
     
     // Observe document title changes
-    observer.observe(document.querySelector('title')!, {
-      subtree: true,
-      characterData: true,
-      childList: true
-    });
+    if (document.querySelector('title')) {
+      observer.observe(document.querySelector('title')!, {
+        subtree: true,
+        characterData: true,
+        childList: true
+      });
+    }
     
     // Announcement on initial load
     setPageTitle(document.title);
@@ -32,11 +38,10 @@ export function usePageChangeAnnouncer() {
       observer.disconnect();
     };
   }, []);
-  
-  return (
-    <AriaLive 
-      message={pageTitle ? `Page changed to ${pageTitle}` : ''} 
-      clearAfter={5000}
-    />
-  );
+
+  // Return structured page change info
+  return {
+    pageTitle: pageTitle,
+    pageAnnouncement: pageTitle ? `Page changed to ${pageTitle}` : ''
+  };
 }

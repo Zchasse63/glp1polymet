@@ -1,5 +1,5 @@
 
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { ErrorSeverity, ErrorGroup } from './types';
 import { ErrorLogger } from './ErrorLogger';
 
@@ -37,9 +37,7 @@ export const handleApiError = (
     errorCode,
     { ...context, originalError: error },
     error,
-    false,
-    ErrorSeverity.ERROR,
-    ErrorGroup.API
+    showToast
   );
 
   // Show a toast notification if requested
