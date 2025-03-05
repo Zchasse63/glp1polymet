@@ -1,70 +1,73 @@
 
-import { useEffect, useState } from 'react';
-import { PerformanceTracker } from "/dev-server/src/utils/performance/PerformanceTracker";
+import { useCallback, useRef } from 'react';
+import { PerformanceTracker } from './PerformanceTracker';
+import { PerformanceEventType } from './types';
 
 /**
- * Hook to track component performance metrics
- * @param componentName - Name of the component being tracked
- * @param options - Additional tracking options
+ * Hook for tracking component performance metrics
+ * 
+ * Following CodeFarm Development Methodology:
+ * - Performance Optimization: Track render, mount, and unmount times
+ * - Continuous Learning: Collect metrics for performance analysis
+ * 
+ * @param componentName The name of the component being tracked
+ * @returns Methods for tracking component lifecycle events
  */
-export const useComponentPerformance = (
-  componentName: string,
-  options?: {
-    trackRender?: boolean;
-    trackMount?: boolean;
-    trackUnmount?: boolean;
-  }
-) => {
-  const [mountTime, setMountTime] = useState<number | null>(null);
-  const [renderCount, setRenderCount] = useState(0);
-  
-  // Default options
-  const { trackRender = true, trackMount = true, trackUnmount = true } = options || {};
-  
-  // Track render
-  useEffect(() => {
-    if (trackRender) {
-      // Increment render count
-      setRenderCount(prev => prev + 1);
-      
-      // Track render performance
-      try {
-        PerformanceTracker.trackComponentRender(componentName);
-      } catch (error) {
-        console.error(`Error tracking component render: ${error}`);
-      }
-    }
+export const useComponentPerformance = (componentName: string) => {
+  // Store metrics collection functions in refs to avoid re-renders
+  const componentRef = useRef({
+    name: componentName,
+    mountTime: 0,
   });
   
-  // Track mount and unmount
-  useEffect(() => {
-    if (trackMount) {
-      const startTime = performance.now();
-      setMountTime(startTime);
-      
-      try {
-        PerformanceTracker.trackComponentMount(componentName);
-      } catch (error) {
-        console.error(`Error tracking component mount: ${error}`);
-      }
+  /**
+   * Track component render time
+   */
+  const trackRender = useCallback(() => {
+    const startTime = performance.now();
+    
+    // In case the actual tracker method doesn't exist, use a fallback
+    if (typeof PerformanceTracker.trackComponentRender === 'function') {
+      PerformanceTracker.trackComponentRender(componentRef.current.name, startTime);
+    } else {
+      console.log(`[Performance] Component ${componentRef.current.name} rendered at ${startTime}ms`);
+    }
+    
+    return startTime;
+  }, []);
+  
+  /**
+   * Track component mount time and return cleanup function
+   */
+  const trackMount = useCallback(() => {
+    const startTime = performance.now();
+    componentRef.current.mountTime = startTime;
+    
+    // In case the actual tracker method doesn't exist, use a fallback
+    if (typeof PerformanceTracker.trackComponentMount === 'function') {
+      PerformanceTracker.trackComponentMount(componentRef.current.name, startTime);
+    } else {
+      console.log(`[Performance] Component ${componentRef.current.name} mounted at ${startTime}ms`);
     }
     
     return () => {
-      if (trackUnmount && mountTime) {
-        const unmountTime = performance.now();
-        const lifespan = unmountTime - mountTime;
-        
-        try {
-          PerformanceTracker.trackComponentUnmount(componentName, lifespan);
-        } catch (error) {
-          console.error(`Error tracking component unmount: ${error}`);
-        }
+      // Track unmount in cleanup function
+      const endTime = performance.now();
+      const duration = endTime - componentRef.current.mountTime;
+      
+      // In case the actual tracker method doesn't exist, use a fallback
+      if (typeof PerformanceTracker.trackComponentUnmount === 'function') {
+        PerformanceTracker.trackComponentUnmount(componentRef.current.name, endTime, duration);
+      } else {
+        console.log(`[Performance] Component ${componentRef.current.name} unmounted at ${endTime}ms (duration: ${duration}ms)`);
       }
     };
-  }, [componentName, trackMount, trackUnmount, mountTime]);
+  }, []);
   
   return {
-    renderCount,
-    mountTime
+    trackRender,
+    trackMount,
   };
 };
+
+export default useComponentPerformance;

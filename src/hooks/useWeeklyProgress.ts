@@ -61,7 +61,7 @@ const fetchProgressData = async (days: number): Promise<WeeklyProgressData> => {
   const mockProgressData: WeeklyProgressData = {
     summaryText: "You're making excellent progress!",
     comparisonText: `Your weight loss is 15% faster than the average GLP-1 user at this stage.`,
-    badges: badges as any, // Type assertion needed here
+    badges: badges,
     period: periodText,
     metadata: {
       startDate: "2023-09-01",

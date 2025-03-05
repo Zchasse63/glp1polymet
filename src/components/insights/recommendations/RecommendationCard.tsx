@@ -23,7 +23,7 @@ interface RecommendationCardProps {
   isBookmarked: boolean;
   onBookmarkToggle: (id: string) => void;
   bookmarkIcon: React.ReactNode;
-  bookmarkFilledIcon: React.ReactNode; // Added the missing prop
+  bookmarkFilledIcon: React.ReactNode;
 }
 
 /**
@@ -83,17 +83,20 @@ export const formatRecType = (type: string): string => {
 /**
  * Helper function to get the appropriate icon component based on the recommendation type
  */
-const getIconComponent = (iconType: RecommendationIconType) => {
-  switch (iconType) {
-    case 'nutrition':
+const getIconComponent = (iconType: string) => {
+  // Convert string to RecommendationIconType enum value if possible
+  const safeIconType = iconType as RecommendationIconType;
+  
+  switch (safeIconType) {
+    case RecommendationIconType.NUTRITION:
       return <UserIcon aria-hidden="true" />;
-    case 'medication':
+    case RecommendationIconType.MEDICATION:
       return <PillIcon aria-hidden="true" />;
-    case 'activity':
+    case RecommendationIconType.ACTIVITY:
       return <ActivityIcon aria-hidden="true" />;
-    case 'sleep':
+    case RecommendationIconType.SLEEP:
       return <MoonIcon aria-hidden="true" />;
-    case 'stress':
+    case RecommendationIconType.STRESS:
       return <BrainIcon aria-hidden="true" />;
     default:
       return <SparklesIcon aria-hidden="true" />;

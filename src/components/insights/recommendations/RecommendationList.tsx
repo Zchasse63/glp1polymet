@@ -96,8 +96,15 @@ const RecommendationList: React.FC<RecommendationListProps> = ({ recommendations
             onBookmarkToggle={handleBookmarkToggle}
             bookmarkIcon={
               <AccessibleIcon 
-                icon={bookmarked ? <BookmarkCheck className="h-5 w-5 text-yellow-500" /> : <Bookmark className="h-5 w-5" />}
+                icon={<Bookmark className="h-5 w-5" />}
                 label={bookmarked ? "Remove bookmark" : "Bookmark recommendation"}
+                role="button"
+              />
+            }
+            bookmarkFilledIcon={
+              <AccessibleIcon 
+                icon={<BookmarkCheck className="h-5 w-5 text-yellow-500" />}
+                label="Remove bookmark"
                 role="button"
               />
             }

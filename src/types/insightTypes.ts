@@ -23,6 +23,11 @@ export enum RecommendationType {
 }
 
 /**
+ * Filter type for recommendations
+ */
+export type RecommendationFilterType = RecommendationType | 'all' | 'bookmarked' | string;
+
+/**
  * Icons for health recommendations
  */
 export enum RecommendationIconType {
@@ -125,6 +130,29 @@ export interface WeeklyProgress {
   improvementArea: string;
   /** Next week recommendations */
   recommendations: Recommendation[];
+}
+
+/**
+ * Weekly progress data model for presentation
+ */
+export interface WeeklyProgressData {
+  /** Summary text */
+  summaryText: string;
+  /** Comparison text */
+  comparisonText: string;
+  /** Badge information */
+  badges: Array<{
+    text: string;
+    colorTheme: string;
+  }>;
+  /** Time period text */
+  period: string;
+  /** Additional metadata */
+  metadata: {
+    startDate: string;
+    endDate: string;
+    comparisonGroup: string;
+  };
 }
 
 /**

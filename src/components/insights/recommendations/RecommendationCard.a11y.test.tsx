@@ -7,7 +7,8 @@ import RecommendationCard from './RecommendationCard';
 import { 
   Recommendation, 
   RecommendationType, 
-  RecommendationIconType 
+  RecommendationIconType,
+  ImpactLevel
 } from '@/types/insightTypes';
 import { vi } from 'vitest';
 import { BookmarkIcon, BookmarkFilledIcon } from '@radix-ui/react-icons';
@@ -20,7 +21,7 @@ describe('RecommendationCard Accessibility', () => {
     type: RecommendationType.EXERCISE,
     iconType: RecommendationIconType.ACTIVITY,
     color: 'green',
-    impact: 'medium',
+    impact: 'medium' as ImpactLevel,
     actionLabel: 'Learn More',
     actionLink: '/recommendations/123'
   };
@@ -147,7 +148,7 @@ describe('RecommendationCard Accessibility', () => {
     // Rerender with high impact
     const highImpactRecommendation = {
       ...mockRecommendation,
-      impact: 'high'
+      impact: 'high' as ImpactLevel
     };
 
     rerender(
@@ -168,7 +169,7 @@ describe('RecommendationCard Accessibility', () => {
     // Rerender with low impact
     const lowImpactRecommendation = {
       ...mockRecommendation,
-      impact: 'low'
+      impact: 'low' as ImpactLevel
     };
 
     rerender(
