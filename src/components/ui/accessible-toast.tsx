@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { 
   Toast, 
   ToastClose,
@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/toast';
 import { ScreenReaderAnnouncement } from '@/utils/accessibility';
 
-// Fix the interface by not extending ToastProps directly
 interface AccessibleToastProps {
   title?: React.ReactNode;
   description?: React.ReactNode;
@@ -19,7 +18,7 @@ interface AccessibleToastProps {
   assertive?: boolean;
   className?: string;
   variant?: "default" | "destructive";
-  // Add other props we need from ToastProps
+  // Add other needed props from ToastProps
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   id?: string;

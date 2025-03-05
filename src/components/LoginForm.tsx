@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,7 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useSecureAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { SSOButtons } from "./SSOButtons";
 import { ErrorLogger } from "@/utils/errorHandling";
 
@@ -28,11 +29,11 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
+  const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
   const [authError, setAuthError] = useState<string | null>(null);
-  const { login } = useSecureAuth();
+  const { login } = useAuth();
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -71,10 +72,10 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         </div>
       </div>
 
-      <Form {...{...form, register}}>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
-            control={register}
+            control={form.control}
             name="email"
             render={({ field }) => (
               <FormItem>
@@ -86,13 +87,13 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                     {...field}
                   />
                 </FormControl>
-                <FormMessage>{errors.email?.message}</FormMessage>
+                <FormMessage />
               </FormItem>
             )}
           />
 
           <FormField
-            control={register}
+            control={form.control}
             name="password"
             render={({ field }) => (
               <FormItem>
@@ -104,7 +105,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                     {...field}
                   />
                 </FormControl>
-                <FormMessage>{errors.password?.message}</FormMessage>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -115,8 +116,8 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Logging in..." : "Login"}
+          <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? "Logging in..." : "Login"}
           </Button>
         </form>
       </Form>

@@ -37,6 +37,24 @@ export interface UserProfile {
 }
 
 /**
+ * Registration form data structure
+ */
+export interface RegisterFormData {
+  /** User's full name */
+  name: string;
+  /** User's email address */
+  email: string;
+  /** User's chosen password */
+  password: string;
+  /** Password confirmation for validation */
+  confirmPassword: string;
+  /** Whether terms and conditions were accepted */
+  termsAccepted: boolean;
+  /** Whether marketing emails were opted into */
+  marketingEmails?: boolean;
+}
+
+/**
  * Authentication error types
  */
 export type AuthErrorType = 

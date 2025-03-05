@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { useAuth } from '@/contexts/AuthContext';
 import { ScreenReaderAnnouncement } from '@/utils/accessibility';
 import { usePageChangeAnnouncer } from '@/utils/a11y/usePageChangeAnnouncer';
@@ -27,15 +27,15 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 // Routes with accessibility enhancements
 export const AppRoutes = () => {
   // Announce page changes to screen readers
-  const { pageTitle, pageAnnouncement } = usePageChangeAnnouncer();
+  const pageChangeInfo = usePageChangeAnnouncer();
 
   return (
     <>
       {/* Announce page changes to screen readers */}
-      <ScreenReaderAnnouncement message={pageAnnouncement} />
+      <ScreenReaderAnnouncement message={pageChangeInfo?.pageAnnouncement || ''} />
       
       {/* Update document title when it changes */}
-      {pageTitle && <title>{pageTitle}</title>}
+      {pageChangeInfo?.pageTitle && <title>{pageChangeInfo.pageTitle}</title>}
       
       <ErrorBoundary>
         <Routes>

@@ -14,6 +14,7 @@ import userEvent from '@testing-library/user-event';
 import RecommendationCard from './RecommendationCard';
 import { testAccessibility, checkKeyboardAccessibility } from '@/utils/testing/a11yTestUtils';
 import { Recommendation } from '@/types/insightTypes';
+import { BookmarkIcon } from 'lucide-react';
 
 describe('RecommendationCard Accessibility', () => {
   const mockRecommendation: Recommendation = {
@@ -28,12 +29,15 @@ describe('RecommendationCard Accessibility', () => {
     actionLink: '/water'
   };
   
+  const mockBookmarkIcon = <BookmarkIcon className="h-4 w-4" data-testid="bookmark-icon" />;
+  
   const defaultProps = {
     recommendation: mockRecommendation,
     onActionClick: jest.fn(),
     index: 0,
     isBookmarked: false,
-    onBookmarkToggle: jest.fn()
+    onBookmarkToggle: jest.fn(),
+    bookmarkIcon: mockBookmarkIcon
   };
 
   it('should not have accessibility violations', async () => {

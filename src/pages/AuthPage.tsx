@@ -6,12 +6,11 @@ import { RegisterForm } from "@/components/RegisterForm";
 import { SSOButtons } from "@/components/SSOButtons";
 import { Layout } from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SkipToContent } from "@/utils/accessibility/SkipToContent";
 import { ErrorLogger } from "@/utils/errorHandling";
-import { ErrorGroup, ErrorSeverity } from "@/utils/errorHandling/types";
 
 /**
  * Authentication Page
@@ -28,6 +27,7 @@ const AuthPage = () => {
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Get the intended destination from the location state, if any
   const from = location.state?.from?.pathname || "/";
@@ -51,6 +51,11 @@ const AuthPage = () => {
       );
     }
   }, [location]);
+
+  // Handle successful authentication
+  const handleAuthSuccess = () => {
+    navigate(from, { replace: true });
+  };
 
   // Loading state component using Skeleton UI
   if (isLoading) {
@@ -129,13 +134,13 @@ const AuthPage = () => {
               transition={{ duration: 0.3 }}
             >
               <TabsContent value="login" className="mt-6">
-                <LoginForm />
+                <LoginForm onSuccess={handleAuthSuccess} />
                 <div className="mt-6">
                   <SSOButtons />
                 </div>
               </TabsContent>
               <TabsContent value="register" className="mt-6">
-                <RegisterForm />
+                <RegisterForm onSuccess={handleAuthSuccess} />
                 <div className="mt-6">
                   <SSOButtons />
                 </div>

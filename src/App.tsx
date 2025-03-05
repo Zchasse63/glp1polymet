@@ -17,7 +17,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { I18nProvider } from "./lib/i18n";
-import AppRoutes from "./routes/AppRoutes";
+import { AppRoutes } from "./routes/AppRoutes";
 import { EnhancedErrorBoundary, setupGlobalErrorHandlers } from "./utils/errorHandling";
 import { createQueryClient } from "./lib/queryClient";
 import { useEffect } from "react";
