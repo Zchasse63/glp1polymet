@@ -52,7 +52,7 @@ const WeightLossCorrelations = () => {
                 tickLine={false}
                 tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                 tickFormatter={value => `${value}%`}
-                tickCount={6}
+                tickCount={6} // Fixed: Changed from array to number
               />
               <YAxis 
                 type="category" 
@@ -100,7 +100,7 @@ const WeightLossCorrelations = () => {
                   dataKey="formattedValue" 
                   position="right" 
                   formatter={(value, name, props) => {
-                    // Fixed: Check if props and props.payload exist before accessing
+                    // Check if props and props.payload exist before accessing
                     if (props && props.payload) {
                       const item = props.payload;
                       const sign = item.correlation > 0 ? '+' : '';
