@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Correlation } from '@/utils/insights/types';
 import { TimePeriod } from '@/components/insights/TimePeriodSelector';

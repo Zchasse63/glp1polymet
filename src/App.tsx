@@ -1,4 +1,3 @@
-
 /**
  * Main Application Component
  * 
@@ -18,12 +17,11 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { I18nProvider } from "./lib/i18n";
 import AppRoutes from "./routes/AppRoutes";
-import { EnhancedErrorBoundary } from "./utils/errorHandling";
+import { EnhancedErrorBoundary, setupGlobalErrorHandlers } from "./utils/errorHandling";
 import { createQueryClient } from "./lib/queryClient";
 import { useEffect } from "react";
-import { setupGlobalErrorHandlers } from "./utils/errorHandling";
-import { useSkipLink } from "./utils/accessibilityUtils";
 import { initPerformanceMonitoring } from "./utils/performanceMonitoring";
+import { useSkipLink } from "./utils/accessibilityUtils";
 
 // Create a QueryClient instance with enhanced configuration
 const queryClient = createQueryClient();
