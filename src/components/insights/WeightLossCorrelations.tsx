@@ -52,7 +52,7 @@ const WeightLossCorrelations = () => {
                 tickLine={false}
                 tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                 tickFormatter={value => `${value}%`}
-                tickCount={6} // Fixed: Changed from array to number
+                tickCount={6}
               />
               <YAxis 
                 type="category" 
@@ -83,7 +83,7 @@ const WeightLossCorrelations = () => {
                 cursor={{ fill: 'hsl(var(--muted)/0.15)' }}
               />
               <Bar 
-                dataKey="absValue" 
+                dataKey="absValue"
                 background={{ fill: 'hsl(var(--accent)/0.4)', radius: [0, 4, 4, 0] }}
                 radius={[0, 4, 4, 0]}
                 animationDuration={1500}
