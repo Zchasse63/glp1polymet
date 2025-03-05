@@ -1,58 +1,53 @@
 
-import { UserHealthData } from "./types";
+import { Correlation } from './types';
+import { TimePeriod } from '@/components/insights/TimePeriodSelector';
 
-// Mock data generator for development
-export function generateMockHealthData(days: number): UserHealthData[] {
-  const data: UserHealthData[] = [];
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - days);
+/**
+ * Generates mock correlation data for development and testing
+ * 
+ * @param timePeriod - The selected time period for data analysis
+ * @returns Array of correlation data
+ */
+export const getMockCorrelationData = (timePeriod: TimePeriod): Correlation[] => {
+  // Base correlations that will be slightly modified based on the time period
+  // to simulate how correlations might change over different timeframes
+  const baseCorrelations: Correlation[] = [
+    { factor: "Sleep Duration", correlation: 0.68 },
+    { factor: "Water Intake", correlation: 0.52 },
+    { factor: "Step Count", correlation: 0.47 },
+    { factor: "Meal Frequency", correlation: -0.38 },
+    { factor: "Protein Intake", correlation: 0.41 },
+    { factor: "Processed Foods", correlation: -0.62 },
+    { factor: "Stress Level", correlation: -0.44 },
+    { factor: "Alcohol Consumption", correlation: -0.35 }
+  ];
   
-  let currentWeight = 185; // Starting weight
-  
-  for (let i = 0; i < days; i++) {
-    const date = new Date(startDate);
-    date.setDate(date.getDate() + i);
-    
-    // Randomize factors that affect weight
-    const medicationAdherence = Math.random() > 0.2; // 80% adherence rate
-    const proteinIntake = 40 + Math.random() * 80; // 40-120g
-    const sleepHours = 5 + Math.random() * 4; // 5-9 hours
-    const stepCount = 2000 + Math.random() * 10000; // 2k-12k steps
-    const stressLevel = 1 + Math.random() * 9; // 1-10 scale
-    const carbIntake = 100 + Math.random() * 200; // 100-300g
-    
-    // Weight changes based on factors (simplified model)
-    let weightChange = 0;
-    weightChange -= medicationAdherence ? 0.15 : 0; // Medication helps lose weight
-    weightChange -= (proteinIntake > 70) ? 0.1 : 0; // Higher protein helps lose weight
-    weightChange -= (sleepHours > 7) ? 0.08 : 0; // Good sleep helps lose weight
-    weightChange -= (stepCount > 8000) ? 0.1 : 0; // More steps help lose weight
-    weightChange += (stressLevel > 7) ? 0.1 : 0; // High stress can increase weight
-    weightChange += (carbIntake > 200) ? 0.12 : 0; // High carbs can increase weight
-    
-    // Add some randomness
-    weightChange += (Math.random() - 0.5) * 0.2;
-    
-    // Update current weight
-    currentWeight += weightChange;
-    
-    // Calculate calories based on macros (simplified)
-    const fatIntake = 30 + Math.random() * 50; // 30-80g
-    const caloriesConsumed = (carbIntake * 4) + (proteinIntake * 4) + (fatIntake * 9);
-    
-    data.push({
-      date: date.toISOString().split('T')[0],
-      weight: currentWeight,
-      caloriesConsumed,
-      proteinIntake,
-      carbIntake,
-      fatIntake,
-      sleepHours,
-      stressLevel,
-      stepCount,
-      medicationAdherence
-    });
+  // Adjust correlations based on time period to simulate how data might 
+  // show different patterns over different timeframes
+  let timeFactor = 1.0;
+  switch (timePeriod) {
+    case '7days':
+      // For short time periods, correlations are more volatile
+      timeFactor = 0.9 + Math.random() * 0.3;
+      break;
+    case '30days':
+      // Default baseline
+      timeFactor = 1.0;
+      break;
+    case '90days':
+      // More stable correlations for longer periods
+      timeFactor = 1.0 + (Math.random() * 0.1);
+      break;
+    case '6months':
+    case '1year':
+      // Even more stable and potentially stronger correlations
+      timeFactor = 1.05 + (Math.random() * 0.15);
+      break;
   }
   
-  return data;
-}
+  // Apply the time factor, but make sure correlations stay in valid range [-1, 1]
+  return baseCorrelations.map(item => ({
+    factor: item.factor,
+    correlation: Math.max(-0.95, Math.min(0.95, item.correlation * timeFactor))
+  }));
+};

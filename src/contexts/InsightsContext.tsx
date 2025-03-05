@@ -8,9 +8,12 @@
  * - Single Source of Truth: Centralized state for insights data
  * - Sustainable Code: Reusable context with clear responsibilities
  */
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { TimePeriod } from '@/components/insights/TimePeriodSelector';
+import { Correlation } from '@/utils/insights/types';
+import { useCorrelationData } from '@/hooks/useCorrelationData';
 
+// Base context for time period selection
 interface InsightsContextType {
   /** Selected time period for insights data */
   timePeriod: TimePeriod;
@@ -20,12 +23,34 @@ interface InsightsContextType {
   getDaysFromTimePeriod: (period?: TimePeriod) => number;
 }
 
+// Extended context with correlation data
+interface ExtendedInsightsContextType extends InsightsContextType {
+  /** Correlation data for weight loss factors */
+  correlationData: Correlation[] | undefined;
+  /** Loading state for correlation data */
+  isLoadingCorrelations: boolean;
+  /** Error state for correlation data */
+  correlationError: Error | null;
+  /** AI-generated insight about correlations */
+  correlationInsight: string | null;
+}
+
 const InsightsContext = createContext<InsightsContextType | undefined>(undefined);
+const ExtendedInsightsContext = createContext<ExtendedInsightsContextType | undefined>(undefined);
 
 export const useInsightsContext = (): InsightsContextType => {
   const context = useContext(InsightsContext);
   if (!context) {
     throw new Error('useInsightsContext must be used within an InsightsProvider');
+  }
+  return context;
+};
+
+// New hook for accessing extended insights data including correlations
+export const useInsights = (): ExtendedInsightsContextType => {
+  const context = useContext(ExtendedInsightsContext);
+  if (!context) {
+    throw new Error('useInsights must be used within an InsightsProvider');
   }
   return context;
 };
@@ -36,6 +61,14 @@ interface InsightsProviderProps {
 
 export const InsightsProvider: React.FC<InsightsProviderProps> = ({ children }) => {
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('30days');
+
+  // Fetch correlation data using the custom hook
+  const { 
+    data: correlationData,
+    isLoading: isLoadingCorrelations,
+    error: correlationError,
+    insight: correlationInsight
+  } = useCorrelationData(timePeriod);
 
   /**
    * Converts a time period string to the equivalent number of days
@@ -61,15 +94,27 @@ export const InsightsProvider: React.FC<InsightsProviderProps> = ({ children }) 
     }
   };
 
-  const value = {
+  // Base context value
+  const baseValue = {
     timePeriod,
     setTimePeriod,
     getDaysFromTimePeriod
   };
 
+  // Extended context value with correlation data
+  const extendedValue = {
+    ...baseValue,
+    correlationData,
+    isLoadingCorrelations,
+    correlationError,
+    correlationInsight
+  };
+
   return (
-    <InsightsContext.Provider value={value}>
-      {children}
+    <InsightsContext.Provider value={baseValue}>
+      <ExtendedInsightsContext.Provider value={extendedValue}>
+        {children}
+      </ExtendedInsightsContext.Provider>
     </InsightsContext.Provider>
   );
 };
