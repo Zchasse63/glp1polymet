@@ -1,55 +1,134 @@
 
-# CodeFarm Architecture
+# Health Insights Application Architecture
 
-This document outlines the architectural decisions and patterns used in the health insights application, following the CodeFarm methodology.
+This document provides an overview of the application architecture and the ongoing improvements we've made following the CodeFarm Development Methodology.
 
-## Core Principles
+## Latest Updates
 
-- **Holistic Development**: Combining technical excellence with strategic thinking
-- **Continuous Learning**: Embracing emerging technologies and methodologies
-- **User-Centric Design**: Prioritizing end-user experience in every development stage
-- **Sustainable Code**: Creating maintainable, scalable, and efficient software solutions
+We've implemented significant improvements across several key areas:
 
-## Architecture Overview
+### Component Size and Complexity
+- Refactored large components into smaller, focused ones
+- Extracted reusable UI elements into dedicated components
+- Applied single responsibility principle throughout the codebase
 
-The application follows a modular, component-based architecture with clear separation of concerns:
+### Error Handling
+- Standardized error handling with consistent patterns
+- Created reusable error utilities for common scenarios
+- Enhanced error logging and user notifications
+
+### Accessibility
+- Implemented comprehensive accessibility utilities
+- Added proper ARIA attributes and keyboard navigation
+- Created screen reader announcements for dynamic content
+- Added support for reduced motion preferences
+
+### Documentation
+- Created detailed contribution guidelines
+- Documented architecture decisions
+- Added accessibility guidelines
+- Improved inline code documentation
+
+### Testing
+- Added testing utilities for component testing
+- Created example test implementations
+- Implemented provider wrappers for testing context
+
+## Core Architecture
+
+The application follows a modular, component-based architecture with:
+
+1. **Feature-Based Organization**
+   - Components grouped by feature/domain
+   - Shared utilities in centralized locations
+   - Clear separation of concerns
+
+2. **Data Management**
+   - React Query for server state
+   - Custom hooks for local state
+   - Context API for global state
+
+3. **UI Component Library**
+   - Shadcn/UI for base components
+   - Tailwind CSS for styling
+   - Custom component extensions for specific needs
+
+4. **Accessibility Framework**
+   - ARIA compliant components
+   - Keyboard navigation utilities
+   - Screen reader support
+   - Reduced motion accommodations
+
+5. **Performance Monitoring**
+   - Component render tracking
+   - API request timing
+   - User interaction metrics
+
+## File Structure
 
 ```
 src/
-├── components/     # UI components organized by feature
-├── contexts/       # React contexts for state management
-├── hooks/          # Custom React hooks
-├── lib/            # Third-party library integrations
-├── pages/          # Page components
-├── types/          # TypeScript type definitions
-├── utils/          # Utility functions
-└── architecture/   # Architecture documentation
+├── components/         # UI components
+│   ├── ui/             # Base UI components
+│   ├── insights/       # Insight-related components
+│   ├── health/         # Health data components
+│   └── medication/     # Medication components
+├── hooks/              # Custom React hooks
+├── contexts/           # React context providers
+├── utils/              # Utility functions
+│   ├── accessibility/  # Accessibility utilities
+│   ├── errorHandling/  # Error handling utilities
+│   ├── performance/    # Performance monitoring
+│   └── testing/        # Testing utilities
+├── types/              # TypeScript type definitions
+├── lib/                # External library wrappers
+├── pages/              # Route components
+├── routes/             # Routing configuration
+├── services/           # Service integrations
+├── schemas/            # Validation schemas
+└── architecture/       # Architecture documentation
 ```
 
-## Design Patterns
+## Best Practices
 
-1. **Container/Presentation Pattern**: Separating data fetching from presentation
-2. **Context API for State Management**: Using React Context for global state
-3. **Custom Hooks for Logic Reuse**: Extracting reusable logic into hooks
-4. **Type-Driven Development**: Using TypeScript types to drive implementation
+We follow these best practices from the CodeFarm methodology:
 
-## Data Flow
+1. **TypeScript Usage**
+   - Strong typing throughout the application
+   - Interfaces for object types
+   - Type utilities for complex transformations
 
-1. Data is fetched through custom hooks
-2. Passed to container components
-3. Rendered by presentation components
-4. User interactions trigger state updates
-5. State changes propagate through the component tree
+2. **Component Structure**
+   - Single responsibility principle
+   - Proper prop definitions
+   - Error handling and loading states
 
-## Integration Patterns
+3. **Performance Optimization**
+   - Memoization where appropriate
+   - Optimized rendering
+   - Resource loading best practices
 
-1. **Health Data Sources**: Consistent adapter pattern for external health data
-2. **Authentication**: Centralized auth context with role-based permissions
-3. **APIs**: Standardized error handling and response formatting
+4. **Accessibility**
+   - Semantic HTML
+   - ARIA attributes
+   - Keyboard support
+   - Screen reader compatibility
 
-## Performance Considerations
+5. **Error Handling**
+   - Consistent error patterns
+   - User-friendly messages
+   - Proper logging and monitoring
 
-1. Memoization of expensive calculations
-2. Code splitting for page components
-3. Lazy loading for non-critical components
-4. Optimistic UI updates for improved perceived performance
+## Future Enhancements
+
+Planned enhancements include:
+
+1. **Server-Side Rendering**: For improved performance and SEO
+2. **Offline Support**: Progressive Web App capabilities
+3. **Enhanced Analytics**: For better user insights
+4. **Internationalization**: Multi-language support
+5. **Advanced Personalization**: AI-driven recommendations
+
+## Getting Started
+
+See the CONTRIBUTING.md file for details on development practices and guidelines.

@@ -1,16 +1,15 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRecommendations } from "@/hooks/useRecommendations";
 import { RecommendationFilterType } from "@/types/insightTypes";
 import RecommendationsLoadingState from "./RecommendationsLoadingState";
-import { motion } from "framer-motion";
-import RecommendationList from "./recommendations/RecommendationList";
 import RecommendationFilters from "./recommendations/RecommendationFilters";
-import NoRecommendationsState from "./recommendations/NoRecommendationsState";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { ErrorLogger } from "@/utils/errorHandling";
 import RecommendationHeader from "./recommendations/RecommendationHeader";
 import { useComponentPerformance } from "@/utils/performance";
+import RecommendationContainer from "./recommendations/RecommendationContainer";
+import EmptyRecommendationState from "./recommendations/EmptyRecommendationState";
 
 /**
  * PersonalizedRecommendations Component
@@ -29,7 +28,7 @@ const PersonalizedRecommendations: React.FC = () => {
   const performance = useComponentPerformance('PersonalizedRecommendations');
   
   // Log any errors from recommendations fetch
-  React.useEffect(() => {
+  useEffect(() => {
     if (error) {
       ErrorLogger.error(
         'Failed to load recommendations',
@@ -41,7 +40,7 @@ const PersonalizedRecommendations: React.FC = () => {
   }, [error]);
   
   // Track component mount time
-  React.useEffect(() => {
+  useEffect(() => {
     const endTracking = performance.trackMount();
     return endTracking;
   }, []);
@@ -54,21 +53,14 @@ const PersonalizedRecommendations: React.FC = () => {
   // Show empty state if there are no recommendations or if there was an error
   if ((recommendations.length === 0 && !isLoading) || error) {
     return (
-      <div className="space-y-3">
-        <h2 className="text-lg font-semibold">
-          Personalized Recommendations
-        </h2>
-        <NoRecommendationsState 
-          isFiltered={false} 
-          activeFilter={activeFilter} 
-          resetFilter={() => setActiveFilter('all')} 
-        />
-      </div>
+      <EmptyRecommendationState 
+        activeFilter={activeFilter}
+        setActiveFilter={setActiveFilter}
+      />
     );
   }
 
   // Get unique recommendation types for filtering
-  // Fix: Extract the type property from each recommendation object
   const recommendationTypes = [...new Set(recommendations.map(rec => rec.type))];
   
   // Filter recommendations based on active filter
@@ -96,22 +88,12 @@ const PersonalizedRecommendations: React.FC = () => {
         hasBookmarks={hasBookmarks}
       />
 
-      <motion.div 
-        className="grid gap-3"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-      >
-        {noFilteredResults ? (
-          <NoRecommendationsState 
-            isFiltered={true} 
-            activeFilter={activeFilter} 
-            resetFilter={() => setActiveFilter('all')} 
-          />
-        ) : (
-          <RecommendationList recommendations={filteredRecommendations} />
-        )}
-      </motion.div>
+      <RecommendationContainer 
+        filteredRecommendations={filteredRecommendations}
+        noFilteredResults={noFilteredResults}
+        activeFilter={activeFilter}
+        setActiveFilter={setActiveFilter}
+      />
     </div>
   );
 };
