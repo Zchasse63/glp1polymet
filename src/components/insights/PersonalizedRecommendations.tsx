@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,15 +27,15 @@ import RecommendationsLoadingState from "./RecommendationsLoadingState";
  * - Single Responsibility: Each subcomponent has a focused purpose
  */
 const PersonalizedRecommendations: React.FC = () => {
-  const { recommendations, loading, error, markAsViewed } = useRecommendations();
+  const { data: recommendations = [], isLoading, error } = useRecommendations();
 
   // Show loading state while data is being fetched
-  if (loading) {
+  if (isLoading) {
     return <RecommendationsLoadingState />;
   }
 
   // Show empty state if there are no recommendations or if there was an error
-  if ((recommendations.length === 0 && !loading) || error) {
+  if ((recommendations.length === 0 && !isLoading) || error) {
     return (
       <div className="space-y-3">
         <h2 className="text-lg font-semibold">
@@ -76,7 +75,7 @@ const PersonalizedRecommendations: React.FC = () => {
           <RecommendationCard
             key={recommendation.id}
             recommendation={recommendation}
-            onActionClick={() => markAsViewed(recommendation.id)}
+            onActionClick={() => console.log(`Recommendation viewed: ${recommendation.id}`)}
           />
         ))}
       </div>
