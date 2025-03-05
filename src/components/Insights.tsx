@@ -10,7 +10,7 @@
  * 
  * @returns React component that renders the Insights page content
  */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "@/components/ui/use-toast";
@@ -21,6 +21,7 @@ import WeightLossCorrelations from "./insights/WeightLossCorrelations";
 import PersonalizedRecommendations from "./insights/PersonalizedRecommendations";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { InsightsProvider, useInsights } from "@/contexts/InsightsContext";
+import { ErrorLogger } from "@/utils/errorHandling";
 
 // Animation variants for staggered entry
 const containerVariants = {
@@ -56,7 +57,8 @@ const InsightsContent: React.FC = () => {
     correlationData,
     correlationInsight,
     isLoadingCorrelations,
-    correlationError
+    correlationError,
+    refreshCorrelationData
   } = useInsights();
 
   useEffect(() => {
@@ -71,7 +73,7 @@ const InsightsContent: React.FC = () => {
   }, [isAuthenticated, refreshTrigger]);
   
   // Handle manual refresh of all insights data
-  const handleRefreshData = () => {
+  const handleRefreshData = useCallback(() => {
     setIsDataLoaded(false);
     setRefreshTrigger(prev => prev + 1);
     
@@ -79,7 +81,29 @@ const InsightsContent: React.FC = () => {
       title: "Refreshing insights",
       description: "Your health insights are being updated with the latest data."
     });
-  };
+  }, []);
+  
+  // Handle correlation data refresh
+  const handleRefreshCorrelations = useCallback(() => {
+    if (refreshCorrelationData) {
+      refreshCorrelationData();
+      
+      toast({
+        title: "Refreshing correlation data",
+        description: "We're updating your weight loss correlation analysis."
+      });
+    } else {
+      // Fallback to full refresh if specific refresh not available
+      handleRefreshData();
+      
+      // Log this issue for monitoring
+      ErrorLogger.warning(
+        "refreshCorrelationData function not available",
+        "MISSING_REFRESH_FUNCTION",
+        { component: "InsightsContent" }
+      );
+    }
+  }, [refreshCorrelationData, handleRefreshData]);
   
   // Handle authentication loading state
   if (authLoading) {
@@ -131,6 +155,7 @@ const InsightsContent: React.FC = () => {
                   isLoading={isLoadingCorrelations}
                   error={correlationError}
                   insight={correlationInsight}
+                  onRetry={handleRefreshCorrelations}
                 />
               </ErrorBoundary>
             </motion.div>

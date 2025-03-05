@@ -8,10 +8,11 @@
  * - Single Source of Truth: Centralized state for insights data
  * - Sustainable Code: Reusable context with clear responsibilities
  */
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { TimePeriod } from '@/components/insights/TimePeriodSelector';
 import { Correlation } from '@/utils/insights/types';
 import { useCorrelationData } from '@/hooks/useCorrelationData';
+import { ErrorLogger } from '@/utils/errorHandling';
 
 // Base context for time period selection
 interface InsightsContextType {
@@ -33,6 +34,8 @@ interface ExtendedInsightsContextType extends InsightsContextType {
   correlationError: Error | null;
   /** AI-generated insight about correlations */
   correlationInsight: string | null;
+  /** Function to manually refresh correlation data */
+  refreshCorrelationData: () => void;
 }
 
 const InsightsContext = createContext<InsightsContextType | undefined>(undefined);
@@ -61,6 +64,7 @@ interface InsightsProviderProps {
 
 export const InsightsProvider: React.FC<InsightsProviderProps> = ({ children }) => {
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('30days');
+  const [refreshCounter, setRefreshCounter] = useState(0);
 
   // Fetch correlation data using the custom hook
   const { 
@@ -68,7 +72,19 @@ export const InsightsProvider: React.FC<InsightsProviderProps> = ({ children }) 
     isLoading: isLoadingCorrelations,
     error: correlationError,
     insight: correlationInsight
-  } = useCorrelationData(timePeriod);
+  } = useCorrelationData(timePeriod, refreshCounter);
+
+  // Log any errors that occur when fetching correlation data
+  useEffect(() => {
+    if (correlationError) {
+      ErrorLogger.error(
+        "Error fetching correlation data", 
+        "CORRELATION_FETCH_ERROR",
+        { timePeriod, refreshCounter },
+        correlationError
+      );
+    }
+  }, [correlationError, timePeriod, refreshCounter]);
 
   /**
    * Converts a time period string to the equivalent number of days
@@ -94,6 +110,13 @@ export const InsightsProvider: React.FC<InsightsProviderProps> = ({ children }) 
     }
   };
 
+  /**
+   * Manually refresh correlation data
+   */
+  const refreshCorrelationData = useCallback(() => {
+    setRefreshCounter(prev => prev + 1);
+  }, []);
+
   // Base context value
   const baseValue = {
     timePeriod,
@@ -107,7 +130,8 @@ export const InsightsProvider: React.FC<InsightsProviderProps> = ({ children }) 
     correlationData,
     isLoadingCorrelations,
     correlationError,
-    correlationInsight
+    correlationInsight,
+    refreshCorrelationData
   };
 
   return (

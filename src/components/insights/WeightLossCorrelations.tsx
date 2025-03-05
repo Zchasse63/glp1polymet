@@ -1,10 +1,11 @@
 
-import React, { useMemo, useRef } from "react";
+import React, { useMemo, useRef, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Correlation } from "@/utils/insights/types";
 import CorrelationBarChart from "./charts/CorrelationBarChart";
 import CorrelationLoadingState from "./CorrelationLoadingState";
-import { ErrorDisplay } from "@/utils/errorHandling";
+import CorrelationErrorState from "./CorrelationErrorState";
+import { ErrorLogger, ErrorSeverity } from "@/utils/errorHandling";
 import { useIntersectionObserver } from "@/utils/performanceUtils";
 
 interface WeightLossCorrelationsProps {
@@ -12,6 +13,7 @@ interface WeightLossCorrelationsProps {
   isLoading: boolean;
   error: Error | null;
   insight: string | null;
+  onRetry?: () => void;
 }
 
 // Use React.memo to prevent unnecessary re-renders
@@ -19,11 +21,31 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
   correlations,
   isLoading,
   error,
-  insight
+  insight,
+  onRetry
 }) => {
   // Use a ref to track when the component is visible
   const cardRef = useRef<HTMLDivElement>(null);
   const isVisible = useIntersectionObserver(cardRef, { threshold: 0.1 });
+  
+  // Log errors to our centralized error logger
+  React.useEffect(() => {
+    if (error) {
+      ErrorLogger.error(
+        "Failed to load correlation data", 
+        "CORRELATION_LOAD_ERROR",
+        { componentName: "WeightLossCorrelations" },
+        error
+      );
+    }
+  }, [error]);
+  
+  // Memoized retry handler to avoid unnecessary re-renders
+  const handleRetry = useCallback(() => {
+    if (onRetry) {
+      onRetry();
+    }
+  }, [onRetry]);
   
   // Only compute sorted correlations when data changes
   const sortedCorrelations = useMemo(() => {
@@ -48,9 +70,10 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
 
     if (error) {
       return (
-        <ErrorDisplay 
-          title="Couldn't load correlations" 
-          message="We're having trouble analyzing your health data. Please try again later."
+        <CorrelationErrorState 
+          error={error}
+          onRetry={handleRetry}
+          severity={ErrorSeverity.ERROR}
         />
       );
     }
