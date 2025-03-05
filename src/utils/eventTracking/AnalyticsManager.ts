@@ -209,6 +209,7 @@ class AnalyticsManager {
       event.priority === EventPriority.CRITICAL &&
       event.properties?.message
     ) {
+      // Fix: Remove the fourth argument which is causing the TS error
       ErrorLogger.error(
         String(event.properties.message),
         String(event.name),

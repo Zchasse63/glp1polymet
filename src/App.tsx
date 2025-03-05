@@ -1,3 +1,4 @@
+
 /**
  * Main Application Component
  * 
@@ -20,7 +21,7 @@ import AppRoutes from "./routes/AppRoutes";
 import { EnhancedErrorBoundary, setupGlobalErrorHandlers } from "./utils/errorHandling";
 import { createQueryClient } from "./lib/queryClient";
 import { useEffect } from "react";
-import { initPerformanceMonitoring } from "./utils/performanceMonitoring";
+import { initPerformanceMonitoring } from "./utils/performance"; // Updated import path
 import { useSkipLink } from "./utils/accessibilityUtils";
 
 // Create a QueryClient instance with enhanced configuration
