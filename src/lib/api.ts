@@ -1,7 +1,6 @@
-
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
-import { EventCategory, trackFeatureUsage, trackError } from '@/utils/eventTracking';
+import { EventCategory, EventPriority, trackFeatureUsage, trackError } from '@/utils/eventTracking';
 
 // Utility type to make certain properties required
 type RequireAtLeastOne<T, Keys extends keyof T = keyof T> =
@@ -108,7 +107,7 @@ export async function api<T = any>(...args: ApiCallArgs): Promise<T> {
       });
       
       // Track the authentication failure
-      trackError(new Error('Authentication failed'), { url }, 'HIGH');
+      trackError(new Error('Authentication failed'), { url }, EventPriority.HIGH);
       
       throw new Error('Authentication failed. Please log in again.');
     }
@@ -132,7 +131,7 @@ export async function api<T = any>(...args: ApiCallArgs): Promise<T> {
     if (error.name === 'AbortError') {
       // Handle timeout errors
       console.error('API request timed out:', url);
-      trackError(error, { url, timeout: options.timeout || 15000 }, 'HIGH');
+      trackError(error, { url, timeout: options.timeout || 15000 }, EventPriority.HIGH);
       toast({
         title: "Request timed out",
         description: "The server took too long to respond.",
@@ -141,7 +140,7 @@ export async function api<T = any>(...args: ApiCallArgs): Promise<T> {
     } else {
       // Handle other API request errors
       console.error('API request failed:', error);
-      trackError(error, { url }, 'HIGH');
+      trackError(error, { url }, EventPriority.HIGH);
       toast({
         title: "API error",
         description: error.message || "Something went wrong with the API request.",
