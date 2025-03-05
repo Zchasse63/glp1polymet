@@ -1,11 +1,12 @@
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { MoonIcon, SunIcon, BellIcon, PlusIcon, LogOutIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Navigation } from "@/components/Navigation";
 import { UserProfile } from "@/components/UserProfile";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { toast } from "@/components/ui/use-toast";
 
 interface LayoutProps {
@@ -21,32 +22,8 @@ export function Layout({
   currentPage,
   setCurrentPage,
 }: LayoutProps) {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const { theme, toggleTheme } = useTheme();
   const { isAuthenticated, logout } = useAuth();
-
-  useEffect(() => {
-    // Get theme from localStorage
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      setTheme("dark");
-      document.documentElement.classList.add("dark");
-    } else {
-      setTheme("light");
-      document.documentElement.classList.remove("dark");
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-    
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  };
 
   const handleLogout = () => {
     logout();
