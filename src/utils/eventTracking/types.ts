@@ -15,7 +15,8 @@ export enum EventCategory {
   FEATURE = 'feature',
   ERROR = 'error',
   PERFORMANCE = 'performance',
-  HEALTH = 'health'
+  HEALTH = 'health',
+  SECURITY = 'security' // New category for security-related events
 }
 
 // Event priorities
@@ -26,6 +27,14 @@ export enum EventPriority {
   CRITICAL = 'critical'
 }
 
+// Provider status for better error handling
+export enum ProviderStatus {
+  INITIALIZED = 'initialized',
+  FAILED = 'failed',
+  PENDING = 'pending',
+  DISABLED = 'disabled'
+}
+
 // Interface for event data structure
 export interface TrackingEvent {
   name: string;
@@ -33,14 +42,25 @@ export interface TrackingEvent {
   properties?: Record<string, any>;
   priority?: EventPriority;
   timestamp?: number;
+  userId?: string; // Optional user ID for user-specific events
 }
 
 // Interface for analytics providers
 export interface AnalyticsProvider {
   name: string;
+  status?: ProviderStatus;
   initialize(): Promise<boolean>;
   trackEvent(event: TrackingEvent): void;
   identify(userId: string, traits?: Record<string, any>): void;
   setUserProperties(properties: Record<string, any>): void;
   pageView(path: string, properties?: Record<string, any>): void;
+}
+
+// Configuration options for analytics providers
+export interface AnalyticsConfig {
+  enabled: boolean;
+  userId?: string;
+  debugMode?: boolean;
+  anonymizeIp?: boolean;
+  providers?: Record<string, boolean>;
 }
