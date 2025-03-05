@@ -1,74 +1,54 @@
 
 /**
- * Security Utilities
+ * Security Utils Index
  * 
  * Following CodeFarm Development Methodology:
- * - Security-First Approach: Comprehensive security utilities
- * - Modular Architecture: Segregated security concerns
- * - Documentation: Clear security capabilities
+ * - Security-First: Centralized security controls
+ * - Modular Design: Composable security features
  */
 
-// Re-export security types
-export {
-  SecurityLevel,
-  type CSRFConfig,
-  type StorageEncryptionConfig,
-  type SanitizationConfig
-} from './types';
+// Export content security utilities
+export { 
+  initContentSecurity,
+  sanitizeHTML,
+  isUrlSafe
+} from './contentSecurity';
 
-// Re-export input sanitization utilities
+// Export CSRF protection utilities
 export {
-  sanitizeHtml,
-  sanitizeText,
-  sanitizeUrl,
-  sanitizeEmail,
-  sanitizeForDatabase,
-  configureSanitizer
-} from './inputSanitization';
-
-// Re-export CSRF protection utilities
-export {
-  configureCSRF,
-  generateCSRFToken,
-  getCSRFToken,
   initCSRFProtection,
-  addCSRFToken,
-  createCSRFProtectedFetch
+  getCSRFToken
 } from './csrfProtection';
 
-// Re-export secure storage utilities
+// Export input sanitization utilities
 export {
-  configureSecureStorage,
-  secureLocalStorage,
-  getFromSecureLocalStorage,
-  removeFromSecureLocalStorage,
-  secureSessionStorage,
-  getFromSecureSessionStorage,
-  removeFromSecureSessionStorage
+  sanitizeInput,
+  validateEmail,
+  validatePhone,
+  validateUrl
+} from './inputSanitization';
+
+// Export secure storage utilities
+export {
+  secureStore,
+  secureRetrieve,
+  secureDelete,
+  clearSecureStorage
 } from './secureStorage';
 
-// Re-export content security utilities
-export {
-  applyCSP,
-  generateStrictCSP,
-  generateModerateCSP,
-  generateDevCSP,
-  applyIframeProtection,
-  initContentSecurity
-} from './contentSecurity';
+// Export types
+export * from './types';
 
 /**
  * Initialize all security features
  * @param environment Application environment
  */
 export function initSecurity(environment: 'development' | 'production' = 'production'): void {
-  // We need to import these functions from their respective files
-  const { initCSRFProtection } = require('./csrfProtection');
-  const { initContentSecurity } = require('./contentSecurity');
-  
   // Initialize CSRF protection
   initCSRFProtection();
   
-  // Initialize content security
+  // Initialize content security policy
   initContentSecurity(environment);
+  
+  console.log(`Security initialized (${environment} mode)`);
 }

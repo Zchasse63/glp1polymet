@@ -1,99 +1,144 @@
 
+import { ErrorLogger } from '../errorHandling';
+
 /**
- * Content Security Utilities
+ * Content Security Module
  * 
  * Following CodeFarm Development Methodology:
- * - Security-First Approach: Implement content security policies
- * - User-Centric Design: Secure experience without disrupting UX
+ * - Security-First: Protect against XSS and other content injection attacks
+ * - Sustainable Code: Centralized security controls
  */
 
-// Generate a strict Content Security Policy
-export function generateStrictCSP(): string {
-  return [
-    "default-src 'self'",
-    "script-src 'self'",
-    "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: https:",
-    "font-src 'self'",
-    "connect-src 'self' https:",
-    "media-src 'self'",
-    "object-src 'none'",
-    "frame-src 'self'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    "frame-ancestors 'self'",
-    "upgrade-insecure-requests"
-  ].join('; ');
+// CSP configuration for different environments
+export interface CSPConfig {
+  defaultSrc: string[];
+  scriptSrc: string[];
+  styleSrc: string[];
+  imgSrc: string[];
+  connectSrc: string[];
+  fontSrc: string[];
+  objectSrc: string[];
+  mediaSrc: string[];
+  frameSrc: string[];
+  reportUri?: string;
+  reportOnly: boolean;
 }
 
-// Generate a moderate Content Security Policy (more permissive)
-export function generateModerateCSP(): string {
-  return [
-    "default-src 'self'",
-    "script-src 'self' https: 'unsafe-inline' 'unsafe-eval'",
-    "style-src 'self' https: 'unsafe-inline'",
-    "img-src 'self' data: https:",
-    "font-src 'self' https:",
-    "connect-src 'self' https:",
-    "media-src 'self' https:",
-    "object-src 'none'",
-    "frame-src 'self' https:",
-    "base-uri 'self'",
-    "form-action 'self' https:",
-    "frame-ancestors 'self'"
-  ].join('; ');
-}
-
-// Generate a development Content Security Policy (very permissive)
-export function generateDevCSP(): string {
-  return [
-    "default-src * 'unsafe-inline' 'unsafe-eval'",
-    "script-src * 'unsafe-inline' 'unsafe-eval'",
-    "style-src * 'unsafe-inline'",
-    "img-src * data: blob:",
-    "font-src * data:",
-    "connect-src * ws: wss:",
-    "media-src *",
-    "object-src *",
-    "frame-src *",
-    "base-uri *",
-    "form-action *",
-    "frame-ancestors *"
-  ].join('; ');
-}
-
-// Apply a Content Security Policy to the document
-export function applyCSP(policy: string): void {
-  if (typeof document === 'undefined') return;
-  
-  const meta = document.createElement('meta');
-  meta.httpEquiv = 'Content-Security-Policy';
-  meta.content = policy;
-  document.head.appendChild(meta);
-}
-
-// Apply iframe protection
-export function applyIframeProtection(): void {
-  if (typeof window === 'undefined') return;
-  
-  if (window.self !== window.top) {
-    // If the page is loaded in an iframe, you can take protective measures
-    // like redirecting to the top level or displaying a warning
-    window.top.location.href = window.self.location.href;
+// Default CSP Configuration
+const cspConfig: Record<'development' | 'production', CSPConfig> = {
+  development: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Looser in dev for hot reloading
+    styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+    imgSrc: ["'self'", "data:", "https://api.dicebear.com"],
+    connectSrc: ["'self'", "ws:", "wss:", "https://xngupqmwtbncjkegbhys.supabase.co"],
+    fontSrc: ["'self'", "https://fonts.gstatic.com"],
+    objectSrc: ["'none'"],
+    mediaSrc: ["'self'"],
+    frameSrc: ["'self'"],
+    reportOnly: true
+  },
+  production: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'"],
+    styleSrc: ["'self'", "https://fonts.googleapis.com"],
+    imgSrc: ["'self'", "data:", "https://api.dicebear.com"],
+    connectSrc: ["'self'", "https://xngupqmwtbncjkegbhys.supabase.co"],
+    fontSrc: ["'self'", "https://fonts.gstatic.com"],
+    objectSrc: ["'none'"],
+    mediaSrc: ["'self'"],
+    frameSrc: ["'self'"],
+    reportUri: "/api/csp-report",
+    reportOnly: false
   }
-}
+};
 
-// Initialize content security features
+/**
+ * Initialize Content Security Policy
+ * @param environment The current environment
+ */
 export function initContentSecurity(environment: 'development' | 'production' = 'production'): void {
-  if (typeof document === 'undefined' || typeof window === 'undefined') return;
-  
-  // Apply the appropriate CSP based on environment
-  if (environment === 'development') {
-    applyCSP(generateDevCSP());
-  } else {
-    applyCSP(generateStrictCSP());
+  try {
+    // Only apply CSP if running in browser
+    if (typeof document === 'undefined') {
+      return;
+    }
+    
+    const config = cspConfig[environment];
+    
+    // Build CSP string
+    const cspString = [
+      `default-src ${config.defaultSrc.join(' ')}`,
+      `script-src ${config.scriptSrc.join(' ')}`,
+      `style-src ${config.styleSrc.join(' ')}`,
+      `img-src ${config.imgSrc.join(' ')}`,
+      `connect-src ${config.connectSrc.join(' ')}`,
+      `font-src ${config.fontSrc.join(' ')}`,
+      `object-src ${config.objectSrc.join(' ')}`,
+      `media-src ${config.mediaSrc.join(' ')}`,
+      `frame-src ${config.frameSrc.join(' ')}`,
+    ].join('; ');
+    
+    // Create meta tag for CSP
+    const metaTag = document.createElement('meta');
+    metaTag.httpEquiv = config.reportOnly ? 'Content-Security-Policy-Report-Only' : 'Content-Security-Policy';
+    metaTag.content = cspString;
+    
+    // Add report-uri if specified
+    if (config.reportUri) {
+      metaTag.content += `; report-uri ${config.reportUri}`;
+    }
+    
+    // Add meta tag to head
+    document.head.appendChild(metaTag);
+    
+    console.log(`Content Security Policy (${environment}) initialized`);
+  } catch (error) {
+    ErrorLogger.error(
+      'Failed to initialize Content Security Policy',
+      'CSP_INIT_ERROR',
+      { error, environment }
+    );
   }
-  
-  // Apply iframe protection
-  applyIframeProtection();
+}
+
+/**
+ * Sanitize HTML content to prevent XSS
+ * @param html HTML string to sanitize
+ * @returns Sanitized HTML string
+ */
+export function sanitizeHTML(html: string): string {
+  try {
+    // Use DOMPurify if available
+    if (typeof DOMPurify !== 'undefined') {
+      return DOMPurify.sanitize(html);
+    }
+    
+    // Fallback basic sanitization
+    const element = document.createElement('div');
+    element.textContent = html;
+    return element.innerHTML;
+  } catch (error) {
+    ErrorLogger.warning(
+      'HTML sanitization failed, returning empty string',
+      'HTML_SANITIZE_ERROR',
+      { error }
+    );
+    return '';
+  }
+}
+
+/**
+ * Validate a URL for safety
+ * @param url URL to validate
+ * @param allowedProtocols List of allowed protocols
+ * @returns Whether the URL is safe
+ */
+export function isUrlSafe(url: string, allowedProtocols: string[] = ['https:', 'http:']): boolean {
+  try {
+    const parsedUrl = new URL(url);
+    return allowedProtocols.includes(parsedUrl.protocol);
+  } catch (error) {
+    return false;
+  }
 }
