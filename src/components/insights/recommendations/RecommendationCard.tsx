@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRightIcon, BookmarkIcon } from "lucide-react";
+import { ArrowRightIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Recommendation, RecommendationIconType, ImpactLevel } from "@/types/insightTypes";
 import { motion } from "framer-motion";
@@ -22,6 +22,7 @@ interface RecommendationCardProps {
   index: number;
   isBookmarked: boolean;
   onBookmarkToggle: (id: string) => void;
+  bookmarkIcon: React.ReactNode; // Add the bookmarkIcon prop
 }
 
 /**
@@ -103,7 +104,8 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
   onActionClick,
   index,
   isBookmarked,
-  onBookmarkToggle
+  onBookmarkToggle,
+  bookmarkIcon  // Use the bookmarkIcon prop
 }) => {
   const colors = colorMap[recommendation.color as keyof typeof colorMap] || colorMap.blue;
   const Icon = () => getIconComponent(recommendation.iconType);
@@ -141,20 +143,12 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   {recommendation.title}
                 </h3>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={`h-7 w-7 ${isBookmarked ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}`}
+                  <div 
                     onClick={() => onBookmarkToggle(recommendation.id)}
-                    aria-label={isBookmarked ? "Remove bookmark" : "Bookmark recommendation"}
-                    aria-pressed={isBookmarked}
+                    className="cursor-pointer"
                   >
-                    <BookmarkIcon 
-                      className="h-4 w-4" 
-                      fill={isBookmarked ? "currentColor" : "none"}
-                      aria-hidden="true"
-                    />
-                  </Button>
+                    {bookmarkIcon}
+                  </div>
                   <Badge variant="outline" className="text-xs">
                     {formatRecType(recommendation.type)}
                   </Badge>

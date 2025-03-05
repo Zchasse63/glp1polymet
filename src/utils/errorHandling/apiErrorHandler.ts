@@ -1,96 +1,251 @@
 
-import { ErrorLogger } from './ErrorLogger';
-import { ErrorGroup, ErrorSeverity } from './types';
+import { ErrorLogger, ErrorSeverity, ErrorGroup } from './index';
+import { toast } from '@/hooks/use-toast';
 
 /**
- * Standardized API error handler for consistent error handling
- * Following CodeFarm Development Methodology:
- * - Error Handling: Consistent API error handling
- * - User-Centric Design: Appropriate user feedback
+ * Types of API errors that can occur
  */
-
-/**
- * Handles API errors in a consistent way
- */
-export async function handleApiError<T>(
-  promise: Promise<T>,
-  options: {
-    operation: string;
-    errorCode?: string;
-    severity?: ErrorSeverity;
-    context?: Record<string, any>;
-    shouldNotifyUser?: boolean;
-    userMessage?: string;
-    userTitle?: string;
-  }
-): Promise<T> {
-  try {
-    return await promise;
-  } catch (error) {
-    // Default error code based on operation
-    const errorCode = options.errorCode || `API_${options.operation.toUpperCase().replace(/\s+/g, '_')}_ERROR`;
-    
-    // Log the error
-    ErrorLogger.log({
-      message: error instanceof Error ? error.message : `API Error: ${options.operation}`,
-      code: errorCode,
-      severity: options.severity || ErrorSeverity.ERROR,
-      group: ErrorGroup.API,
-      context: {
-        operation: options.operation,
-        ...options.context
-      },
-      originalError: error,
-      shouldNotifyUser: options.shouldNotifyUser !== false, // Default to true
-      userMessage: options.userMessage || `There was a problem with ${options.operation.toLowerCase()}. Please try again.`,
-      userTitle: options.userTitle || 'Error'
-    });
-    
-    // Re-throw to allow caller to handle it
-    throw error;
-  }
+export enum ApiErrorType {
+  NETWORK = 'network',
+  TIMEOUT = 'timeout',
+  SERVER = 'server',
+  VALIDATION = 'validation',
+  UNAUTHORIZED = 'unauthorized',
+  FORBIDDEN = 'forbidden',
+  NOT_FOUND = 'not_found',
+  CONFLICT = 'conflict',
+  UNKNOWN = 'unknown'
 }
 
 /**
- * Wraps an API function with standardized error handling
+ * Interface for API error responses
+ */
+export interface ApiErrorResponse {
+  status: number;
+  type: ApiErrorType;
+  message: string;
+  details?: Record<string, any>;
+}
+
+/**
+ * Map HTTP status codes to error types
+ */
+const mapStatusToErrorType = (status: number): ApiErrorType => {
+  switch (status) {
+    case 400:
+      return ApiErrorType.VALIDATION;
+    case 401:
+      return ApiErrorType.UNAUTHORIZED;
+    case 403:
+      return ApiErrorType.FORBIDDEN;
+    case 404:
+      return ApiErrorType.NOT_FOUND;
+    case 409:
+      return ApiErrorType.CONFLICT;
+    case 408:
+      return ApiErrorType.TIMEOUT;
+    case 500:
+    case 502:
+    case 503:
+    case 504:
+      return ApiErrorType.SERVER;
+    default:
+      return ApiErrorType.UNKNOWN;
+  }
+};
+
+/**
+ * Get a user-friendly error message based on the error type
+ */
+const getUserFriendlyMessage = (type: ApiErrorType, originalMessage?: string): string => {
+  switch (type) {
+    case ApiErrorType.NETWORK:
+      return 'Unable to connect to the server. Please check your internet connection.';
+    case ApiErrorType.TIMEOUT:
+      return 'The request timed out. Please try again.';
+    case ApiErrorType.SERVER:
+      return 'Something went wrong on our end. We\'re working to fix it.';
+    case ApiErrorType.VALIDATION:
+      return originalMessage || 'Invalid input. Please check your data and try again.';
+    case ApiErrorType.UNAUTHORIZED:
+      return 'You need to log in to access this resource.';
+    case ApiErrorType.FORBIDDEN:
+      return 'You don\'t have permission to access this resource.';
+    case ApiErrorType.NOT_FOUND:
+      return 'The requested resource was not found.';
+    case ApiErrorType.CONFLICT:
+      return originalMessage || 'This operation conflicts with the current state.';
+    default:
+      return 'An unexpected error occurred. Please try again.';
+  }
+};
+
+/**
+ * Higher-order function to handle API errors
+ * Fixed the return type to use Promise<ReturnType<T>>
  */
 export function withApiErrorHandling<T extends (...args: any[]) => Promise<any>>(
   fn: T,
   options: {
-    operation: string;
-    errorCode?: string;
-    severity?: ErrorSeverity;
-    contextFromArgs?: (...args: Parameters<T>) => Record<string, any>;
-    shouldNotifyUser?: boolean;
-    userMessage?: string;
-    userTitle?: string;
-  }
-): (...args: Parameters<T>) => ReturnType<T> {
-  return async (...args: Parameters<T>): ReturnType<T> => {
+    showToast?: boolean;
+    context?: Record<string, any>;
+    errorMap?: Record<ApiErrorType, string>;
+    onError?: (error: ApiErrorResponse) => void;
+  } = {}
+): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
+  return async (...args: Parameters<T>): Promise<Awaited<ReturnType<T>>> => {
     try {
       return await fn(...args);
     } catch (error) {
-      // Get context from args if provided
-      const context = options.contextFromArgs ? options.contextFromArgs(...args) : {};
+      // Parse the error
+      let apiError: ApiErrorResponse;
+      
+      if (error instanceof Response) {
+        // Handle fetch Response error
+        const status = error.status;
+        let errorData: any = { message: error.statusText };
+        
+        try {
+          errorData = await error.json();
+        } catch (e) {
+          // If we can't parse JSON, use statusText
+        }
+        
+        apiError = {
+          status,
+          type: mapStatusToErrorType(status),
+          message: errorData.message || error.statusText,
+          details: errorData.details
+        };
+      } else if (error instanceof Error) {
+        // Handle standard Error object
+        apiError = {
+          status: 0,
+          type: error.name === 'AbortError' ? ApiErrorType.TIMEOUT : ApiErrorType.NETWORK,
+          message: error.message
+        };
+      } else {
+        // Handle unknown error format
+        apiError = {
+          status: 0,
+          type: ApiErrorType.UNKNOWN,
+          message: String(error)
+        };
+      }
+      
+      // Apply custom error messages if provided
+      if (options.errorMap && options.errorMap[apiError.type]) {
+        apiError.message = options.errorMap[apiError.type];
+      }
+      
+      // Get user-friendly message
+      const userMessage = getUserFriendlyMessage(apiError.type, apiError.message);
       
       // Log the error
-      ErrorLogger.log({
-        message: error instanceof Error ? error.message : `API Error: ${options.operation}`,
-        code: options.errorCode || `API_${options.operation.toUpperCase().replace(/\s+/g, '_')}_ERROR`,
-        severity: options.severity || ErrorSeverity.ERROR,
-        group: ErrorGroup.API,
-        context: {
-          operation: options.operation,
-          ...context
+      ErrorLogger.error(
+        `API Error: ${apiError.message}`,
+        `API_${apiError.type.toUpperCase()}`,
+        {
+          ...options.context,
+          status: apiError.status,
+          details: apiError.details
         },
-        originalError: error,
-        shouldNotifyUser: options.shouldNotifyUser !== false, // Default to true
-        userMessage: options.userMessage || `There was a problem with ${options.operation.toLowerCase()}. Please try again.`,
-        userTitle: options.userTitle || 'Error'
-      });
+        error,
+        options.showToast !== false, // Default to true
+        userMessage
+      );
       
-      // Re-throw to allow caller to handle it
-      throw error;
+      // Show toast if enabled
+      if (options.showToast !== false) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: userMessage,
+        });
+      }
+      
+      // Call the onError callback if provided
+      if (options.onError) {
+        options.onError(apiError);
+      }
+      
+      throw apiError;
     }
   };
+}
+
+/**
+ * Function to handle API errors for one-off API calls
+ */
+export function handleApiError(
+  error: unknown,
+  options: {
+    showToast?: boolean;
+    context?: Record<string, any>;
+    errorMap?: Record<ApiErrorType, string>;
+  } = {}
+): ApiErrorResponse {
+  const apiError = parseApiError(error);
+  
+  // Apply custom error messages if provided
+  if (options.errorMap && options.errorMap[apiError.type]) {
+    apiError.message = options.errorMap[apiError.type];
+  }
+  
+  // Get user-friendly message
+  const userMessage = getUserFriendlyMessage(apiError.type, apiError.message);
+  
+  // Log the error
+  ErrorLogger.error(
+    `API Error: ${apiError.message}`,
+    `API_${apiError.type.toUpperCase()}`,
+    {
+      ...options.context,
+      status: apiError.status,
+      details: apiError.details
+    },
+    error,
+    options.showToast !== false, // Default to true
+    userMessage
+  );
+  
+  // Show toast if enabled
+  if (options.showToast !== false) {
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: userMessage,
+    });
+  }
+  
+  return apiError;
+}
+
+/**
+ * Helper function to parse errors into a standard format
+ */
+function parseApiError(error: unknown): ApiErrorResponse {
+  if (error instanceof Response) {
+    // Handle fetch Response error
+    const status = error.status;
+    return {
+      status,
+      type: mapStatusToErrorType(status),
+      message: error.statusText
+    };
+  } else if (error instanceof Error) {
+    // Handle standard Error object
+    return {
+      status: 0,
+      type: error.name === 'AbortError' ? ApiErrorType.TIMEOUT : ApiErrorType.NETWORK,
+      message: error.message
+    };
+  } else {
+    // Handle unknown error format
+    return {
+      status: 0,
+      type: ApiErrorType.UNKNOWN,
+      message: String(error)
+    };
+  }
 }

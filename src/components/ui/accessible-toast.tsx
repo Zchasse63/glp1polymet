@@ -2,20 +2,27 @@
 import React, { useEffect } from 'react';
 import { 
   Toast, 
-  ToastProps, 
+  ToastClose,
   ToastAction,
   ToastActionElement, 
   ToastDescription,
-  ToastTitle, 
-  ToastClose
+  ToastTitle,
+  ToastProps
 } from '@/components/ui/toast';
 import { ScreenReaderAnnouncement } from '@/utils/accessibility';
 
-interface AccessibleToastProps extends ToastProps {
+// Fix the interface by not extending ToastProps directly
+interface AccessibleToastProps {
   title?: React.ReactNode;
   description?: React.ReactNode;
   action?: ToastActionElement;
   assertive?: boolean;
+  className?: string;
+  variant?: "default" | "destructive";
+  // Add other props we need from ToastProps
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  id?: string;
 }
 
 /**
@@ -46,7 +53,7 @@ export function AccessibleToast({
       )}
       
       {/* Render the visual toast */}
-      <Toast {...props}>
+      <Toast {...props as ToastProps}>
         <div className="grid gap-1">
           {title && <ToastTitle>{title}</ToastTitle>}
           {description && (

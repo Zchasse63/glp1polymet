@@ -1,43 +1,117 @@
 
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import Index from "../pages/Index";
-import NotFound from "../pages/NotFound";
-import HealthPage from "../pages/HealthPage";
-import MedicationPage from "../pages/MedicationPage";
-import InsightsPage from "../pages/InsightsPage";
-import AuthPage from "../pages/AuthPage";
-import UserProfilePage from "../pages/UserProfilePage";
-import AppSettingsPage from "../pages/AppSettingsPage";
-import SubscriptionPage from "../pages/SubscriptionPage";
-import AppIntegrationsPage from "../pages/AppIntegrationsPage";
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { useAuth } from '@/contexts/AuthContext';
+import { ScreenReaderAnnouncement } from '@/utils/accessibility';
+import { usePageChangeAnnouncer } from '@/utils/a11y/usePageChangeAnnouncer';
+import {
+  SuspenseIndex,
+  SuspenseAuthPage,
+  SuspenseHealthPage,
+  SuspenseInsightsPage,
+  SuspenseMedicationPage,
+  SuspenseUserProfilePage,
+  SuspenseAppSettingsPage,
+  SuspenseAppIntegrationsPage,
+  SuspenseSubscriptionPage,
+  SuspenseNotFound
+} from './LazyRoutes';
 
-const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuth();
-  
-  if (isLoading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  }
-  
-  return isAuthenticated ? <>{children}</> : <Navigate to="/auth" />;
+// Protected Route component that redirects to login if not authenticated
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <>{children}</> : <Navigate to="/auth" replace />;
 };
 
-const AppRoutes = () => {
+// Routes with accessibility enhancements
+export const AppRoutes = () => {
+  // Announce page changes to screen readers
+  const { pageTitle, pageAnnouncement } = usePageChangeAnnouncer();
+
   return (
-    <Routes>
-      <Route path="/auth" element={<AuthPage />} />
-      <Route path="/" element={<PrivateRoute><Index /></PrivateRoute>} />
-      <Route path="/health" element={<PrivateRoute><HealthPage /></PrivateRoute>} />
-      <Route path="/medications" element={<PrivateRoute><MedicationPage /></PrivateRoute>} />
-      <Route path="/insights" element={<PrivateRoute><InsightsPage /></PrivateRoute>} />
-      <Route path="/profile" element={<PrivateRoute><UserProfilePage /></PrivateRoute>} />
-      <Route path="/settings" element={<PrivateRoute><AppSettingsPage /></PrivateRoute>} />
-      <Route path="/subscription" element={<PrivateRoute><SubscriptionPage /></PrivateRoute>} />
-      <Route path="/integrations" element={<PrivateRoute><AppIntegrationsPage /></PrivateRoute>} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <>
+      {/* Announce page changes to screen readers */}
+      <ScreenReaderAnnouncement message={pageAnnouncement} />
+      
+      {/* Update document title when it changes */}
+      {pageTitle && <title>{pageTitle}</title>}
+      
+      <ErrorBoundary>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/auth" element={<SuspenseAuthPage />} />
+          
+          {/* Protected routes */}
+          <Route 
+            path="/" 
+            element={
+              <ProtectedRoute>
+                <SuspenseIndex />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/health" 
+            element={
+              <ProtectedRoute>
+                <SuspenseHealthPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/insights" 
+            element={
+              <ProtectedRoute>
+                <SuspenseInsightsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/medications" 
+            element={
+              <ProtectedRoute>
+                <SuspenseMedicationPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/profile" 
+            element={
+              <ProtectedRoute>
+                <SuspenseUserProfilePage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/settings" 
+            element={
+              <ProtectedRoute>
+                <SuspenseAppSettingsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/integrations" 
+            element={
+              <ProtectedRoute>
+                <SuspenseAppIntegrationsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/subscription" 
+            element={
+              <ProtectedRoute>
+                <SuspenseSubscriptionPage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Fall-back routes */}
+          <Route path="*" element={<SuspenseNotFound />} />
+        </Routes>
+      </ErrorBoundary>
+    </>
   );
 };
-
-export default AppRoutes;
