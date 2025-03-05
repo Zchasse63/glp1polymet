@@ -8,6 +8,7 @@ import { ErrorLogger } from "@/utils/errorHandling";
 import { useComponentPerformance } from "@/utils/performance";
 import { AccessibleIcon } from "@/utils/accessibility";
 import { Bookmark, BookmarkCheck } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 interface RecommendationListProps {
   recommendations: Recommendation[];
@@ -33,9 +34,12 @@ const RecommendationList: React.FC<RecommendationListProps> = ({ recommendations
   }, [performance]);
 
   // Handle recommendation click
-  const handleRecommendationClick = (recommendationId: string, title: string) => {
+  const handleRecommendationClick = async (recommendationId: string, title: string) => {
     try {
       console.log(`Recommendation viewed: ${recommendationId}`);
+      
+      // In a full implementation, we would log this to Supabase as well
+      // For now, just show a toast notification
       
       toast({
         title: title,

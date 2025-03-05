@@ -10,6 +10,7 @@ import RecommendationHeader from "./recommendations/RecommendationHeader";
 import { useComponentPerformance } from "@/utils/performance";
 import RecommendationContainer from "./recommendations/RecommendationContainer";
 import EmptyRecommendationState from "./recommendations/EmptyRecommendationState";
+import { useAuth } from "@/contexts/AuthContext";
 
 /**
  * PersonalizedRecommendations Component
@@ -24,8 +25,9 @@ import EmptyRecommendationState from "./recommendations/EmptyRecommendationState
 const PersonalizedRecommendations: React.FC = () => {
   const { data: recommendations = [], isLoading, error } = useRecommendations();
   const [activeFilter, setActiveFilter] = useState<RecommendationFilterType>('all');
-  const { isBookmarked, bookmarkedIds } = useBookmarks();
+  const { isBookmarked, bookmarkedIds, isLoading: bookmarksLoading } = useBookmarks();
   const performance = useComponentPerformance('PersonalizedRecommendations');
+  const { isAuthenticated } = useAuth();
   
   // Log any errors from recommendations fetch
   useEffect(() => {
@@ -46,7 +48,7 @@ const PersonalizedRecommendations: React.FC = () => {
   }, []);
 
   // Show loading state while data is being fetched
-  if (isLoading) {
+  if (isLoading || bookmarksLoading) {
     return <RecommendationsLoadingState />;
   }
 
