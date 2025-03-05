@@ -14,9 +14,14 @@ import { format } from "date-fns";
  * - User-Centric Design: Provides clear context about data timeframe and refresh capability
  * - Sustainable Code: Simple, focused component with clear documentation
  * 
+ * @param onRefresh - Optional callback function to trigger data refresh
  * @returns React component that renders the Insights page header
  */
-const InsightsHeader: React.FC = () => {
+interface InsightsHeaderProps {
+  onRefresh?: () => void;
+}
+
+const InsightsHeader: React.FC<InsightsHeaderProps> = ({ onRefresh }) => {
   /**
    * Handles the refresh action when user clicks the refresh button
    * In a production environment, this would trigger a data refresh from multiple sources
@@ -25,6 +30,9 @@ const InsightsHeader: React.FC = () => {
     console.log("Refreshing insights data...");
     // In a production app, this would dispatch actions to refresh all insights data
     // from various sources (e.g., health data APIs, medication tracking systems)
+    if (onRefresh) {
+      onRefresh();
+    }
   };
 
   /**
