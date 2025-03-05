@@ -7,63 +7,56 @@ import { Badge } from "@/components/ui/badge";
 import CorrelationBarChart from "./charts/CorrelationBarChart";
 import InsightDisplay from "./InsightDisplay";
 import CorrelationLoadingState from "./CorrelationLoadingState";
+import { toast } from "@/components/ui/use-toast";
+import { CorrelationFactor } from "@/types/insightTypes";
+import { useCorrelationData } from "@/hooks/useCorrelationData";
 
-const WeightLossCorrelations = () => {
-  const [correlationData, setCorrelationData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [insight, setInsight] = useState<string>("");
-  const [dataSources, setDataSources] = useState<string[]>([]);
+/**
+ * WeightLossCorrelations Component
+ * 
+ * Displays factors correlated with weight loss success, following CodeFarm principles:
+ * - Separation of concerns: Data fetching handled by custom hook
+ * - Error handling: Graceful fallbacks and user notifications
+ * - Documentation: Comprehensive JSDoc comments
+ * - Single Responsibility: Each subcomponent has a focused purpose
+ */
+const WeightLossCorrelations: React.FC = () => {
+  const { 
+    correlationData, 
+    loading, 
+    error, 
+    insight, 
+    dataSources 
+  } = useCorrelationData();
   
+  // Inform user of errors via toast
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const userId = "demo-user";
-        const correlations = await analyzeWeightLossCorrelations(userId);
-        setCorrelationData(correlations);
-        setInsight(generateKeyInsights(correlations));
-        
-        const integrations = await fetchUserIntegrations(userId);
-        const activeIntegrations = integrations
-          .filter(integration => integration.status === 'active')
-          .map(integration => integration.provider);
-          
-        if (activeIntegrations.length > 0) {
-          setDataSources(activeIntegrations);
-        } else {
-          setDataSources(['App Data']);
-        }
-      } catch (error) {
-        console.error("Error fetching correlation data:", error);
-        setCorrelationData([
-          { factor: "Medication Adherence", correlation: 0.85, color: "hsl(142, 76%, 36%)" },
-          { factor: "Protein Intake", correlation: 0.72, color: "hsl(142, 76%, 36%)" },
-          { factor: "Sleep Quality", correlation: 0.68, color: "hsl(142, 76%, 36%)" },
-          { factor: "Step Count", correlation: 0.65, color: "hsl(142, 76%, 36%)" },
-          { factor: "Stress Level", correlation: -0.58, color: "hsl(0, 84%, 60%)" },
-          { factor: "Carb Intake", correlation: -0.45, color: "hsl(0, 84%, 60%)" },
-        ]);
-        setInsight("Your weight loss is most strongly correlated with <span class=\"font-semibold text-green-600 dark:text-green-400\"> medication adherence</span> and <span class=\"font-semibold text-green-600 dark:text-green-400\"> protein intake</span>. Focus on these areas for maximum results.");
-        setDataSources(['Sample Data']);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (error) {
+      toast({
+        title: "Unable to load correlation data",
+        description: "Showing sample data instead. Please try again later.",
+        variant: "destructive"
+      });
+    }
+  }, [error]);
+  
+  // Sort data for optimal display
+  const formattedData = React.useMemo(() => {
+    if (!correlationData.length) return [];
     
-    fetchData();
-  }, []);
-  
-  const sortedData = [...correlationData].sort((a, b) => {
-    if (a.correlation >= 0 && b.correlation < 0) return -1;
-    if (a.correlation < 0 && b.correlation >= 0) return 1;
-    return Math.abs(b.correlation) - Math.abs(a.correlation);
-  });
-  
-  const formattedData = sortedData.map(item => ({
-    ...item,
-    value: item.correlation * 100,
-    formattedValue: Math.round(item.correlation * 100)
-  }));
+    // Sort by positive correlations first, then by absolute correlation strength
+    const sortedData = [...correlationData].sort((a, b) => {
+      if (a.correlation >= 0 && b.correlation < 0) return -1;
+      if (a.correlation < 0 && b.correlation >= 0) return 1;
+      return Math.abs(b.correlation) - Math.abs(a.correlation);
+    });
+    
+    return sortedData.map(item => ({
+      ...item,
+      value: item.correlation * 100,
+      formattedValue: Math.round(item.correlation * 100)
+    }));
+  }, [correlationData]);
   
   if (loading) {
     return <CorrelationLoadingState />;
