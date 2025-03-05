@@ -16,7 +16,8 @@ export enum EventCategory {
   ERROR = 'error',
   PERFORMANCE = 'performance',
   HEALTH = 'health',
-  SECURITY = 'security' // New category for security-related events
+  SECURITY = 'security', // New category for security-related events
+  USER_JOURNEY = 'user_journey' // Added for page view tracking
 }
 
 // Event priorities
@@ -52,15 +53,19 @@ export interface AnalyticsProvider {
   initialize(): Promise<boolean>;
   trackEvent(event: TrackingEvent): void;
   identify(userId: string, traits?: Record<string, any>): void;
-  setUserProperties(properties: Record<string, any>): void;
-  pageView(path: string, properties?: Record<string, any>): void;
+  setUserProperties?(properties: Record<string, any>): void;
+  pageView?(path: string, properties?: Record<string, any>): void;
 }
 
 // Configuration options for analytics providers
 export interface AnalyticsConfig {
   enabled: boolean;
+  debug: boolean; // Added debug property
+  disabledProviders: string[]; // Added disabledProviders property
+  respectDoNotTrack: boolean; // Added respectDoNotTrack property
+  samplingRate: number; // Added samplingRate property
+  anonymizeIp?: boolean;
   userId?: string;
   debugMode?: boolean;
-  anonymizeIp?: boolean;
   providers?: Record<string, boolean>;
 }
