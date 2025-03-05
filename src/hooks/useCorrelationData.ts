@@ -55,8 +55,6 @@ export const useCorrelationData = (): CorrelationDataResult => {
   const { data, error, isLoading } = useQuery({
     queryKey: ['correlationData', userId],
     queryFn: () => fetchCorrelationData(userId),
-    // If there's an error, fall back to sample data instead of showing an error
-    keepPreviousData: true,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
   });

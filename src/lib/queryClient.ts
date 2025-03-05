@@ -30,33 +30,37 @@ export const createQueryClient = () => {
           return failureCount < 2;
         },
         
-        // Show toast on error
-        onError: (error) => {
-          console.error('Query error:', error);
-          toast({
-            title: "Data loading failed",
-            description: error instanceof Error ? error.message : "An unexpected error occurred",
-            variant: "destructive",
-          });
+        // Show toast on error - updated for React Query v5
+        meta: {
+          onError: (error: Error) => {
+            console.error('Query error:', error);
+            toast({
+              title: "Data loading failed",
+              description: error instanceof Error ? error.message : "An unexpected error occurred",
+              variant: "destructive",
+            });
+          }
         }
       },
       mutations: {
-        // Show toast on error
-        onError: (error) => {
-          console.error('Mutation error:', error);
-          toast({
-            title: "Operation failed",
-            description: error instanceof Error ? error.message : "An unexpected error occurred",
-            variant: "destructive",
-          });
-        },
-        // Show toast on success (commented out to avoid too many toasts)
-        // onSuccess: () => {
-        //   toast({
-        //     title: "Success",
-        //     description: "Operation completed successfully",
-        //   });
-        // }
+        // Show toast on error - updated for React Query v5
+        meta: {
+          onError: (error: Error) => {
+            console.error('Mutation error:', error);
+            toast({
+              title: "Operation failed",
+              description: error instanceof Error ? error.message : "An unexpected error occurred",
+              variant: "destructive",
+            });
+          }
+          // Show toast on success (commented out to avoid too many toasts)
+          // onSuccess: () => {
+          //   toast({
+          //     title: "Success",
+          //     description: "Operation completed successfully",
+          //   });
+          // }
+        }
       }
     }
   });
