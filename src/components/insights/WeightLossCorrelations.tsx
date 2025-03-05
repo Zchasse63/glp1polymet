@@ -84,8 +84,8 @@ const WeightLossCorrelations = () => {
               />
               <Bar 
                 dataKey="absValue"
-                background={{ fill: 'hsl(var(--accent)/0.4)', radius: [0, 4, 4, 0] }}
-                radius={[0, 4, 4, 0]}
+                background={{ fill: 'hsl(var(--accent)/0.4)', radius: 4 }}
+                radius={4}
                 animationDuration={1500}
                 animationEasing="ease-out"
               >
