@@ -4,12 +4,15 @@ import { Correlation } from "@/utils/insights/types";
 import CorrelationBarChart from "./charts/CorrelationBarChart";
 import CorrelationLoadingState from "./CorrelationLoadingState";
 import CorrelationErrorState from "./CorrelationErrorState";
-import { ErrorLogger, ErrorSeverity } from "@/utils/errorHandling";
+import { ErrorLogger } from "@/utils/errorHandling";
 import { useIntersectionObserver } from "@/utils/performanceUtils";
-import { Button } from "@/components/ui/button";
-import { Info, Download, HelpCircle } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { getErrorSeverity } from "./correlations/ErrorSeverityUtils";
+import CorrelationInsight from "./correlations/CorrelationInsight";
+import CorrelationLegend from "./correlations/CorrelationLegend";
+import CorrelationActions from "./correlations/CorrelationActions";
+import NoSignificantCorrelations from "./correlations/NoSignificantCorrelations";
+import NoCorrelationsState from "./correlations/NoCorrelationsState";
 
 interface WeightLossCorrelationsProps {
   correlations: Correlation[] | undefined;
@@ -49,27 +52,6 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
       );
     }
   }, [error, isVisible]);
-  
-  // Determine error severity based on error message
-  const getErrorSeverity = useCallback((err: Error | null): ErrorSeverity => {
-    if (!err) return ErrorSeverity.ERROR;
-    
-    const message = err.message.toLowerCase();
-    
-    if (message.includes('network') || message.includes('connection')) {
-      return ErrorSeverity.WARNING;
-    }
-    
-    if (message.includes('timeout')) {
-      return ErrorSeverity.WARNING;
-    }
-    
-    if (message.includes('permission') || message.includes('forbidden') || message.includes('unauthorized')) {
-      return ErrorSeverity.CRITICAL;
-    }
-    
-    return ErrorSeverity.ERROR;
-  }, []);
   
   // Memoized retry handler to avoid unnecessary re-renders
   const handleRetry = useCallback(() => {
@@ -129,10 +111,6 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
       { dataCount: correlations.length }
     );
     
-    // In a real app, this would generate and download a file
-    // For now, we'll just show a toast message
-    console.log("Exporting correlation data", correlations);
-    
     // Create a simple CSV string
     const headers = ["Factor", "Correlation Value"];
     const rows = sortedCorrelations.map(item => [
@@ -173,24 +151,12 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
     }
 
     if (!correlations || correlations.length === 0) {
-      return (
-        <div className="py-8 text-center">
-          <p className="text-muted-foreground">
-            Not enough data to analyze correlations.
-            <br />
-            Continue tracking your health metrics to see what affects your progress.
-          </p>
-        </div>
-      );
+      return <NoCorrelationsState />;
     }
 
     return (
       <div>
-        {insight && (
-          <div className="mb-4 p-3 bg-primary/10 rounded-md">
-            <p dangerouslySetInnerHTML={{ __html: insight }} />
-          </div>
-        )}
+        <CorrelationInsight insight={insight} />
         
         <div className={cn(
           "h-[300px]", 
@@ -199,74 +165,18 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
           <CorrelationBarChart data={displayedCorrelations} />
         </div>
         
-        {!hasSignificantCorrelations && (
-          <div className="mt-2 p-2 bg-muted/50 rounded text-xs text-muted-foreground">
-            <p className="flex items-center gap-1">
-              <Info className="h-3 w-3" />
-              No strong correlations detected yet. Continue tracking for more accurate insights.
-            </p>
-          </div>
-        )}
+        {!hasSignificantCorrelations && <NoSignificantCorrelations />}
         
         <div className="mt-4 flex flex-col space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-muted-foreground flex items-center space-x-3">
-              <span className="flex items-center">
-                <span className="inline-block w-3 h-3 bg-green-600 mr-1 rounded-sm"></span>
-                <span>Positive correlation</span>
-              </span>
-              <span className="flex items-center">
-                <span className="inline-block w-3 h-3 bg-red-600 mr-1 rounded-sm"></span>
-                <span>Negative correlation</span>
-              </span>
-            </div>
-            
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    aria-label="Learn about correlations"
-                  >
-                    <HelpCircle className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p className="max-w-xs text-xs">
-                    Correlations show relationships between factors and your weight loss.
-                    Positive values (green) indicate factors that may help weight loss,
-                    while negative values (red) may hinder progress.
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
+          <CorrelationLegend />
           
-          <div className="flex justify-between items-center">
-            {sortedCorrelations.length > 5 && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={toggleFactorDisplay}
-                className="text-xs h-8"
-              >
-                {showAllFactors ? "Show top factors only" : "Show all factors"}
-              </Button>
-            )}
-            
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs h-8 ml-auto"
-              onClick={handleExportData}
-              disabled={!correlations || correlations.length === 0}
-            >
-              <Download className="h-3 w-3 mr-1" />
-              Export data
-            </Button>
-          </div>
+          <CorrelationActions 
+            showAllFactors={showAllFactors}
+            toggleFactorDisplay={toggleFactorDisplay}
+            handleExportData={handleExportData}
+            hasExportData={Boolean(correlations && correlations.length > 0)}
+            hasMoreItems={sortedCorrelations.length > 5}
+          />
         </div>
       </div>
     );
