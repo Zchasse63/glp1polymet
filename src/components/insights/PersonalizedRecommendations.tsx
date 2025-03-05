@@ -1,5 +1,7 @@
-import React from "react";
+
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
   ChevronRightIcon, 
@@ -10,11 +12,14 @@ import {
   SunIcon,
   MoonIcon,
   BrainIcon,
-  SparklesIcon
+  SparklesIcon,
+  FilterIcon
 } from "lucide-react";
 import { useRecommendations } from "@/hooks/useRecommendations";
-import { Recommendation, RecommendationIconType } from "@/types/insightTypes";
+import { Recommendation, RecommendationType, RecommendationIconType } from "@/types/insightTypes";
 import RecommendationsLoadingState from "./RecommendationsLoadingState";
+import { motion } from "framer-motion";
+import { toast } from "@/components/ui/use-toast";
 
 /**
  * PersonalizedRecommendations Component
@@ -28,6 +33,7 @@ import RecommendationsLoadingState from "./RecommendationsLoadingState";
  */
 const PersonalizedRecommendations: React.FC = () => {
   const { data: recommendations = [], isLoading, error } = useRecommendations();
+  const [activeFilter, setActiveFilter] = useState<RecommendationType | 'all'>('all');
 
   // Show loading state while data is being fetched
   if (isLoading) {
@@ -55,8 +61,16 @@ const PersonalizedRecommendations: React.FC = () => {
     );
   }
 
+  // Get unique recommendation types for filtering
+  const recommendationTypes = [...new Set(recommendations.map(rec => rec.type))];
+  
+  // Filter recommendations based on active filter
+  const filteredRecommendations = activeFilter === 'all' 
+    ? recommendations 
+    : recommendations.filter(rec => rec.type === activeFilter);
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold">
           Personalized Recommendations
@@ -70,17 +84,95 @@ const PersonalizedRecommendations: React.FC = () => {
         </Button>
       </div>
 
-      <div className="grid gap-3">
-        {recommendations.map((recommendation) => (
-          <RecommendationCard
-            key={recommendation.id}
-            recommendation={recommendation}
-            onActionClick={() => console.log(`Recommendation viewed: ${recommendation.id}`)}
-          />
+      {/* Recommendation Type Filters */}
+      <div className="flex flex-wrap gap-2 pb-1">
+        <Badge 
+          variant={activeFilter === 'all' ? 'default' : 'outline'}
+          className="cursor-pointer hover:bg-primary/90 transition-colors"
+          onClick={() => setActiveFilter('all')}
+        >
+          All
+        </Badge>
+        {recommendationTypes.map(type => (
+          <Badge 
+            key={type}
+            variant={activeFilter === type ? 'default' : 'outline'}
+            className="cursor-pointer hover:bg-primary/90 transition-colors"
+            onClick={() => setActiveFilter(type)}
+          >
+            {formatRecType(type)}
+          </Badge>
         ))}
       </div>
+
+      <motion.div 
+        className="grid gap-3"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
+        {filteredRecommendations.map((recommendation, index) => (
+          <motion.div
+            key={recommendation.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.1 }}
+          >
+            <RecommendationCard
+              recommendation={recommendation}
+              onActionClick={() => handleRecommendationClick(recommendation)}
+            />
+          </motion.div>
+        ))}
+        
+        {filteredRecommendations.length === 0 && activeFilter !== 'all' && (
+          <Card className="p-4">
+            <div className="text-center py-4">
+              <FilterIcon className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+              <h3 className="text-md font-medium mb-1">No {formatRecType(activeFilter)} Recommendations</h3>
+              <p className="text-sm text-muted-foreground">
+                Try another category or view all recommendations.
+              </p>
+              <Button 
+                variant="link" 
+                className="mt-2"
+                onClick={() => setActiveFilter('all')}
+              >
+                Show All Recommendations
+              </Button>
+            </div>
+          </Card>
+        )}
+      </motion.div>
     </div>
   );
+};
+
+/**
+ * Format recommendation type for display
+ */
+const formatRecType = (type: RecommendationType | 'all'): string => {
+  if (type === 'all') return 'All';
+  
+  return {
+    nutrition: 'Nutrition',
+    activity: 'Activity',
+    medication: 'Medication',
+    sleep: 'Sleep',
+    stress: 'Stress',
+    general: 'General'
+  }[type] || type.charAt(0).toUpperCase() + type.slice(1);
+};
+
+/**
+ * Handle recommendation click
+ */
+const handleRecommendationClick = (recommendation: Recommendation) => {
+  console.log(`Recommendation viewed: ${recommendation.id}`);
+  toast({
+    title: `${recommendation.title}`,
+    description: "We've saved this recommendation to your activity feed.",
+  });
 };
 
 /**
@@ -160,10 +252,15 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
           >
             <Icon />
           </div>
-          <div>
-            <h3 className="font-medium">
-              {recommendation.title}
-            </h3>
+          <div className="w-full">
+            <div className="flex justify-between items-start">
+              <h3 className="font-medium">
+                {recommendation.title}
+              </h3>
+              <Badge variant="outline" className="text-xs">
+                {formatRecType(recommendation.type)}
+              </Badge>
+            </div>
             <p
               className="text-sm text-gray-500 dark:text-gray-400 mt-1"
             >
