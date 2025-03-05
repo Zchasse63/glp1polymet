@@ -163,21 +163,35 @@ export const HealthVitalsOverview = ({ vitals }: HealthVitalsOverviewProps) => {
   return (
     <section className="space-y-4">
       <h2 className="text-xl font-semibold">Today's Vitals</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {metricsData.map((metric, index) => (
-          <MetricCard
-            key={metric.title}
-            title={metric.title}
-            value={metric.value}
-            unit={metric.unit}
-            icon={metric.icon}
-            iconBgColor={metric.iconBgColor}
-            trend={metric.trend}
-            trendIcon={metric.trendIcon}
-            trendColor={metric.trendColor}
-            animationDelay={`${0.1 + index * 0.05}s`}
-            isLoaded={true}
-          />
+          <Card key={metric.title} className="overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-start mb-2">
+                <p className="text-xs font-medium text-muted-foreground">{metric.title}</p>
+                <div 
+                  className="w-7 h-7 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: metric.iconBgColor }}
+                >
+                  {metric.icon}
+                </div>
+              </div>
+              
+              <div className="flex items-baseline">
+                <span className="text-xl font-bold">{metric.value}</span>
+                {metric.unit && (
+                  <span className="text-xs ml-1 text-muted-foreground">{metric.unit}</span>
+                )}
+              </div>
+              
+              {metric.trend && metric.trendIcon && (
+                <div className={`flex items-center text-xs mt-1 ${metric.trendColor}`}>
+                  {metric.trendIcon}
+                  <span>{metric.trend}</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         ))}
       </div>
     </section>
