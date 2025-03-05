@@ -1,175 +1,148 @@
 
-import { ErrorLogger } from '../errorHandling';
-
 /**
  * CSRF Protection Module
  * 
  * Following CodeFarm Development Methodology:
- * - Security-First: Protection against CSRF attacks
- * - User-Centric Design: Transparent protection with minimal user impact
+ * - Security-First: Protection against Cross-Site Request Forgery attacks
+ * - Modular Design: Standalone security component
  */
 
-// Configuration for CSRF protection
-export interface CSRFConfig {
-  tokenKey: string;
-  headerName: string;
-  cookieName: string;
-  refreshThreshold: number; // in seconds
-}
+import { CSRFConfig } from './types';
+import { ErrorLogger } from '../errorHandling';
 
-// Default configuration
-const csrfConfig: CSRFConfig = {
-  tokenKey: 'csrf_token',
+// Default CSRF configuration
+const defaultCSRFConfig: CSRFConfig = {
+  cookieName: 'csrf_token',
   headerName: 'X-CSRF-Token',
-  cookieName: 'csrf',
-  refreshThreshold: 30 * 60 // 30 minutes
+  tokenLength: 32,
+  cookieOptions: {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    path: '/',
+    maxAge: 3600 // 1 hour
+  }
 };
 
+// Current configuration
+let csrfConfig: CSRFConfig = { ...defaultCSRFConfig };
+
 /**
- * Generate a new CSRF token
- * @returns New CSRF token
+ * Configure CSRF protection
+ * @param config Custom CSRF configuration
  */
-function generateCSRFToken(): string {
-  // Generate a random token
-  const array = new Uint8Array(32);
+export function configureCSRF(config: Partial<CSRFConfig>): void {
+  csrfConfig = { ...defaultCSRFConfig, ...config };
+}
+
+/**
+ * Generate a random CSRF token
+ * @returns Random token string
+ */
+function generateToken(): string {
+  const array = new Uint8Array(csrfConfig.tokenLength);
   window.crypto.getRandomValues(array);
   return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
 /**
- * Get the current CSRF token, generating a new one if needed
- * @returns CSRF token
- */
-export function getCSRFToken(): string | null {
-  try {
-    // Check if token exists in localStorage
-    let token = localStorage.getItem(csrfConfig.tokenKey);
-    const timestamp = localStorage.getItem(`${csrfConfig.tokenKey}_time`);
-    
-    // If token doesn't exist or is expired, generate a new one
-    if (!token || !timestamp || isTokenExpired(parseInt(timestamp, 10))) {
-      token = generateCSRFToken();
-      setCSRFToken(token);
-    }
-    
-    return token;
-  } catch (error) {
-    ErrorLogger.warning(
-      'Failed to get CSRF token',
-      'CSRF_TOKEN_ERROR',
-      { error }
-    );
-    return null;
-  }
-}
-
-/**
- * Set a new CSRF token
+ * Set CSRF token cookie
  * @param token CSRF token
  */
-function setCSRFToken(token: string): void {
-  try {
-    localStorage.setItem(csrfConfig.tokenKey, token);
-    localStorage.setItem(`${csrfConfig.tokenKey}_time`, Date.now().toString());
-    
-    // Also set as a cookie for server-side validation
-    document.cookie = `${csrfConfig.cookieName}=${token}; path=/; SameSite=Strict; Secure`;
-  } catch (error) {
-    ErrorLogger.warning(
-      'Failed to set CSRF token',
-      'CSRF_TOKEN_ERROR',
-      { error }
-    );
-  }
-}
-
-/**
- * Check if a token is expired
- * @param timestamp Token timestamp
- * @returns Whether token is expired
- */
-function isTokenExpired(timestamp: number): boolean {
-  const expirationTime = timestamp + (csrfConfig.refreshThreshold * 1000);
-  return Date.now() > expirationTime;
-}
-
-/**
- * Add CSRF token to headers
- * @param headers Headers object to add token to
- */
-function addCSRFToken(headers: Headers): void {
-  const token = getCSRFToken();
-  if (token) {
-    headers.set(csrfConfig.headerName, token);
-  }
-}
-
-/**
- * Intercept fetch requests to add CSRF token
- */
-function interceptFetchRequests(): void {
-  const originalFetch = window.fetch;
+function setCSRFCookie(token: string): void {
+  const { cookieName, cookieOptions } = csrfConfig;
+  const expires = new Date(Date.now() + cookieOptions.maxAge * 1000).toUTCString();
   
-  window.fetch = function(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-    // Clone the init object to avoid modifying the original
-    const modifiedInit: RequestInit = init ? { ...init } : {};
-    
-    // Only add CSRF token for requests to same origin
-    if (typeof input === 'string' && (input.startsWith('/') || input.startsWith(window.location.origin))) {
-      // Initialize headers if they don't exist
-      if (!modifiedInit.headers) {
-        modifiedInit.headers = new Headers();
-      }
-      
-      // Handle the headers based on their type
-      if (modifiedInit.headers instanceof Headers) {
-        addCSRFToken(modifiedInit.headers);
-      } else {
-        // Convert HeadersInit to Record<string, string> safely
-        const headerRecord: Record<string, string> = {};
-        
-        // Handle different types of HeadersInit
-        if (Array.isArray(modifiedInit.headers)) {
-          // It's an array of [name, value] pairs
-          modifiedInit.headers.forEach(([key, value]) => {
-            headerRecord[key] = value;
-          });
-        } else {
-          // It's a record object
-          Object.entries(modifiedInit.headers).forEach(([key, value]) => {
-            headerRecord[key] = value;
-          });
-        }
-        
-        // Add CSRF token
-        modifiedInit.headers = {
-          ...headerRecord,
-          [csrfConfig.headerName]: getCSRFToken() || ''
-        };
-      }
+  document.cookie = `${cookieName}=${token}; expires=${expires}; path=${cookieOptions.path}; ${
+    cookieOptions.secure ? 'secure;' : ''
+  } ${cookieOptions.httpOnly ? 'httpOnly;' : ''} samesite=${cookieOptions.sameSite}`;
+}
+
+/**
+ * Get CSRF token from cookie
+ * @returns CSRF token or null if not found
+ */
+function getCSRFCookieToken(): string | null {
+  const { cookieName } = csrfConfig;
+  const cookies = document.cookie.split(';').map(cookie => cookie.trim());
+  
+  for (const cookie of cookies) {
+    if (cookie.startsWith(`${cookieName}=`)) {
+      return cookie.substring(cookieName.length + 1);
     }
-    
-    return originalFetch.call(window, input, modifiedInit);
-  };
+  }
+  
+  return null;
 }
 
 /**
  * Initialize CSRF protection
+ * @returns Whether initialization was successful
  */
-export function initCSRFProtection(): void {
+export function initCSRFProtection(): boolean {
   try {
-    // Generate initial token
-    getCSRFToken();
+    // Only apply CSRF protection if running in browser
+    if (typeof document === 'undefined') {
+      return false;
+    }
     
-    // Intercept fetch requests
-    interceptFetchRequests();
+    // Generate and set token if not exists
+    let token = getCSRFCookieToken();
+    
+    if (!token) {
+      token = generateToken();
+      setCSRFCookie(token);
+    }
     
     console.log('CSRF protection initialized');
+    return true;
   } catch (error) {
     ErrorLogger.error(
       'Failed to initialize CSRF protection',
       'CSRF_INIT_ERROR',
       { error }
     );
+    return false;
   }
+}
+
+/**
+ * Get CSRF token for use in requests
+ * @returns CSRF token or null if not available
+ */
+export function getCSRFToken(): string | null {
+  return getCSRFCookieToken();
+}
+
+/**
+ * Add CSRF token to fetch options
+ * @param options Fetch options object
+ * @returns Updated fetch options with CSRF token
+ */
+export function addCSRFToken(options: RequestInit = {}): RequestInit {
+  const token = getCSRFToken();
+  
+  if (!token) {
+    console.warn('CSRF token not available');
+    return options;
+  }
+  
+  const headers = new Headers(options.headers || {});
+  headers.append(csrfConfig.headerName, token);
+  
+  return {
+    ...options,
+    headers
+  };
+}
+
+/**
+ * Protect a fetch request with CSRF token
+ * @param url URL to fetch
+ * @param options Fetch options
+ * @returns Promise resolving to fetch response
+ */
+export function protectedFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  const protectedOptions = addCSRFToken(options);
+  return fetch(url, protectedOptions);
 }

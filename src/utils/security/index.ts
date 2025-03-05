@@ -7,37 +7,87 @@
  * - Modular Design: Composable security features
  */
 
-// Export content security utilities
-export { 
+// Import content security utilities
+import { 
   initContentSecurity,
   sanitizeHTML,
   isUrlSafe
 } from './contentSecurity';
 
-// Export CSRF protection utilities
-export {
+// Import CSRF protection utilities
+import {
   initCSRFProtection,
-  getCSRFToken
+  getCSRFToken,
+  addCSRFToken,
+  protectedFetch,
+  configureCSRF
 } from './csrfProtection';
 
-// Export input sanitization utilities
-export {
+// Import input sanitization utilities
+import {
   sanitizeInput,
   validateEmail,
   validatePhone,
-  validateUrl
+  validateUrl,
+  sanitizeHtml,
+  sanitizeText,
+  sanitizeUrl,
+  sanitizeEmail,
+  sanitizeForDatabase,
+  configureSanitizer
 } from './inputSanitization';
 
-// Export secure storage utilities
-export {
+// Import secure storage utilities
+import {
   secureStore,
   secureRetrieve,
   secureDelete,
-  clearSecureStorage
+  clearSecureStorage,
+  secureLocalStorage,
+  getFromSecureLocalStorage,
+  removeFromSecureLocalStorage,
+  configureSecureStorage
 } from './secureStorage';
 
 // Export types
 export * from './types';
+
+// Re-export all utility functions
+export {
+  // Content security exports
+  initContentSecurity,
+  sanitizeHTML,
+  isUrlSafe,
+  
+  // CSRF protection exports
+  initCSRFProtection,
+  getCSRFToken,
+  addCSRFToken,
+  protectedFetch,
+  configureCSRF,
+  
+  // Input sanitization exports
+  sanitizeInput,
+  validateEmail,
+  validatePhone,
+  validateUrl,
+  sanitizeHtml,
+  sanitizeText,
+  sanitizeUrl,
+  sanitizeEmail,
+  sanitizeForDatabase,
+  configureSanitizer,
+  
+  // Secure storage exports
+  secureStore,
+  secureRetrieve,
+  secureDelete,
+  clearSecureStorage,
+  secureLocalStorage,
+  getFromSecureLocalStorage,
+  removeFromSecureLocalStorage,
+  configureSecureStorage
+};
 
 /**
  * Initialize all security features

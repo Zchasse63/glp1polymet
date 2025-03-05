@@ -181,6 +181,23 @@ async function decrypt(encryptedData: string): Promise<string> {
   }
 }
 
+// Add the missing exported functions referenced in index.ts
+export const secureStore = async (key: string, value: string, level = SecurityLevel.MEDIUM): Promise<void> => {
+  return secureLocalStorage(key, value, level);
+};
+
+export const secureRetrieve = async (key: string, level = SecurityLevel.MEDIUM): Promise<string | null> => {
+  return getFromSecureLocalStorage(key, level);
+};
+
+export const secureDelete = (key: string): void => {
+  removeFromSecureLocalStorage(key);
+};
+
+export const clearSecureStorage = (): void => {
+  localStorage.clear();
+};
+
 /**
  * Store data securely in localStorage
  * @param key Storage key

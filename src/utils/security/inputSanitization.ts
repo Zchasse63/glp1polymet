@@ -141,7 +141,7 @@ export function sanitizeForDatabase(input: string): string {
 }
 
 /**
- * Validate and sanitize email address
+ * Sanitize and validate email address
  * @param email Email to validate
  * @returns Sanitized email or empty string if invalid
  */
@@ -158,3 +158,23 @@ export function sanitizeEmail(email: string): string {
   // Sanitize the email
   return sanitizeText(email);
 }
+
+// Add the missing exported functions to match the imports in index.ts
+export const sanitizeInput = sanitizeText; // Alias for sanitizeText
+export const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
+};
+export const validatePhone = (phone: string): boolean => {
+  // Basic international phone validation
+  const phoneRegex = /^\+?[0-9]{10,15}$/;
+  return phoneRegex.test(phone);
+};
+export const validateUrl = (url: string): boolean => {
+  try {
+    new URL(url);
+    return !url.toLowerCase().startsWith('javascript:');
+  } catch (e) {
+    return false;
+  }
+};

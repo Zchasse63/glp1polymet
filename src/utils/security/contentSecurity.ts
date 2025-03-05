@@ -1,5 +1,7 @@
 
 import { ErrorLogger } from '../errorHandling';
+// Import DOMPurify
+import DOMPurify from 'dompurify';
 
 /**
  * Content Security Module
