@@ -1,73 +1,69 @@
 
-import { useCallback, useRef } from 'react';
-import { PerformanceTracker } from './PerformanceTracker';
-import { PerformanceEventType } from './types';
-
 /**
- * Hook for tracking component performance metrics
+ * Component Performance Tracking
  * 
- * Following CodeFarm Development Methodology:
- * - Performance Optimization: Track render, mount, and unmount times
- * - Continuous Learning: Collect metrics for performance analysis
- * 
- * @param componentName The name of the component being tracked
- * @returns Methods for tracking component lifecycle events
+ * Utilities for measuring and optimizing React component performance
  */
-export const useComponentPerformance = (componentName: string) => {
-  // Store metrics collection functions in refs to avoid re-renders
-  const componentRef = useRef({
-    name: componentName,
-    mountTime: 0,
-  });
+
+import { useEffect, useRef } from 'react';
+import { PerformanceEventType } from './types';
+import { performanceTracker } from './PerformanceTracker';
+
+// Measure component render time with proper cleanup
+export function useComponentPerformance(componentName: string) {
+  const metricsRef = useRef<string[]>([]);
   
-  /**
-   * Track component render time
-   */
-  const trackRender = useCallback(() => {
-    const startTime = performance.now();
-    
-    // In case the actual tracker method doesn't exist, use a fallback
-    if (typeof PerformanceTracker.trackComponentRender === 'function') {
-      PerformanceTracker.trackComponentRender(componentRef.current.name, startTime);
-    } else {
-      console.log(`[Performance] Component ${componentRef.current.name} rendered at ${startTime}ms`);
-    }
-    
-    return startTime;
-  }, []);
-  
-  /**
-   * Track component mount time and return cleanup function
-   */
-  const trackMount = useCallback(() => {
-    const startTime = performance.now();
-    componentRef.current.mountTime = startTime;
-    
-    // In case the actual tracker method doesn't exist, use a fallback
-    if (typeof PerformanceTracker.trackComponentMount === 'function') {
-      PerformanceTracker.trackComponentMount(componentRef.current.name, startTime);
-    } else {
-      console.log(`[Performance] Component ${componentRef.current.name} mounted at ${startTime}ms`);
-    }
-    
+  // Clean up metrics when component unmounts
+  useEffect(() => {
     return () => {
-      // Track unmount in cleanup function
-      const endTime = performance.now();
-      const duration = endTime - componentRef.current.mountTime;
+      // End any metrics that weren't properly ended
+      metricsRef.current.forEach(id => {
+        try {
+          performanceTracker.end(id);
+        } catch (e) {
+          // Ignore errors when ending metrics
+        }
+      });
       
-      // In case the actual tracker method doesn't exist, use a fallback
-      if (typeof PerformanceTracker.trackComponentUnmount === 'function') {
-        PerformanceTracker.trackComponentUnmount(componentRef.current.name, endTime, duration);
-      } else {
-        console.log(`[Performance] Component ${componentRef.current.name} unmounted at ${endTime}ms (duration: ${duration}ms)`);
-      }
+      // Clear the metrics array
+      metricsRef.current = [];
     };
   }, []);
   
   return {
-    trackRender,
-    trackMount,
+    measureRender: (callback: () => void) => {
+      const metricId = performanceTracker.start(componentName, PerformanceEventType.COMPONENT_RENDER);
+      metricsRef.current.push(metricId);
+      
+      try {
+        callback();
+      } finally {
+        performanceTracker.end(metricId);
+        // Remove from tracking array once properly ended
+        metricsRef.current = metricsRef.current.filter(id => id !== metricId);
+      }
+    },
+    
+    // Track component mount time
+    trackMount: () => {
+      const metricId = performanceTracker.start(`${componentName}_mount`, PerformanceEventType.COMPONENT_RENDER);
+      metricsRef.current.push(metricId);
+      
+      return () => {
+        performanceTracker.end(metricId);
+        metricsRef.current = metricsRef.current.filter(id => id !== metricId);
+      };
+    },
+    
+    // Track component update time
+    trackUpdate: () => {
+      const metricId = performanceTracker.start(`${componentName}_update`, PerformanceEventType.COMPONENT_RENDER);
+      metricsRef.current.push(metricId);
+      
+      return () => {
+        performanceTracker.end(metricId);
+        metricsRef.current = metricsRef.current.filter(id => id !== metricId);
+      };
+    }
   };
-};
-
-export default useComponentPerformance;
+}

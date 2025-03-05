@@ -93,7 +93,7 @@ const RecommendationList: React.FC<RecommendationListProps> = ({ recommendations
             onActionClick={() => handleRecommendationClick(recommendation.id, recommendation.title)}
             index={index}
             isBookmarked={bookmarked}
-            onBookmarkToggle={handleBookmarkToggle}
+            onBookmarkToggle={() => handleBookmarkToggle(recommendation.id)}
             bookmarkIcon={
               <AccessibleIcon 
                 icon={<Bookmark className="h-5 w-5" />}

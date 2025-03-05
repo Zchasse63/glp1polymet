@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRecommendations } from "@/hooks/useRecommendations";
-import { RecommendationFilterType } from "@/types/insightTypes";
+import { RecommendationFilterType, RecommendationType } from "@/types/insightTypes";
 import RecommendationsLoadingState from "./RecommendationsLoadingState";
 import RecommendationFilters from "./recommendations/RecommendationFilters";
 import { useBookmarks } from "@/hooks/useBookmarks";
@@ -61,7 +61,8 @@ const PersonalizedRecommendations: React.FC = () => {
   }
 
   // Get unique recommendation types for filtering
-  const recommendationTypes = [...new Set(recommendations.map(rec => rec.type))];
+  // Using type assertion to make TypeScript happy since we know these values will be valid RecommendationType
+  const recommendationTypes = [...new Set(recommendations.map(rec => rec.type))] as RecommendationType[];
   
   // Filter recommendations based on active filter
   const filteredRecommendations = activeFilter === 'all' 
