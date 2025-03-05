@@ -6,6 +6,7 @@
  * - Holistic Development: Combines various insight modules into a cohesive experience
  * - User-Centric Design: Progressive disclosure of complex health data
  * - Sustainable Code: Modular architecture with clear separation of concerns
+ * - Error Containment: Error boundaries to isolate component failures
  * 
  * @returns React component that renders the Insights page content
  */
@@ -18,6 +19,7 @@ import InsightsHeader from "./insights/InsightsHeader";
 import WeeklyProgressSummary from "./insights/WeeklyProgressSummary";
 import WeightLossCorrelations from "./insights/WeightLossCorrelations";
 import PersonalizedRecommendations from "./insights/PersonalizedRecommendations";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Animation variants for staggered entry
 const containerVariants = {
@@ -94,7 +96,9 @@ const Insights: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <InsightsHeader onRefresh={handleRefreshData} />
+      <ErrorBoundary>
+        <InsightsHeader onRefresh={handleRefreshData} />
+      </ErrorBoundary>
       
       <AnimatePresence>
         {isDataLoaded ? (
@@ -105,15 +109,21 @@ const Insights: React.FC = () => {
             animate="visible"
           >
             <motion.div variants={itemVariants}>
-              <WeeklyProgressSummary />
+              <ErrorBoundary>
+                <WeeklyProgressSummary />
+              </ErrorBoundary>
             </motion.div>
             
             <motion.div variants={itemVariants}>
-              <WeightLossCorrelations />
+              <ErrorBoundary>
+                <WeightLossCorrelations />
+              </ErrorBoundary>
             </motion.div>
             
             <motion.div variants={itemVariants}>
-              <PersonalizedRecommendations />
+              <ErrorBoundary>
+                <PersonalizedRecommendations />
+              </ErrorBoundary>
             </motion.div>
           </motion.div>
         ) : (

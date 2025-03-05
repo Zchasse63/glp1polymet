@@ -7,11 +7,11 @@
  * - Separation of Concerns: Data fetching logic separate from UI
  * - Error Handling: Comprehensive error management
  * - Type Safety: Strong TypeScript typing
+ * - Caching: Efficient data caching through React Query
  */
-import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { WeeklyProgressData } from "@/types/insightTypes";
-import { delay, formatErrorMessage } from "@/lib/utils";
-import { toast } from "@/components/ui/use-toast";
+import { delay } from "@/lib/utils";
 
 interface WeeklyProgressResult {
   /** Weekly progress data */
@@ -25,67 +25,56 @@ interface WeeklyProgressResult {
 }
 
 /**
+ * Fetches weekly progress data from API or returns mock data
+ */
+const fetchProgressData = async (): Promise<WeeklyProgressData> => {
+  // In production, this would be an API call to your backend
+  // For now, we'll simulate a delay and return mock data
+  await delay(600);
+  
+  // Mock data for weekly progress
+  const mockProgressData: WeeklyProgressData = {
+    summaryText: "You're making excellent progress!",
+    comparisonText: "Your weight loss is 15% faster than the average GLP-1 user at this stage.",
+    badges: [
+      { text: "-2.3 lbs this week", colorTheme: "green" },
+      { text: "100% medication adherence", colorTheme: "blue" },
+      { text: "+12% activity level", colorTheme: "purple" }
+    ],
+    period: "Last 7 days",
+    metadata: {
+      startDate: "2023-09-01",
+      endDate: "2023-09-07",
+      comparisonGroup: "GLP-1 users, 3 months"
+    }
+  };
+  
+  return mockProgressData;
+};
+
+/**
  * Custom hook for fetching and managing weekly progress data
  * @returns Object containing progress data and status indicators
  */
 export const useWeeklyProgress = (): WeeklyProgressResult => {
-  const [progressData, setProgressData] = useState<WeeklyProgressData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchProgressData = async (): Promise<void> => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // In production, this would be an API call to your backend
-      // For now, we'll simulate a delay and return mock data
-      await delay(600);
-      
-      // Mock data for weekly progress
-      const mockProgressData: WeeklyProgressData = {
-        summaryText: "You're making excellent progress!",
-        comparisonText: "Your weight loss is 15% faster than the average GLP-1 user at this stage.",
-        badges: [
-          { text: "-2.3 lbs this week", colorTheme: "green" },
-          { text: "100% medication adherence", colorTheme: "blue" },
-          { text: "+12% activity level", colorTheme: "purple" }
-        ],
-        period: "Last 7 days",
-        metadata: {
-          startDate: "2023-09-01",
-          endDate: "2023-09-07",
-          comparisonGroup: "GLP-1 users, 3 months"
-        }
-      };
-      
-      setProgressData(mockProgressData);
-    } catch (err) {
-      console.error("Error fetching weekly progress data:", err);
-      setError(err instanceof Error ? err : new Error(formatErrorMessage(err)));
-      
-      toast({
-        title: "Failed to load progress summary",
-        description: "Unable to load your weekly progress summary. Please try again later.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['weeklyProgress'],
+    queryFn: fetchProgressData,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+  });
 
   const refreshProgress = async (): Promise<void> => {
-    await fetchProgressData();
+    // Invalidate the cache to trigger a refetch
+    await queryClient.invalidateQueries({ queryKey: ['weeklyProgress'] });
   };
-
-  useEffect(() => {
-    fetchProgressData();
-  }, []);
   
   return { 
-    progressData, 
-    loading, 
-    error, 
+    progressData: data || null, 
+    loading: isLoading, 
+    error: error instanceof Error ? error : null, 
     refreshProgress 
   };
 };

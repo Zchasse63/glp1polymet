@@ -1,15 +1,13 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { analyzeWeightLossCorrelations, generateKeyInsights } from "@/utils/insights/correlationAnalysis";
-import { fetchUserIntegrations } from "@/utils/appIntegrations";
 import { Badge } from "@/components/ui/badge";
 import CorrelationBarChart from "./charts/CorrelationBarChart";
 import InsightDisplay from "./InsightDisplay";
 import CorrelationLoadingState from "./CorrelationLoadingState";
 import { toast } from "@/components/ui/use-toast";
-import { CorrelationFactor } from "@/types/insightTypes";
 import { useCorrelationData } from "@/hooks/useCorrelationData";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 /**
  * WeightLossCorrelations Component
@@ -63,34 +61,36 @@ const WeightLossCorrelations: React.FC = () => {
   }
   
   return (
-    <Card className="border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
-      <CardHeader className="pb-2">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-          <CardTitle className="text-lg font-medium">
-            Weight Loss Correlations
-          </CardTitle>
-          <div className="flex flex-wrap gap-1 mt-2 sm:mt-0">
-            {dataSources.map(source => (
-              <Badge key={source} variant="secondary" className="text-xs">
-                {source.charAt(0).toUpperCase() + source.slice(1)}
-              </Badge>
-            ))}
+    <ErrorBoundary>
+      <Card className="border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
+        <CardHeader className="pb-2">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+            <CardTitle className="text-lg font-medium">
+              Weight Loss Correlations
+            </CardTitle>
+            <div className="flex flex-wrap gap-1 mt-2 sm:mt-0">
+              {dataSources.map(source => (
+                <Badge key={source} variant="secondary" className="text-xs">
+                  {source.charAt(0).toUpperCase() + source.slice(1)}
+                </Badge>
+              ))}
+            </div>
           </div>
-        </div>
-      </CardHeader>
-      <CardContent className="pt-2">
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          Factors most strongly correlated with your weight loss success
-        </p>
+        </CardHeader>
+        <CardContent className="pt-2">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            Factors most strongly correlated with your weight loss success
+          </p>
 
-        <CorrelationBarChart formattedData={formattedData} />
-        <InsightDisplay insight={insight} />
-        
-        <div className="mt-4 text-xs text-muted-foreground">
-          <p>Insights are based on your historical data from all connected apps, even if you've disconnected them.</p>
-        </div>
-      </CardContent>
-    </Card>
+          <CorrelationBarChart formattedData={formattedData} />
+          <InsightDisplay insight={insight} />
+          
+          <div className="mt-4 text-xs text-muted-foreground">
+            <p>Insights are based on your historical data from all connected apps, even if you've disconnected them.</p>
+          </div>
+        </CardContent>
+      </Card>
+    </ErrorBoundary>
   );
 };
 
