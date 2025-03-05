@@ -1,62 +1,103 @@
 
-import { ErrorSeverity, AppError } from "./types";
-import { ErrorLogger } from "./ErrorLogger";
+/**
+ * Error Handling Utilities
+ * 
+ * Following CodeFarm Development Methodology:
+ * - Error Handling: Standardized error handling
+ * - Sustainable Code: Reusable utilities
+ */
+
+import { ErrorLogger } from './ErrorLogger';
+import { ErrorSeverity, ErrorGroup } from './types';
 
 /**
- * Standard error handler function that can be used across the application
- * Provides a consistent way to log and display errors
+ * Format error message from any error type
  */
-export const handleError = (
+export function formatErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  
+  if (typeof error === 'string') {
+    return error;
+  }
+  
+  return 'An unknown error occurred';
+}
+
+/**
+ * Safely log an error with consistent formatting
+ */
+export function logError(
   message: string,
-  code: string,
-  context: Record<string, any>,
-  originalError: unknown,
-  displayToUser: boolean = false,
-  userMessage?: string,
-  severity: ErrorSeverity = ErrorSeverity.ERROR
-) => {
-  // Log the error
+  error: unknown,
+  context: Record<string, any> = {}
+): void {
+  const formattedMessage = `${message}: ${formatErrorMessage(error)}`;
+  
   ErrorLogger.error(
-    message,
-    code,
+    formattedMessage,
+    'GENERAL_ERROR',
     context,
-    originalError,
-    displayToUser,
-    userMessage
+    error
   );
+}
 
-  // Return a formatted error object that can be used by components
-  return {
-    message,
-    code,
-    userMessage: userMessage || message,
-    severity,
-    timestamp: new Date().toISOString()
+/**
+ * Create a standardized error handler function
+ */
+export function createErrorHandler(
+  operationName: string,
+  errorCode: string,
+  severity: ErrorSeverity = ErrorSeverity.ERROR,
+  group: ErrorGroup = ErrorGroup.GENERAL,
+  shouldNotifyUser: boolean = true
+) {
+  return (error: unknown, context: Record<string, any> = {}): void => {
+    const message = `Error in ${operationName}: ${formatErrorMessage(error)}`;
+    
+    ErrorLogger.log({
+      message,
+      code: errorCode,
+      severity,
+      group,
+      context,
+      originalError: error,
+      shouldNotifyUser
+    });
   };
-};
+}
 
 /**
- * Helper to determine if an error should be reported based on its severity
+ * Handle API errors with standardized approach
  */
-export const shouldReportError = (severity: ErrorSeverity): boolean => {
-  return [ErrorSeverity.ERROR, ErrorSeverity.CRITICAL].includes(severity);
-};
+export function handleApiError(
+  apiName: string,
+  error: unknown,
+  context: Record<string, any> = {}
+): void {
+  logError(
+    `API Error: ${apiName}`,
+    error,
+    context
+  );
+}
 
 /**
- * Format error message for display
+ * Safe function execution with error handling
  */
-export const formatErrorForDisplay = (error: Error): string => {
-  if (!error) return "An unknown error occurred";
-  
-  // Clean up common error messages
-  let message = error.message;
-  
-  // Remove technical details that wouldn't be useful to users
-  message = message.replace(/Error:?\s?/i, "");
-  message = message.replace(/\[.*?\]:\s?/g, "");
-  
-  // Capitalize first letter
-  message = message.charAt(0).toUpperCase() + message.slice(1);
-  
-  return message;
-};
+export async function trySafe<T>(
+  fn: () => Promise<T> | T,
+  errorHandler?: (error: unknown) => void
+): Promise<T | null> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (errorHandler) {
+      errorHandler(error);
+    } else {
+      logError('Operation failed', error);
+    }
+    return null;
+  }
+}
