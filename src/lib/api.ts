@@ -1,6 +1,7 @@
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
-import { trackEvent } from './analytics';
+import { EventCategory, trackFeatureUsage, trackError } from '@/utils/eventTracking';
 
 // Utility type to make certain properties required
 type RequireAtLeastOne<T, Keys extends keyof T = keyof T> =
@@ -33,9 +34,7 @@ export async function api<T = any>(...args: ApiCallArgs): Promise<T> {
   const url = args[0];
   const options: ApiOptions = args[1] || {};
   const { toast } = useToast();
-  const { getToken, refreshToken } = useAuth();
-
-  let authToken = getToken();
+  const { user, isAuthenticated } = useAuth();
 
   // Default headers
   const headers: Record<string, string> = {
@@ -43,9 +42,11 @@ export async function api<T = any>(...args: ApiCallArgs): Promise<T> {
     ...options.headers,
   };
 
-  // Add Authorization header if token exists
-  if (authToken) {
-    headers['Authorization'] = `Bearer ${authToken}`;
+  // Add Authorization header if user is authenticated
+  // This assumes the backend expects a simple user ID-based auth
+  // Replace with proper JWT or token implementation based on your auth system
+  if (isAuthenticated && user) {
+    headers['Authorization'] = `Bearer ${user.id}`;
   }
 
   // Prepare the request options
@@ -96,47 +97,32 @@ export async function api<T = any>(...args: ApiCallArgs): Promise<T> {
     const response = await fetch(requestUrl, requestOptions);
     clearTimeout(timeoutId);
 
-    // Check if the token needs to be refreshed
+    // Check if authentication failed
     if (response.status === 401 && !options.skipAuthRefresh) {
-      try {
-        const newAuthToken = await refreshToken();
-        if (newAuthToken) {
-          // Retry the original request with the new token
-          const originalRequestOptions: RequestInit = {
-            ...requestOptions,
-            headers: {
-              ...headers,
-              'Authorization': `Bearer ${newAuthToken}`,
-            },
-          };
-          const retryResponse = await fetch(requestUrl, originalRequestOptions);
-
-          if (!retryResponse.ok) {
-            // If retry fails, throw an error
-            throw new Error(`API request failed after token refresh: ${retryResponse.status} ${retryResponse.statusText}`);
-          }
-
-          // Parse and return the data from the successful retry
-          return options.skipJsonParse ? retryResponse.blob() : await retryResponse.json();
-        } else {
-          // If token refresh fails, propagate the error
-          throw new Error('Failed to refresh authentication token.');
-        }
-      } catch (refreshError: any) {
-        console.error('Token refresh failed:', refreshError);
-        toast({
-          title: "Authentication error",
-          description: "Could not refresh authentication token. Please log in again.",
-          variant: "destructive",
-        });
-        throw refreshError; // Re-throw the error to be caught by the outer catch block
-      }
+      // Since we don't have refreshToken functionality in the current auth context,
+      // we'll just notify the user they need to log in again
+      toast({
+        title: "Authentication error",
+        description: "Your session has expired. Please log in again.",
+        variant: "destructive",
+      });
+      
+      // Track the authentication failure
+      trackError(new Error('Authentication failed'), { url }, 'HIGH');
+      
+      throw new Error('Authentication failed. Please log in again.');
     }
 
     // Check for a successful response
     if (!response.ok) {
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
+
+    // Track successful API call
+    trackFeatureUsage('api_call', { 
+      endpoint: url,
+      method: options.method || 'GET' 
+    });
 
     // Parse and return the data
     return options.skipJsonParse ? await response.blob() : await response.json();
@@ -146,7 +132,7 @@ export async function api<T = any>(...args: ApiCallArgs): Promise<T> {
     if (error.name === 'AbortError') {
       // Handle timeout errors
       console.error('API request timed out:', url);
-      trackEvent('api_timeout', { url });
+      trackError(error, { url, timeout: options.timeout || 15000 }, 'HIGH');
       toast({
         title: "Request timed out",
         description: "The server took too long to respond.",
@@ -155,7 +141,7 @@ export async function api<T = any>(...args: ApiCallArgs): Promise<T> {
     } else {
       // Handle other API request errors
       console.error('API request failed:', error);
-      trackEvent('api_error', { url, error: error.message });
+      trackError(error, { url }, 'HIGH');
       toast({
         title: "API error",
         description: error.message || "Something went wrong with the API request.",
