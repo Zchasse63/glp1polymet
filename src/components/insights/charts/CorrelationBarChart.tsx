@@ -1,125 +1,79 @@
 
-import React from "react";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell, LabelList, ReferenceLine } from "recharts";
-import { Correlation } from "@/utils/insights/types";
+/**
+ * CorrelationBarChart Component
+ * 
+ * Visualizes correlation data between health factors and weight loss.
+ * Following CodeFarm Development Methodology:
+ * - User-Centric Design: Clear visual representation of complex data
+ * - Sustainable Code: Reusable chart component
+ * - Performance Optimization: Memoized rendering
+ */
+import React, { useMemo } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { Correlation } from '@/utils/insights/types';
 
 interface CorrelationBarChartProps {
   data: Correlation[];
 }
 
 const CorrelationBarChart: React.FC<CorrelationBarChartProps> = ({ data }) => {
-  // Transform correlation data for display
-  const formattedData = data.map(item => {
-    // Scale correlation to percentage for display
-    const displayValue = Math.round(Math.abs(item.correlation) * 100);
-    
-    // Determine color based on positive/negative correlation
-    const color = item.correlation > 0 ? 'hsl(142, 71%, 45%)' : 'hsl(346, 84%, 61%)';
-    
-    return {
-      factor: item.factor,
-      correlation: item.correlation,
-      color,
-      value: item.correlation * 100, // Scale to -100 to 100 for chart
-      formattedValue: displayValue
-    };
-  });
+  // Format data for the chart - convert to percentage for better readability
+  const formattedData = useMemo(() => {
+    return data.map(item => ({
+      ...item,
+      // Convert correlation coefficient to percentage for display
+      value: Math.round(item.correlation * 100),
+      // Format the value for tooltip display
+      formattedValue: Math.round(Math.abs(item.correlation * 100))
+    }));
+  }, [data]);
+
+  // Custom tooltip to show the correlation value
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-background border border-border p-2 rounded-md shadow-md">
+          <p className="font-medium">{data.factor}</p>
+          <p className="text-sm">
+            <span className={data.value >= 0 ? 'text-green-600' : 'text-red-600'}>
+              {data.value >= 0 ? 'Positive' : 'Negative'} correlation: {data.formattedValue}%
+            </span>
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
-    <div className="h-[280px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={formattedData}
-          layout="vertical"
-          margin={{ top: 5, right: 50, left: 20, bottom: 5 }}
-          barSize={16}
-          barGap={2}
-        >
-          <XAxis 
-            type="number" 
-            domain={[-100, 100]} 
-            axisLine={false}
-            tickLine={false}
-            tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-            tickFormatter={value => `${Math.abs(value)}%`}
-            tickCount={5}
-          />
-          <YAxis 
-            type="category" 
-            dataKey="factor" 
-            axisLine={false}
-            tickLine={false}
-            tick={{ fontSize: 12, fill: 'hsl(var(--foreground))', fontWeight: 500 }}
-            width={130}
-            tickMargin={8}
-          />
-          <Tooltip
-            formatter={(value, name, props) => {
-              const item = props.payload;
-              const sign = item.correlation > 0 ? '+' : '';
-              return [`${sign}${item.formattedValue}%`, 'Correlation'];
-            }}
-            contentStyle={{
-              backgroundColor: 'hsl(var(--card))',
-              borderColor: 'hsl(var(--border))',
-              borderRadius: '0.5rem',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-              padding: '8px 12px',
-              fontSize: '12px',
-            }}
-            wrapperStyle={{
-              outline: 'none',
-            }}
-            cursor={{ fill: 'hsl(var(--muted)/0.15)' }}
-          />
-          <ReferenceLine 
-            x={0} 
-            stroke="hsl(var(--border))" 
-            strokeWidth={2} 
-            label={{ 
-              value: "Neutral", 
-              position: "top", 
-              fill: "hsl(var(--muted-foreground))",
-              fontSize: 10 
-            }} 
-          />
-          <Bar 
-            dataKey="value"
-            background={{ fill: 'hsl(var(--accent)/0.4)', radius: 4 }}
-            radius={4}
-            animationDuration={1500}
-            animationEasing="ease-out"
-          >
-            {formattedData.map((entry, index) => (
-              <Cell 
-                key={`cell-${index}`} 
-                fill={entry.color}
-                style={{ filter: 'brightness(1.05)' }}
-              />
-            ))}
-            <LabelList 
-              dataKey="formattedValue" 
-              position="right"
-              formatter={(value, name, props) => {
-                if (props && props.payload) {
-                  const item = props.payload;
-                  const sign = item.correlation > 0 ? '+' : '';
-                  return `${sign}${value}%`;
-                }
-                return value;
-              }}
-              style={{ 
-                fill: 'hsl(var(--foreground))', 
-                fontWeight: 'bold', 
-                fontSize: 12,
-                filter: 'drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.1))'
-              }}
-              offset={8}
-            />
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart
+        data={formattedData}
+        layout="vertical"
+        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+        <XAxis 
+          type="number" 
+          domain={[-100, 100]}
+          tickFormatter={(value) => `${Math.abs(value)}%`}
+        />
+        <YAxis 
+          type="category" 
+          dataKey="factor" 
+          width={120}
+          tickFormatter={(value) => value.length > 15 ? `${value.substring(0, 15)}...` : value}
+        />
+        <Tooltip content={<CustomTooltip />} />
+        <ReferenceLine x={0} stroke="#666" />
+        <Bar 
+          dataKey="value" 
+          fill={(data) => data.color || (data.value >= 0 ? "#22c55e" : "#ef4444")}
+          radius={[4, 4, 4, 4]}
+        />
+      </BarChart>
+    </ResponsiveContainer>
   );
 };
 

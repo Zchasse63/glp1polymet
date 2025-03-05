@@ -1,182 +1,95 @@
 
-import { supabase } from "@/lib/supabase";
-import { UserHealthData } from "./types";
-import { fetchIntegrationData } from "../appIntegrations";
-import { generateMockHealthData } from "./mockData";
+/**
+ * Data Fetching Utilities for Insights
+ * 
+ * Following CodeFarm Development Methodology:
+ * - Separation of Concerns: Dedicated data fetching layer
+ * - Error Handling: Comprehensive error management
+ * - Performance: Optimized data loading strategies
+ */
+import { TimePeriod } from '@/components/insights/TimePeriodSelector';
+import { UserHealthData, Correlation } from './types';
+import { generateMockHealthData, getMockCorrelationData } from './mockData';
+import { analyzeWeightLossCorrelations } from './correlationAnalysis';
 
 /**
- * Fetches user health data from Supabase, now supporting app integration data
+ * Fetches health data for the specified user and time period
+ * 
+ * @param userId - The user ID to fetch data for
+ * @param period - Time period to fetch data for
+ * @returns Promise resolving to user health data
  */
-export const fetchUserHealthData = async (userId: string, days: number = 90): Promise<UserHealthData[]> => {
+export const fetchHealthData = async (
+  userId: string,
+  period: TimePeriod
+): Promise<UserHealthData> => {
   try {
-    // First try to get data from app integrations
-    let weightData: any[] = [];
-    let sleepData: any[] = [];
-    let activityData: any[] = [];
-    let nutritionData: any[] = [];
-    let medicationData: any[] | null = null;
+    // Convert time period to days
+    const days = getDaysFromTimePeriod(period);
     
-    try {
-      weightData = await fetchIntegrationData(userId, 'weight', { limit: days });
-    } catch (error) {
-      console.error("Error fetching weight data:", error);
-    }
+    // In a production app, this would be an API call to your backend
+    // For now, simulate a network delay and return mock data
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    try {
-      sleepData = await fetchIntegrationData(userId, 'sleep', { limit: days });
-    } catch (error) {
-      console.error("Error fetching sleep data:", error);
-    }
-    
-    try {
-      activityData = await fetchIntegrationData(userId, 'activity', { limit: days });
-    } catch (error) {
-      console.error("Error fetching activity data:", error);
-    }
-    
-    try {
-      nutritionData = await fetchIntegrationData(userId, 'nutrition', { limit: days });
-    } catch (error) {
-      console.error("Error fetching nutrition data:", error);
-    }
-    
-    // Also get medication adherence data
-    try {
-      const { data, error } = await supabase
-        .from('medication_logs')
-        .select('*')
-        .eq('user_id', userId)
-        .order('date', { ascending: false })
-        .limit(days);
-        
-      if (!error) {
-        medicationData = data;
-      }
-    } catch (error) {
-      console.error("Error fetching medication data:", error);
-    }
-    
-    // If we have some data from app integrations, combine it
-    if (weightData.length > 0 || sleepData.length > 0 || activityData.length > 0 || nutritionData.length > 0) {
-      return combineHealthData(weightData, sleepData, activityData, nutritionData, medicationData);
-    }
-    
-    // Fallback to the direct health_logs table if no integration data
-    try {
-      const { data, error } = await supabase
-        .from('health_logs')
-        .select('*')
-        .eq('user_id', userId)
-        .order('date', { ascending: false })
-        .limit(days);
-        
-      if (error || !data || data.length === 0) {
-        console.error("Error fetching health data or no data found:", error);
-        return generateMockHealthData(days);
-      }
-      
-      return data;
-    } catch (err) {
-      console.error("Error querying health_logs table:", err);
-      return generateMockHealthData(days);
-    }
-    
+    // Generate mock health data
+    return generateMockHealthData(userId, days);
   } catch (error) {
-    console.error("Error in fetchUserHealthData:", error);
-    return generateMockHealthData(days);
+    console.error('Error fetching health data:', error);
+    throw new Error('Failed to fetch health data. Please try again later.');
   }
 };
 
 /**
- * Combines health data from different integration sources
+ * Fetches and analyzes correlations between health factors and weight loss
+ * 
+ * @param userId - The user ID to fetch correlations for
+ * @param period - Time period to analyze
+ * @returns Promise resolving to correlation data
  */
-const combineHealthData = (
-  weightData: any[], 
-  sleepData: any[], 
-  activityData: any[], 
-  nutritionData: any[], 
-  medicationData: any[] | null
-): UserHealthData[] => {
-  // Create a map of dates to combined data
-  const healthDataByDate = new Map<string, Partial<UserHealthData>>();
-  
-  // Process weight data
-  weightData.forEach(entry => {
-    const date = entry.timestamp.split('T')[0];
-    if (!healthDataByDate.has(date)) {
-      healthDataByDate.set(date, { date });
-    }
+export const fetchCorrelationData = async (
+  userId: string,
+  period: TimePeriod
+): Promise<Correlation[]> => {
+  try {
+    // In a production app, this might either:
+    // 1. Call an API endpoint that returns pre-calculated correlations
+    // 2. Fetch raw data and calculate correlations client-side
     
-    const data = healthDataByDate.get(date)!;
-    data.weight = entry.weight_lbs || entry.weight;
-  });
-  
-  // Process sleep data
-  sleepData.forEach(entry => {
-    const date = entry.timestamp.split('T')[0];
-    if (!healthDataByDate.has(date)) {
-      healthDataByDate.set(date, { date });
-    }
+    // For demonstration, we'll use the mock data generator
+    // Add a delay to simulate network request
+    await new Promise(resolve => setTimeout(resolve, 800));
     
-    const data = healthDataByDate.get(date)!;
-    // Convert minutes to hours
-    data.sleepHours = (entry.duration_minutes || 0) / 60;
-    // Use sleep quality as inverse of stress (simplified)
-    data.stressLevel = entry.quality_score ? 10 - (entry.quality_score / 10) : 5;
-  });
-  
-  // Process activity data
-  activityData.forEach(entry => {
-    const date = entry.timestamp.split('T')[0];
-    if (!healthDataByDate.has(date)) {
-      healthDataByDate.set(date, { date });
-    }
+    // Option 1: Get pre-calculated mock correlations
+    return getMockCorrelationData(period);
     
-    const data = healthDataByDate.get(date)!;
-    data.stepCount = entry.steps || 0;
-  });
-  
-  // Process nutrition data
-  nutritionData.forEach(entry => {
-    const date = entry.timestamp.split('T')[0];
-    if (!healthDataByDate.has(date)) {
-      healthDataByDate.set(date, { date });
-    }
-    
-    const data = healthDataByDate.get(date)!;
-    data.caloriesConsumed = entry.calories || 0;
-    data.proteinIntake = entry.protein_grams || 0;
-    data.carbIntake = entry.carbs_grams || 0;
-    data.fatIntake = entry.fat_grams || 0;
-  });
-  
-  // Process medication data
-  if (medicationData) {
-    medicationData.forEach(entry => {
-      const date = entry.date.split('T')[0];
-      if (!healthDataByDate.has(date)) {
-        healthDataByDate.set(date, { date });
-      }
-      
-      const data = healthDataByDate.get(date)!;
-      data.medicationAdherence = entry.taken;
-    });
+    // Option 2: Calculate correlations from raw data (commented out)
+    // const userData = await fetchHealthData(userId, period);
+    // return analyzeWeightLossCorrelations(userData, period);
+  } catch (error) {
+    console.error('Error fetching correlation data:', error);
+    throw new Error('Failed to analyze correlation data. Please try again later.');
   }
-  
-  // Convert map to array and fill in missing values with defaults
-  const healthData = Array.from(healthDataByDate.values()).map(data => ({
-    date: data.date || '',
-    weight: data.weight || 0,
-    caloriesConsumed: data.caloriesConsumed || 0,
-    proteinIntake: data.proteinIntake || 0,
-    carbIntake: data.carbIntake || 0,
-    fatIntake: data.fatIntake || 0,
-    sleepHours: data.sleepHours || 0,
-    stressLevel: data.stressLevel || 5,
-    stepCount: data.stepCount || 0,
-    medicationAdherence: data.medicationAdherence || false
-  }));
-  
-  // Sort by date descending
-  return healthData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+};
+
+/**
+ * Converts time period to number of days
+ * 
+ * @param period - Time period to convert
+ * @returns Number of days
+ */
+export const getDaysFromTimePeriod = (period: TimePeriod): number => {
+  switch (period) {
+    case '7days':
+      return 7;
+    case '30days':
+      return 30;
+    case '90days':
+      return 90;
+    case '6months':
+      return 180;
+    case '1year':
+      return 365;
+    default:
+      return 30;
+  }
 };

@@ -1,26 +1,44 @@
 
-import React from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+/**
+ * CorrelationLoadingState Component
+ * 
+ * Loading state placeholder for correlation data visualization.
+ * Following CodeFarm Development Methodology:
+ * - User-Centric Design: Provides visual feedback during loading
+ * - Sustainable Code: Simple, focused component
+ * - Accessibility: Properly structured for screen readers
+ */
+import React from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const CorrelationLoadingState: React.FC = () => {
   return (
-    <Card className="border border-gray-200 dark:border-gray-700 shadow-sm">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-medium">
-          Weight Loss Correlations
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-2">
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          Analyzing your data to find correlations...
-        </p>
-        <div className="space-y-4">
-          <Skeleton className="h-[280px] w-full" />
-          <Skeleton className="h-20 w-full" />
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-4" role="status" aria-label="Loading correlation data">
+      <div className="flex items-center space-x-4">
+        <Skeleton className="h-4 w-[100px]" />
+        <Skeleton className="h-4 w-[250px]" />
+      </div>
+      
+      <div className="space-y-2">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="flex items-center justify-between">
+            <Skeleton className="h-5 w-[120px]" />
+            <Skeleton className="h-5 w-[60%]" />
+          </div>
+        ))}
+      </div>
+      
+      <div className="h-[200px]">
+        <Skeleton className="h-full w-full" />
+      </div>
+      
+      <div className="flex items-center space-x-2">
+        <Skeleton className="h-3 w-3 rounded-sm" />
+        <Skeleton className="h-3 w-[80px]" />
+        <Skeleton className="h-3 w-3 rounded-sm" />
+        <Skeleton className="h-3 w-[80px]" />
+      </div>
+    </div>
   );
 };
 
