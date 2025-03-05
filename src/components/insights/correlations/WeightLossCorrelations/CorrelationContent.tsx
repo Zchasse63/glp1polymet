@@ -2,7 +2,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Correlation } from "@/utils/insights/types";
-import { CorrelationBarChart } from "../../charts/CorrelationBarChart";
+import { CorrelationBarChart } from "../../../charts/correlation";
 import CorrelationLoadingState from "../../CorrelationLoadingState";
 import CorrelationErrorState from "../../CorrelationErrorState";
 import { getErrorSeverity } from "../ErrorSeverityUtils";

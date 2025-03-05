@@ -1,45 +1,58 @@
 
 import React from 'react';
+import { TooltipProps } from 'recharts';
 import { useI18n } from '@/lib/i18n';
 
-interface TooltipProps {
-  active?: boolean;
-  payload?: any[];
+interface CustomTooltipProps extends TooltipProps<number, string> {
+  correlationKey?: string;
+  tooltipStyle?: React.CSSProperties;
+  labelStyle?: React.CSSProperties;
 }
 
-/**
- * Custom tooltip to show the correlation value with additional context
- */
-export const CustomTooltip = ({ active, payload }: TooltipProps) => {
+export const CustomTooltip: React.FC<CustomTooltipProps> = ({
+  active,
+  payload,
+  label,
+  correlationKey = 'correlation',
+  tooltipStyle,
+  labelStyle,
+}) => {
   const { t } = useI18n();
-  
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    const absValue = Math.abs(data.value);
-    
-    // Determine strength text based on correlation value
-    let strengthText = t('insights.correlation.weak');
-    if (absValue > 70) strengthText = t('insights.correlation.veryStrong');
-    else if (absValue > 50) strengthText = t('insights.correlation.strong');
-    else if (absValue > 30) strengthText = t('insights.correlation.moderate');
-    
-    return (
-      <div className="bg-background border border-border p-3 rounded-md shadow-md max-w-xs" role="tooltip">
-        <p className="font-medium mb-1">{data.factor}</p>
-        <p className="text-sm mb-1">
-          <span className={data.value >= 0 ? 'text-green-600' : 'text-red-600'}>
-            {data.value >= 0 ? t('insights.correlation.positive') : t('insights.correlation.negative')} 
-            {' '}{t('insights.correlation.correlation')}: {data.formattedValue}%
-          </span>
-        </p>
-        <p className="text-xs text-muted-foreground">
-          {data.value >= 0 
-            ? t('insights.correlation.positiveExplanation', { strength: strengthText })
-            : t('insights.correlation.negativeExplanation', { strength: strengthText })
-          }
-        </p>
-      </div>
-    );
+
+  if (!active || !payload || !payload.length) {
+    return null;
   }
-  return null;
+
+  const correlationValue = payload[0].value;
+  const formattedValue = typeof correlationValue === 'number' 
+    ? correlationValue.toFixed(2) 
+    : correlationValue;
+  
+  // Determine correlation strength description
+  const getCorrelationStrength = (value: number) => {
+    const absValue = Math.abs(value);
+    if (absValue >= 0.7) return t('strong');
+    if (absValue >= 0.4) return t('moderate');
+    return t('weak');
+  };
+
+  // Get direction text (positive/negative)
+  const getCorrelationDirection = (value: number) => {
+    return value >= 0 ? t('positive') : t('negative');
+  };
+
+  const strength = getCorrelationStrength(Number(correlationValue));
+  const direction = getCorrelationDirection(Number(correlationValue));
+
+  return (
+    <div className="custom-tooltip rounded-md border p-3 shadow-sm" style={tooltipStyle}>
+      <p className="font-medium mb-1" style={labelStyle}>{label}</p>
+      <p className="text-sm">
+        {t('correlation')}: <span className="font-medium">{formattedValue}</span>
+      </p>
+      <p className="text-sm">
+        {t('strength')}: <span className="font-medium">{strength} {direction}</span>
+      </p>
+    </div>
+  );
 };
