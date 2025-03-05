@@ -1,4 +1,3 @@
-
 import { UserHealthData, Correlation } from "./types";
 import { fetchUserHealthData } from "./dataFetching";
 
@@ -28,8 +27,15 @@ export const analyzeWeightLossCorrelations = async (
     calculateCorrelation("Carb Intake", healthData, weightChanges, d => d.carbIntake)
   ];
   
-  // Sort by absolute correlation value
-  return correlations.sort((a, b) => Math.abs(b.correlation) - Math.abs(a.correlation));
+  // Sort by correlation value - positive first, then negative, sorted by absolute magnitude
+  return correlations.sort((a, b) => {
+    // First separate positive and negative
+    if (a.correlation >= 0 && b.correlation < 0) return -1;
+    if (a.correlation < 0 && b.correlation >= 0) return 1;
+    
+    // Then sort by absolute value within each group
+    return Math.abs(b.correlation) - Math.abs(a.correlation);
+  });
 };
 
 /**

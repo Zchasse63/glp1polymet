@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell, LabelList } from "recharts";
@@ -17,13 +16,11 @@ const WeightLossCorrelations = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // In a real app, you would get the actual user ID
         const userId = "demo-user";
         const correlations = await analyzeWeightLossCorrelations(userId);
         setCorrelationData(correlations);
         setInsight(generateKeyInsights(correlations));
         
-        // Fetch user's connected integrations
         const integrations = await fetchUserIntegrations(userId);
         const activeIntegrations = integrations
           .filter(integration => integration.status === 'active')
@@ -32,12 +29,10 @@ const WeightLossCorrelations = () => {
         if (activeIntegrations.length > 0) {
           setDataSources(activeIntegrations);
         } else {
-          // Default if no integrations
           setDataSources(['App Data']);
         }
       } catch (error) {
         console.error("Error fetching correlation data:", error);
-        // Fallback to sample data if there's an error
         setCorrelationData([
           { factor: "Medication Adherence", correlation: 0.85, color: "hsl(142, 76%, 36%)" },
           { factor: "Protein Intake", correlation: 0.72, color: "hsl(142, 76%, 36%)" },
@@ -56,10 +51,12 @@ const WeightLossCorrelations = () => {
     fetchData();
   }, []);
   
-  // Sort data for better visualization
-  const sortedData = [...correlationData].sort((a, b) => Math.abs(b.correlation) - Math.abs(a.correlation));
+  const sortedData = [...correlationData].sort((a, b) => {
+    if (a.correlation >= 0 && b.correlation < 0) return -1;
+    if (a.correlation < 0 && b.correlation >= 0) return 1;
+    return Math.abs(b.correlation) - Math.abs(a.correlation);
+  });
   
-  // Format data for horizontal bar chart
   const formattedData = sortedData.map(item => ({
     ...item,
     absValue: Math.abs(item.correlation) * 100,
@@ -172,7 +169,6 @@ const WeightLossCorrelations = () => {
                   dataKey="formattedValue" 
                   position="right" 
                   formatter={(value, name, props) => {
-                    // Check if props and props.payload exist before accessing
                     if (props && props.payload) {
                       const item = props.payload;
                       const sign = item.correlation > 0 ? '+' : '';
