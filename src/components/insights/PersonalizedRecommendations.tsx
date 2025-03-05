@@ -1,16 +1,18 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronRightIcon, BookmarkIcon } from "lucide-react";
+import { ChevronRightIcon } from "lucide-react";
 import { useRecommendations } from "@/hooks/useRecommendations";
-import { RecommendationType, RecommendationFilterType } from "@/types/insightTypes";
+import { RecommendationFilterType } from "@/types/insightTypes";
 import RecommendationsLoadingState from "./RecommendationsLoadingState";
 import { motion } from "framer-motion";
-import { toast } from "@/components/ui/use-toast";
-import RecommendationCard from "./recommendations/RecommendationCard";
+import RecommendationList from "./recommendations/RecommendationList";
 import RecommendationFilters from "./recommendations/RecommendationFilters";
 import NoRecommendationsState from "./recommendations/NoRecommendationsState";
 import { useBookmarks } from "@/hooks/useBookmarks";
+import { ErrorLogger } from "@/utils/errorHandling";
+import RecommendationHeader from "./recommendations/RecommendationHeader";
+import { useComponentPerformance } from "@/utils/performance";
 
 /**
  * PersonalizedRecommendations Component
@@ -20,12 +22,31 @@ import { useBookmarks } from "@/hooks/useBookmarks";
  * - Separation of concerns: Data fetching handled by custom hook
  * - Error handling: Graceful fallbacks and user notifications
  * - Documentation: Comprehensive JSDoc comments
- * - Single Responsibility: Each subcomponent has a focused purpose
+ * - Single Responsibility: Orchestrates smaller focused components
  */
 const PersonalizedRecommendations: React.FC = () => {
   const { data: recommendations = [], isLoading, error } = useRecommendations();
   const [activeFilter, setActiveFilter] = useState<RecommendationFilterType>('all');
-  const { isBookmarked, toggleBookmark, bookmarkedIds } = useBookmarks();
+  const { isBookmarked, bookmarkedIds } = useBookmarks();
+  const performance = useComponentPerformance('PersonalizedRecommendations');
+  
+  // Log any errors from recommendations fetch
+  React.useEffect(() => {
+    if (error) {
+      ErrorLogger.error(
+        'Failed to load recommendations',
+        'RECOMMENDATIONS_FETCH_ERROR',
+        { error },
+        error
+      );
+    }
+  }, [error]);
+  
+  // Track component mount time
+  React.useEffect(() => {
+    const endTracking = performance.trackMount();
+    return endTracking;
+  }, []);
 
   // Show loading state while data is being fetched
   if (isLoading) {
@@ -58,46 +79,16 @@ const PersonalizedRecommendations: React.FC = () => {
       ? recommendations.filter(rec => isBookmarked(rec.id))
       : recommendations.filter(rec => rec.type === activeFilter);
 
-  // Handle recommendation click
-  const handleRecommendationClick = (recommendationId: string, title: string) => {
-    console.log(`Recommendation viewed: ${recommendationId}`);
-    toast({
-      title: title,
-      description: "We've saved this recommendation to your activity feed.",
-    });
-  };
-
-  // Handle bookmark toggle
-  const handleBookmarkToggle = (recommendationId: string) => {
-    toggleBookmark(recommendationId);
-    const isNowBookmarked = !isBookmarked(recommendationId);
-    
-    toast({
-      title: isNowBookmarked ? "Recommendation bookmarked" : "Bookmark removed",
-      description: isNowBookmarked 
-        ? "You can access your bookmarked recommendations anytime."
-        : "The recommendation has been removed from your bookmarks.",
-    });
-  };
-
   // Check if we have any bookmarks to determine whether to show the bookmark filter
   const hasBookmarks = bookmarkedIds.length > 0;
+  
+  // Check if there are no recommendations after filtering
+  const noFilteredResults = filteredRecommendations.length === 0 && activeFilter !== 'all';
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">
-          Personalized Recommendations
-        </h2>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-blue-600 dark:text-blue-400 flex items-center"
-        >
-          View all <ChevronRightIcon className="h-4 w-4 ml-1" />
-        </Button>
-      </div>
-
+      <RecommendationHeader />
+      
       {/* Recommendation Type Filters */}
       <RecommendationFilters 
         activeFilter={activeFilter}
@@ -112,23 +103,14 @@ const PersonalizedRecommendations: React.FC = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
-        {filteredRecommendations.map((recommendation, index) => (
-          <RecommendationCard
-            key={recommendation.id}
-            recommendation={recommendation}
-            onActionClick={() => handleRecommendationClick(recommendation.id, recommendation.title)}
-            index={index}
-            isBookmarked={isBookmarked(recommendation.id)}
-            onBookmarkToggle={handleBookmarkToggle}
-          />
-        ))}
-        
-        {filteredRecommendations.length === 0 && activeFilter !== 'all' && (
+        {noFilteredResults ? (
           <NoRecommendationsState 
             isFiltered={true} 
             activeFilter={activeFilter} 
             resetFilter={() => setActiveFilter('all')} 
           />
+        ) : (
+          <RecommendationList recommendations={filteredRecommendations} />
         )}
       </motion.div>
     </div>

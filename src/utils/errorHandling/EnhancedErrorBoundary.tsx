@@ -8,6 +8,9 @@
  */
 import React, { ErrorInfo, PropsWithChildren } from 'react';
 import { ErrorLogger } from './ErrorLogger';
+import { ErrorDisplay } from './ErrorDisplay';
+import { AppError, ErrorSeverity, ErrorGroup } from './types';
+import analytics, { EventCategory, EventPriority } from '../eventTracking';
 
 /**
  * Enhanced error boundary component with consistent error UI
@@ -17,6 +20,9 @@ export class EnhancedErrorBoundary extends React.Component<
     fallback?: React.ReactNode;
     onError?: (error: Error, errorInfo: ErrorInfo) => void;
     errorComponent?: React.ComponentType<{ error: Error; reset: () => void }>;
+    name?: string; // Boundary name for better error identification
+    group?: ErrorGroup; // Error group for categorization
+    silent?: boolean; // Whether to silence analytics tracking
   }>,
   { hasError: boolean; error: Error | null }
 > {
@@ -31,13 +37,34 @@ export class EnhancedErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Create AppError from caught error
+    const appError: AppError = {
+      message: error.message || 'Component error',
+      severity: ErrorSeverity.ERROR,
+      group: this.props.group || ErrorGroup.UI,
+      context: { 
+        componentStack: errorInfo.componentStack,
+        boundaryName: this.props.name || 'unnamed',
+      },
+      originalError: error,
+    };
+    
     // Log the error
-    ErrorLogger.error(
-      error.message || 'Component error',
-      'COMPONENT_ERROR',
-      { componentStack: errorInfo.componentStack },
-      error
-    );
+    ErrorLogger.log(appError);
+    
+    // Track error in analytics (unless silent)
+    if (!this.props.silent) {
+      analytics.trackEvent({
+        name: 'error_boundary_triggered',
+        category: EventCategory.ERROR,
+        priority: EventPriority.HIGH,
+        properties: {
+          errorMessage: error.message,
+          componentStack: errorInfo.componentStack.split('\n')[1]?.trim() || 'Unknown component',
+          boundaryName: this.props.name || 'unnamed',
+        }
+      });
+    }
     
     // Call the onError callback if provided
     if (this.props.onError) {
@@ -62,20 +89,14 @@ export class EnhancedErrorBoundary extends React.Component<
         return this.props.fallback;
       }
       
-      // Default error UI
+      // Default error UI using ErrorDisplay
       return (
-        <div className="p-4 rounded-md bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 my-4">
-          <h3 className="text-lg font-semibold text-red-800 dark:text-red-300">Something went wrong</h3>
-          <p className="text-red-700 dark:text-red-400 mt-1">
-            We're having trouble displaying this content. Please try reloading the page.
-          </p>
-          <button
-            onClick={this.resetErrorBoundary}
-            className="mt-3 px-4 py-2 bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-100 rounded-md hover:bg-red-200 dark:hover:bg-red-700 transition-colors"
-          >
-            Try again
-          </button>
-        </div>
+        <ErrorDisplay 
+          error={this.state.error || new Error("Unknown error")} 
+          resetError={this.resetErrorBoundary}
+          variant="card"
+          className="my-4"
+        />
       );
     }
 
