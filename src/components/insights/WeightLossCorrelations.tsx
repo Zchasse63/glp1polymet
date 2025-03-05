@@ -2,8 +2,8 @@
 import React, { useMemo, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Correlation } from "@/utils/insights/types";
-import { CorrelationBarChart } from "./charts/CorrelationBarChart";
-import { CorrelationLoadingState } from "./CorrelationLoadingState";
+import CorrelationBarChart from "./charts/CorrelationBarChart";
+import CorrelationLoadingState from "./CorrelationLoadingState";
 import { ErrorDisplay } from "@/utils/errorHandling";
 import { useIntersectionObserver } from "@/utils/performanceUtils";
 

@@ -1,18 +1,30 @@
 
 import React from "react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell, LabelList, ReferenceLine } from "recharts";
+import { Correlation } from "@/utils/insights/types";
 
 interface CorrelationBarChartProps {
-  formattedData: Array<{
-    factor: string;
-    correlation: number;
-    color: string;
-    value: number;
-    formattedValue: number;
-  }>;
+  data: Correlation[];
 }
 
-const CorrelationBarChart: React.FC<CorrelationBarChartProps> = ({ formattedData }) => {
+const CorrelationBarChart: React.FC<CorrelationBarChartProps> = ({ data }) => {
+  // Transform correlation data for display
+  const formattedData = data.map(item => {
+    // Scale correlation to percentage for display
+    const displayValue = Math.round(Math.abs(item.correlation) * 100);
+    
+    // Determine color based on positive/negative correlation
+    const color = item.correlation > 0 ? 'hsl(142, 71%, 45%)' : 'hsl(346, 84%, 61%)';
+    
+    return {
+      factor: item.factor,
+      correlation: item.correlation,
+      color,
+      value: item.correlation * 100, // Scale to -100 to 100 for chart
+      formattedValue: displayValue
+    };
+  });
+
   return (
     <div className="h-[280px] w-full">
       <ResponsiveContainer width="100%" height="100%">
