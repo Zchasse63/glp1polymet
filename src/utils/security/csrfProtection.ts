@@ -73,7 +73,19 @@ export function createCSRFProtectedFetch(
       modifiedInit.headers = {};
     }
     
-    modifiedInit.headers = addCSRFToken(modifiedInit.headers);
+    // Fix: Explicitly handle the headers as either Headers or Record<string, string>
+    if (modifiedInit.headers instanceof Headers) {
+      // It's already a Headers object, use it directly
+      addCSRFToken(modifiedInit.headers);
+    } else {
+      // It's a record object or HeadersInit, convert to Record<string, string>
+      modifiedInit.headers = {
+        ...(typeof modifiedInit.headers === 'object' ? Object.fromEntries(
+          Object.entries(modifiedInit.headers)
+        ) : {}),
+        [csrfConfig.headerName]: getCSRFToken() || ''
+      };
+    }
     
     return originalFetch(input, modifiedInit);
   };
