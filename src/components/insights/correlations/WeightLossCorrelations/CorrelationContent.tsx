@@ -11,6 +11,9 @@ import CorrelationLegend from "../CorrelationLegend";
 import CorrelationActions from "../CorrelationActions";
 import NoSignificantCorrelations from "../NoSignificantCorrelations";
 import NoCorrelationsState from "../NoCorrelationsState";
+import { useReducedMotion } from "@/utils/accessibility/useReducedMotion";
+import { ScreenReaderAnnouncement } from "@/utils/accessibility/ScreenReaderAnnouncement";
+import { trackError } from "@/utils/eventTracking";
 
 interface CorrelationContentProps {
   isLoading: boolean;
@@ -26,6 +29,15 @@ interface CorrelationContentProps {
   handleExportData: () => void;
 }
 
+/**
+ * CorrelationContent Component
+ * 
+ * Displays correlation data with appropriate loading, error, and empty states.
+ * Following CodeFarm principles:
+ * - Error Handling: Comprehensive error states
+ * - Accessibility: Screen reader announcements
+ * - User-Centric Design: Meaningful empty states
+ */
 const CorrelationContent: React.FC<CorrelationContentProps> = ({
   isLoading,
   error,
@@ -39,33 +51,77 @@ const CorrelationContent: React.FC<CorrelationContentProps> = ({
   toggleFactorDisplay,
   handleExportData
 }) => {
+  const isReducedMotion = useReducedMotion();
+  const [errorAnnounced, setErrorAnnounced] = React.useState(false);
+  
+  // Announce errors to screen readers
+  React.useEffect(() => {
+    if (error && !errorAnnounced) {
+      setErrorAnnounced(true);
+      // Track unhandled errors
+      trackError(error, { component: "CorrelationContent" });
+    } else if (!error) {
+      setErrorAnnounced(false);
+    }
+  }, [error, errorAnnounced]);
+
   if (isLoading) {
-    return <CorrelationLoadingState />;
+    return (
+      <>
+        <ScreenReaderAnnouncement message="Loading correlation data" />
+        <CorrelationLoadingState />
+      </>
+    );
   }
 
   if (error) {
     return (
-      <CorrelationErrorState 
-        error={error}
-        onRetry={handleRetry}
-        severity={getErrorSeverity(error)}
-      />
+      <>
+        <ScreenReaderAnnouncement 
+          message={`Error loading correlations: ${error.message}`} 
+          assertive={true}
+        />
+        <CorrelationErrorState 
+          error={error}
+          onRetry={handleRetry}
+          severity={getErrorSeverity(error)}
+        />
+      </>
     );
   }
 
   if (!correlations || correlations.length === 0) {
-    return <NoCorrelationsState />;
+    return (
+      <>
+        <ScreenReaderAnnouncement message="No correlation data available" />
+        <NoCorrelationsState />
+      </>
+    );
   }
+
+  // Prepare screen reader message for correlations
+  const getScreenReaderMessage = () => {
+    if (!hasSignificantCorrelations) {
+      return "No significant correlations were found in your data.";
+    }
+    
+    const topCorrelation = sortedCorrelations[0];
+    return `Found ${sortedCorrelations.length} correlations. The strongest correlation is ${topCorrelation.factor} with a correlation value of ${topCorrelation.correlation.toFixed(2)}.`;
+  };
 
   return (
     <div>
+      <ScreenReaderAnnouncement message={getScreenReaderMessage()} />
+      
       <CorrelationInsight insight={insight} />
       
       <div className={cn(
         "h-[300px]", 
         !hasSignificantCorrelations && "opacity-80"
       )}>
-        <CorrelationBarChart data={displayedCorrelations} />
+        <CorrelationBarChart 
+          data={displayedCorrelations} 
+        />
       </div>
       
       {!hasSignificantCorrelations && <NoSignificantCorrelations />}

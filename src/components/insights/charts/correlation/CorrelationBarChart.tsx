@@ -5,11 +5,16 @@ import { useI18n } from '@/lib/i18n';
 import { CorrelationBarChartProps } from './types';
 import { useChartConfig } from './useChartConfig';
 import { CustomTooltip } from './CustomTooltip';
+import { trackFeatureUsage } from '@/utils/eventTracking';
 
 /**
  * CorrelationBarChart Component
  *
  * Displays correlation data as a bar chart with customizable colors based on positive or negative correlation.
+ * Following CodeFarm principles:
+ * - User-Centric Design: Clear visualization of complex data
+ * - Accessibility: Supports reduced motion preferences
+ * - Error Handling: Graceful handling of data edge cases
  */
 export const CorrelationBarChart: React.FC<CorrelationBarChartProps> = ({
   data,
@@ -29,9 +34,30 @@ export const CorrelationBarChart: React.FC<CorrelationBarChartProps> = ({
     barStroke 
   } = useChartConfig();
 
+  // Track chart interaction on initial render
+  React.useEffect(() => {
+    if (data.length > 0) {
+      trackFeatureUsage('correlation_chart_viewed', { 
+        dataCount: data.length,
+        hasNegativeCorrelations: data.some(item => item[correlationKey] < 0)
+      });
+    }
+  }, [data, correlationKey]);
+
+  // Handle empty data case gracefully
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[300px] border border-dashed rounded-md border-muted">
+        <p className="text-muted-foreground">No correlation data available</p>
+      </div>
+    );
+  }
+
   // Function to determine bar fill color based on correlation value
   const getBarFill = (entry: any) => {
-    return entry[correlationKey] >= 0 ? barColorPositive : barColorNegative;
+    const value = entry[correlationKey];
+    if (value === undefined || value === null) return '#ccc';
+    return value >= 0 ? barColorPositive : barColorNegative;
   };
 
   // Apply colors to each data point
@@ -52,8 +78,19 @@ export const CorrelationBarChart: React.FC<CorrelationBarChartProps> = ({
         }}
       >
         <CartesianGrid strokeDasharray="3 3" fill={cartesianGridFill} />
-        <XAxis dataKey={xAxisKey} stroke={axisColor} />
-        <YAxis stroke={axisColor} />
+        <XAxis 
+          dataKey={xAxisKey} 
+          stroke={axisColor}
+          tick={{ fontSize: 12 }}
+          tickLine={{ stroke: axisColor }}
+        />
+        <YAxis 
+          stroke={axisColor}
+          domain={[-1, 1]} 
+          tickFormatter={(value) => value.toFixed(1)}
+          tick={{ fontSize: 12 }}
+          tickLine={{ stroke: axisColor }}
+        />
         <Tooltip 
           content={<CustomTooltip 
             correlationKey={correlationKey} 

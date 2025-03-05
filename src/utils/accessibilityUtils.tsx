@@ -1,6 +1,8 @@
 
 /**
  * Re-export all accessibility utilities for backward compatibility
+ * This is a bridge file to maintain backward compatibility while
+ * encouraging direct imports from the new structure
  */
 
 export {
@@ -9,5 +11,7 @@ export {
   useSkipLink,
   AccessibleButton,
   AccessibleLabel,
-  useReducedMotion
+  useReducedMotion,
+  AccessibleIcon,
+  AccessibleDialog
 } from './accessibility';
