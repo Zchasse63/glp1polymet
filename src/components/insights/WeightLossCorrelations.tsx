@@ -100,9 +100,13 @@ const WeightLossCorrelations = () => {
                   dataKey="formattedValue" 
                   position="right" 
                   formatter={(value, name, props) => {
-                    const item = props.payload;
-                    const sign = item.correlation > 0 ? '+' : '';
-                    return `${sign}${value}%`;
+                    // Fixed: Check if props and props.payload exist before accessing
+                    if (props && props.payload) {
+                      const item = props.payload;
+                      const sign = item.correlation > 0 ? '+' : '';
+                      return `${sign}${value}%`;
+                    }
+                    return value;
                   }}
                   style={{ 
                     fill: 'hsl(var(--foreground))', 

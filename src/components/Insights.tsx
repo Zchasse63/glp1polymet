@@ -7,7 +7,7 @@ import WeightLossCorrelations from "./insights/WeightLossCorrelations";
 
 const Insights = () => {
   return (
-    <div className="p-5 space-y-8">
+    <div className="p-4 md:p-5 space-y-6 md:space-y-8">
       <InsightsHeader />
       <WeeklyProgressSummary />
       <PersonalizedRecommendations />
