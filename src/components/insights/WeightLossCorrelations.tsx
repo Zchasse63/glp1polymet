@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell, LabelList, ReferenceLine } from "recharts";
@@ -60,8 +59,6 @@ const WeightLossCorrelations = () => {
   
   const formattedData = sortedData.map(item => ({
     ...item,
-    // For the bar chart: positive values stay positive, negative values stay negative
-    // This allows us to draw bars in both directions from the zero axis
     value: item.correlation * 100,
     formattedValue: Math.round(item.correlation * 100)
   }));
@@ -86,6 +83,9 @@ const WeightLossCorrelations = () => {
       </Card>
     );
   }
+  
+  const positiveData = formattedData.filter(item => item.value >= 0);
+  const negativeData = formattedData.filter(item => item.value < 0);
   
   return (
     <Card className="border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
@@ -181,7 +181,7 @@ const WeightLossCorrelations = () => {
                 ))}
                 <LabelList 
                   dataKey="formattedValue" 
-                  position={(entry) => entry.value >= 0 ? "right" : "left"}
+                  position="right"
                   formatter={(value, name, props) => {
                     if (props && props.payload) {
                       const item = props.payload;
