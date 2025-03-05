@@ -82,6 +82,7 @@ export function MedicationSearch({ form }: MedicationSearchProps) {
                       value={field.value || searchValue}
                       onChange={(e) => {
                         setSearchValue(e.target.value);
+                        field.onChange(e.target.value);
                         if (!open) setOpen(true);
                       }}
                       onClick={() => setOpen(true)}
@@ -94,7 +95,7 @@ export function MedicationSearch({ form }: MedicationSearchProps) {
               <PopoverContent 
                 align="start"
                 sideOffset={5}
-                className="w-[300px] p-0 shadow-[0_0_15px_rgba(0,0,0,0.1)] animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+                className="w-[300px] p-0 shadow-[0_0_15px_rgba(0,0,0,0.1)] bg-background animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
               >
                 <Command>
                   <CommandInput 

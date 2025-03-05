@@ -1,52 +1,20 @@
 
-import React from 'react';
-import { cn } from '@/lib/utils';
-
-type SpinnerSize = 'small' | 'medium' | 'large';
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface SpinnerProps {
-  size?: SpinnerSize;
+  size?: "sm" | "md" | "lg";
   className?: string;
-  'aria-label'?: string;
 }
 
-/**
- * Spinner Component
- * 
- * A loading indicator with accessibility support.
- * Following CodeFarm Development Methodology:
- * - User-Centric Design: Ensures loading state is correctly announced
- * - Sustainable Code: Reusable component
- */
-export function Spinner({
-  size = 'medium',
-  className,
-  'aria-label': ariaLabel = 'Loading',
-  ...props
-}: SpinnerProps) {
-  // Size mappings
-  const sizeMap: Record<SpinnerSize, string> = {
-    small: 'h-4 w-4 border-2',
-    medium: 'h-8 w-8 border-3',
-    large: 'h-12 w-12 border-4',
-  };
-  
-  const sizeClass = sizeMap[size];
+export const Spinner = ({ size = "md", className }: SpinnerProps) => {
+  const sizeClass = {
+    sm: "h-4 w-4",
+    md: "h-6 w-6",
+    lg: "h-8 w-8",
+  }[size];
   
   return (
-    <div
-      role="status"
-      aria-label={ariaLabel}
-      className={cn('flex items-center justify-center', className)}
-      {...props}
-    >
-      <div
-        className={cn(
-          'animate-spin rounded-full border-t-transparent border-primary',
-          sizeClass
-        )}
-      />
-      <span className="sr-only">{ariaLabel}</span>
-    </div>
+    <Loader2 className={cn("animate-spin text-primary", sizeClass, className)} />
   );
-}
+};

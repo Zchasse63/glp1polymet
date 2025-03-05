@@ -13,6 +13,8 @@ import { AddMedicationForm } from "@/components/AddMedicationForm";
 import MedicationHeader from "@/components/medication/MedicationHeader";
 import MedicationList from "@/components/medication/MedicationList";
 import MedicationEffectivenessChart from "@/components/medication/MedicationEffectivenessChart";
+import { useMedications } from "@/hooks/useMedications";
+import { Spinner } from "@/components/ui/spinner";
 
 // Define the medication type
 export interface Medication {
@@ -36,45 +38,14 @@ const generateRandomColor = () => {
 const MedicationPage = () => {
   const [currentPage, setCurrentPage] = useState("medication");
   const [isAddingMedication, setIsAddingMedication] = useState(false);
-  const [medications, setMedications] = useState<Medication[]>([
-    {
-      id: "med1",
-      name: "Ozempic",
-      dose: "0.5mg",
-      frequency: "Once weekly",
-      lastTaken: "Today",
-      nextDose: "In 7 days",
-      level: 95,
-      totalDose: 0.5,
-      unit: "mg",
-      color: "#4f46e5",
-    },
-    {
-      id: "med2",
-      name: "Metformin",
-      dose: "500mg",
-      frequency: "Twice daily",
-      lastTaken: "4 hours ago",
-      nextDose: "In 8 hours",
-      level: 80,
-      totalDose: 500,
-      unit: "mg",
-      color: "#0ea5e9",
-    },
-    {
-      id: "med3",
-      name: "Vitamin D",
-      dose: "2000 IU",
-      frequency: "Once daily",
-      lastTaken: "Yesterday",
-      nextDose: "Today",
-      level: 60,
-      totalDose: 2000,
-      unit: "IU",
-      color: "#f59e0b",
-    },
-  ]);
   const { toast } = useToast();
+  const { 
+    medications, 
+    isLoading, 
+    error, 
+    addMedication, 
+    deleteMedication 
+  } = useMedications();
 
   // Sample trend data for medication effectiveness chart
   const trendData = [
@@ -88,10 +59,9 @@ const MedicationPage = () => {
     { date: "Week 8", weight: 195, medication: 95 },
   ];
 
-  const handleAddMedication = (data: { name: string; dose: string; frequency: string; unit?: string; totalDose?: number }) => {
+  const handleAddMedication = async (data: { name: string; dose: string; frequency: string; unit?: string; totalDose?: number }) => {
     try {
-      const newMedication: Medication = {
-        id: `med${medications.length + 1}`,
+      const newMedication = {
         name: data.name,
         dose: data.dose,
         frequency: data.frequency,
@@ -103,7 +73,7 @@ const MedicationPage = () => {
         color: generateRandomColor(),
       };
 
-      setMedications([...medications, newMedication]);
+      await addMedication(newMedication);
       setIsAddingMedication(false);
       
       toast({
@@ -120,10 +90,10 @@ const MedicationPage = () => {
     }
   };
 
-  const handleDeleteMedication = (id: string) => {
+  const handleDeleteMedication = async (id: string) => {
     try {
       const medicationToDelete = medications.find(med => med.id === id);
-      setMedications(medications.filter(med => med.id !== id));
+      await deleteMedication(id);
       
       toast({
         title: "Medication removed",
@@ -144,11 +114,21 @@ const MedicationPage = () => {
       <div className="p-5 space-y-5">
         <MedicationHeader onAddClick={() => setIsAddingMedication(true)} />
         
-        <MedicationList 
-          medications={medications} 
-          onDelete={handleDeleteMedication} 
-          onAdd={() => setIsAddingMedication(true)} 
-        />
+        {isLoading ? (
+          <div className="flex justify-center items-center py-10">
+            <Spinner size="lg" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-10 text-destructive">
+            <p>Error loading medications. Please try again.</p>
+          </div>
+        ) : (
+          <MedicationList 
+            medications={medications} 
+            onDelete={handleDeleteMedication} 
+            onAdd={() => setIsAddingMedication(true)} 
+          />
+        )}
         
         <MedicationEffectivenessChart trendData={trendData} />
 
