@@ -9,12 +9,20 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SkipToContent } from "@/utils/accessibility/SkipToContent";
+import { ErrorLogger } from "@/utils/errorHandling";
+import { ErrorGroup, ErrorSeverity } from "@/utils/errorHandling/types";
 
 /**
  * Authentication Page
  * 
  * Implements the Facade Pattern to provide a simple interface
  * for the complex authentication subsystem
+ * 
+ * Following CodeFarm principles:
+ * - User-Centric Design: Accessible auth forms
+ * - Error Handling: Consistent error handling
+ * - Security-First Approach: Secure authentication flow
  */
 const AuthPage = () => {
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
@@ -26,11 +34,21 @@ const AuthPage = () => {
 
   // Initialize the active tab based on URL parameters
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const tab = searchParams.get("tab");
-    
-    if (tab === "register" || tab === "login") {
-      setActiveTab(tab);
+    try {
+      const searchParams = new URLSearchParams(location.search);
+      const tab = searchParams.get("tab");
+      
+      if (tab === "register" || tab === "login") {
+        setActiveTab(tab);
+      }
+    } catch (error) {
+      ErrorLogger.error(
+        "Failed to parse URL parameters",
+        "AUTH_PAGE_URL_ERROR",
+        { url: location.search },
+        error,
+        false
+      );
     }
   }, [location]);
 
@@ -63,13 +81,17 @@ const AuthPage = () => {
 
   return (
     <Layout>
+      {/* Skip to content link for keyboard users */}
+      <SkipToContent contentId="auth-content" />
+      
       <motion.div 
+        id="auth-content"
         className="flex flex-col justify-center items-center p-6 min-h-screen"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="w-full max-w-md space-y-4">
+        <div className="w-full max-w-md space-y-4" role="main">
           <div className="text-center mb-8">
             <motion.h1 
               className="text-2xl font-bold mb-2"

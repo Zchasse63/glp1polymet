@@ -7,7 +7,7 @@
  * - Sustainable Code: Consistent error recording
  * - Error Handling: Centralized error reporting
  */
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import analytics, { EventCategory, EventPriority } from '../eventTracking';
 import { AppError, ErrorSeverity, ErrorGroup } from './types';
 
@@ -84,13 +84,47 @@ export const ErrorLogger = {
       });
     }
     
-    // Show user-facing notification for critical errors if configured
-    if (error.shouldNotifyUser && error.severity === ErrorSeverity.CRITICAL) {
-      toast({
-        variant: "destructive",
-        title: error.userTitle || "Something went wrong",
-        description: error.userMessage || "We're having trouble with this operation. Please try again later.",
-      });
+    // Show user-facing notification based on settings
+    if (error.shouldNotifyUser) {
+      this.notifyUser(error);
+    }
+  },
+  
+  // Show user-facing notification
+  notifyUser(error: AppError): void {
+    const variant = this.getSeverityVariant(error.severity);
+    
+    toast({
+      variant,
+      title: error.userTitle || this.getDefaultTitleForSeverity(error.severity),
+      description: error.userMessage || error.message,
+    });
+  },
+  
+  // Map severity to toast variant
+  getSeverityVariant(severity: ErrorSeverity): "default" | "destructive" {
+    switch (severity) {
+      case ErrorSeverity.ERROR:
+      case ErrorSeverity.CRITICAL:
+        return "destructive";
+      default:
+        return "default";
+    }
+  },
+  
+  // Get default title based on severity
+  getDefaultTitleForSeverity(severity: ErrorSeverity): string {
+    switch (severity) {
+      case ErrorSeverity.INFO:
+        return "Information";
+      case ErrorSeverity.WARNING:
+        return "Warning";
+      case ErrorSeverity.ERROR:
+        return "Error";
+      case ErrorSeverity.CRITICAL:
+        return "Critical Error";
+      default:
+        return "Notification";
     }
   },
   
@@ -125,7 +159,7 @@ export const ErrorLogger = {
       severity: ErrorSeverity.ERROR, 
       context, 
       originalError,
-      shouldNotifyUser,
+      shouldNotifyUser: shouldNotifyUser !== false, // Default to true
       userMessage: userMessage || "An error occurred. Please try again."
     });
   },
@@ -143,6 +177,31 @@ export const ErrorLogger = {
     });
   },
   
+  // Utility method for creating error from caught exceptions
+  fromException(error: unknown, options: {
+    code?: string;
+    severity?: ErrorSeverity;
+    group?: ErrorGroup;
+    context?: Record<string, any>;
+    shouldNotifyUser?: boolean;
+    userMessage?: string;
+    userTitle?: string;
+  } = {}): AppError {
+    const message = error instanceof Error ? error.message : String(error);
+    
+    return {
+      message,
+      code: options.code || 'EXCEPTION',
+      severity: options.severity || ErrorSeverity.ERROR,
+      group: options.group || ErrorGroup.GENERAL,
+      context: options.context,
+      originalError: error,
+      shouldNotifyUser: options.shouldNotifyUser !== false, // Default to true
+      userMessage: options.userMessage,
+      userTitle: options.userTitle
+    };
+  },
+  
   // Get recent errors for debugging
   getRecentErrors(): AppError[] {
     return [...this.errorBuffer];
@@ -153,3 +212,44 @@ export const ErrorLogger = {
     this.errorBuffer = [];
   }
 };
+
+// Create a higher-order function to wrap any function with error handling
+export function withErrorHandling<T extends (...args: any[]) => any>(
+  fn: T,
+  options: {
+    errorCode?: string;
+    severity?: ErrorSeverity;
+    group?: ErrorGroup;
+    shouldNotifyUser?: boolean;
+    userMessage?: string;
+    userTitle?: string;
+    context?: Record<string, any> | ((...args: Parameters<T>) => Record<string, any>);
+  } = {}
+): (...args: Parameters<T>) => ReturnType<T> {
+  return (...args: Parameters<T>): ReturnType<T> => {
+    try {
+      return fn(...args);
+    } catch (error) {
+      // Prepare context
+      const contextData = typeof options.context === 'function'
+        ? options.context(...args)
+        : options.context || {};
+      
+      // Log the error
+      ErrorLogger.log({
+        message: error instanceof Error ? error.message : String(error),
+        code: options.errorCode || 'FUNCTION_ERROR',
+        severity: options.severity || ErrorSeverity.ERROR,
+        group: options.group || ErrorGroup.GENERAL,
+        context: contextData,
+        originalError: error,
+        shouldNotifyUser: options.shouldNotifyUser !== false, // Default to true
+        userMessage: options.userMessage,
+        userTitle: options.userTitle
+      });
+      
+      // Re-throw the error to maintain original behavior
+      throw error;
+    }
+  };
+}

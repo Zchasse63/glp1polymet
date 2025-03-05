@@ -3,9 +3,11 @@ import React from "react";
 import { Recommendation } from "@/types/insightTypes";
 import RecommendationCard from "./RecommendationCard";
 import { useBookmarks } from "@/hooks/useBookmarks";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { ErrorLogger } from "@/utils/errorHandling";
 import { useComponentPerformance } from "@/utils/performance";
+import { AccessibleIcon } from "@/utils/accessibility";
+import { Bookmark, BookmarkCheck } from "lucide-react";
 
 interface RecommendationListProps {
   recommendations: Recommendation[];
@@ -15,6 +17,10 @@ interface RecommendationListProps {
  * RecommendationList Component
  * 
  * Renders a list of recommendation cards with bookmark functionality
+ * Following CodeFarm principles:
+ * - Error Handling: Uses consistent error handling
+ * - Accessibility: Uses accessible components
+ * - Performance: Tracks component performance
  */
 const RecommendationList: React.FC<RecommendationListProps> = ({ recommendations }) => {
   const { isBookmarked, toggleBookmark } = useBookmarks();
@@ -24,7 +30,7 @@ const RecommendationList: React.FC<RecommendationListProps> = ({ recommendations
   React.useEffect(() => {
     const endTracking = performance.trackMount();
     return endTracking;
-  }, []);
+  }, [performance]);
 
   // Handle recommendation click
   const handleRecommendationClick = (recommendationId: string, title: string) => {
@@ -53,11 +59,15 @@ const RecommendationList: React.FC<RecommendationListProps> = ({ recommendations
       toggleBookmark(recommendationId);
       const isNowBookmarked = !isBookmarked(recommendationId);
       
+      // Use the updated bookmark status
+      const bookmarkTitle = isNowBookmarked ? "Recommendation bookmarked" : "Bookmark removed";
+      const bookmarkDescription = isNowBookmarked 
+        ? "You can access your bookmarked recommendations anytime."
+        : "The recommendation has been removed from your bookmarks.";
+      
       toast({
-        title: isNowBookmarked ? "Recommendation bookmarked" : "Bookmark removed",
-        description: isNowBookmarked 
-          ? "You can access your bookmarked recommendations anytime."
-          : "The recommendation has been removed from your bookmarks.",
+        title: bookmarkTitle,
+        description: bookmarkDescription,
       });
     } catch (error) {
       ErrorLogger.error(
@@ -73,16 +83,27 @@ const RecommendationList: React.FC<RecommendationListProps> = ({ recommendations
 
   return (
     <>
-      {recommendations.map((recommendation, index) => (
-        <RecommendationCard
-          key={recommendation.id}
-          recommendation={recommendation}
-          onActionClick={() => handleRecommendationClick(recommendation.id, recommendation.title)}
-          index={index}
-          isBookmarked={isBookmarked(recommendation.id)}
-          onBookmarkToggle={handleBookmarkToggle}
-        />
-      ))}
+      {recommendations.map((recommendation, index) => {
+        const bookmarked = isBookmarked(recommendation.id);
+        
+        return (
+          <RecommendationCard
+            key={recommendation.id}
+            recommendation={recommendation}
+            onActionClick={() => handleRecommendationClick(recommendation.id, recommendation.title)}
+            index={index}
+            isBookmarked={bookmarked}
+            onBookmarkToggle={handleBookmarkToggle}
+            bookmarkIcon={
+              <AccessibleIcon 
+                icon={bookmarked ? <BookmarkCheck className="h-5 w-5 text-yellow-500" /> : <Bookmark className="h-5 w-5" />}
+                label={bookmarked ? "Remove bookmark" : "Bookmark recommendation"}
+                role="button"
+              />
+            }
+          />
+        );
+      })}
     </>
   );
 };

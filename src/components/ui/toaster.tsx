@@ -1,4 +1,5 @@
-import { useToast } from "@/hooks/use-toast"
+
+import { useToast } from "@/hooks/use-toast";
 import {
   Toast,
   ToastClose,
@@ -6,28 +7,35 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
-} from "@/components/ui/toast"
+} from "@/components/ui/toast";
+import { AccessibleToast } from "./accessible-toast";
 
+/**
+ * Toaster Component
+ * 
+ * Renders a toast notification container with accessibility enhancements
+ * Following CodeFarm Development Methodology:
+ * - User-Centric Design: Ensures toast notifications are accessible
+ */
 export function Toaster() {
-  const { toasts } = useToast()
+  const { toasts } = useToast();
 
   return (
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
-          <Toast key={id} {...props}>
-            <div className="grid gap-1">
-              {title && <ToastTitle>{title}</ToastTitle>}
-              {description && (
-                <ToastDescription>{description}</ToastDescription>
-              )}
-            </div>
-            {action}
-            <ToastClose />
-          </Toast>
-        )
+          <AccessibleToast
+            key={id}
+            title={title}
+            description={description}
+            action={action}
+            // Set assertive for high priority toasts like errors
+            assertive={props.variant === "destructive"}
+            {...props}
+          />
+        );
       })}
       <ToastViewport />
     </ToastProvider>
-  )
+  );
 }
