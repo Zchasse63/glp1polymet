@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell, LabelList } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell, LabelList, ReferenceLine } from "recharts";
 import { analyzeWeightLossCorrelations, generateKeyInsights } from "@/utils/insights/correlationAnalysis";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchUserIntegrations } from "@/utils/appIntegrations";
@@ -59,7 +60,9 @@ const WeightLossCorrelations = () => {
   
   const formattedData = sortedData.map(item => ({
     ...item,
-    absValue: Math.abs(item.correlation) * 100,
+    // For the bar chart: positive values stay positive, negative values stay negative
+    // This allows us to draw bars in both directions from the zero axis
+    value: item.correlation * 100,
     formattedValue: Math.round(item.correlation * 100)
   }));
   
@@ -110,18 +113,18 @@ const WeightLossCorrelations = () => {
             <BarChart
               data={formattedData}
               layout="vertical"
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              margin={{ top: 5, right: 50, left: 20, bottom: 5 }}
               barSize={16}
               barGap={2}
             >
               <XAxis 
                 type="number" 
-                domain={[0, 100]} 
+                domain={[-100, 100]} 
                 axisLine={false}
                 tickLine={false}
                 tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                tickFormatter={value => `${value}%`}
-                tickCount={6}
+                tickFormatter={value => `${Math.abs(value)}%`}
+                tickCount={5}
               />
               <YAxis 
                 type="category" 
@@ -151,8 +154,19 @@ const WeightLossCorrelations = () => {
                 }}
                 cursor={{ fill: 'hsl(var(--muted)/0.15)' }}
               />
+              <ReferenceLine 
+                x={0} 
+                stroke="hsl(var(--border))" 
+                strokeWidth={2} 
+                label={{ 
+                  value: "Neutral", 
+                  position: "top", 
+                  fill: "hsl(var(--muted-foreground))",
+                  fontSize: 10 
+                }} 
+              />
               <Bar 
-                dataKey="absValue"
+                dataKey="value"
                 background={{ fill: 'hsl(var(--accent)/0.4)', radius: 4 }}
                 radius={4}
                 animationDuration={1500}
@@ -167,7 +181,7 @@ const WeightLossCorrelations = () => {
                 ))}
                 <LabelList 
                   dataKey="formattedValue" 
-                  position="right" 
+                  position={(entry) => entry.value >= 0 ? "right" : "left"}
                   formatter={(value, name, props) => {
                     if (props && props.payload) {
                       const item = props.payload;
