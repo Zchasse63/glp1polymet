@@ -7,24 +7,21 @@ import HealthVitalsOverview from "@/components/health/HealthVitalsOverview";
 import HealthTabs from "@/components/health/HealthTabs";
 import { getWeightInDisplayUnit } from "@/utils/weightUtils";
 import { useHealthMetrics } from "@/hooks/useHealthMetrics";
-
-interface WeightEntry {
-  id: string;
-  weight: number;
-  date: string;
-  unit: string;
-}
+import { WeightEntry, WeightUnit } from "@/types/healthMetrics";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
 
 /**
  * Health Page Component - Main entry point for health tracking features
  * Following the CodeFarm architecture principles:
  * - Modular Design: Delegating responsibilities to specialized components
  * - Clean Architecture: Using hooks for data management
- * - Documentation: Comprehensive JSDoc comments
+ * - Error Handling: Comprehensive error management
+ * - Loading States: Clear feedback during data loading
  */
 const HealthPage = () => {
   const [currentPage, setCurrentPage] = useState("health");
-  const [displayUnit, setDisplayUnit] = useState<"lbs" | "kg">("lbs");
+  const [displayUnit, setDisplayUnit] = useState<WeightUnit>("lbs");
   const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([
     { id: "w1", weight: 185.5, date: format(subDays(new Date(), 14), "yyyy-MM-dd"), unit: "lbs" },
     { id: "w2", weight: 184.0, date: format(subDays(new Date(), 12), "yyyy-MM-dd"), unit: "lbs" },
@@ -36,7 +33,7 @@ const HealthPage = () => {
   ]);
 
   // Use our custom hook to fetch and manage health metrics
-  const { healthMetrics, vitalsData } = useHealthMetrics();
+  const { healthMetrics, vitalsData, isLoading, error } = useHealthMetrics();
 
   const toggleDisplayUnit = () => {
     setDisplayUnit(prev => prev === "lbs" ? "kg" : "lbs");
@@ -64,6 +61,36 @@ const HealthPage = () => {
       console.error("Error adding weight entry:", error);
     }
   };
+
+  // Render loading state
+  if (isLoading) {
+    return (
+      <Layout currentPage={currentPage} setCurrentPage={setCurrentPage}>
+        <div className="p-5 flex flex-col items-center justify-center h-[80vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="mt-4 text-lg">Loading health data...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Render error state
+  if (error) {
+    return (
+      <Layout currentPage={currentPage} setCurrentPage={setCurrentPage}>
+        <div className="p-5">
+          <Alert variant="destructive">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              Failed to load health data. Please try refreshing the page.
+              <br />
+              Error details: {error.message}
+            </AlertDescription>
+          </Alert>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout currentPage={currentPage} setCurrentPage={setCurrentPage}>

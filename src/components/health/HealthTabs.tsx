@@ -5,33 +5,32 @@ import WeightTab from "./tabs/WeightTab";
 import ActivityTab from "./tabs/ActivityTab";
 import VitalsTab from "./tabs/VitalsTab";
 import NutritionTab from "./tabs/NutritionTab";
+import { HealthMetricsData, WeightEntry, WeightUnit } from "@/types/healthMetrics";
 
 /**
  * HealthTabs Props Interface
+ * Following CodeFarm architecture principles:
+ * - Strong Typing: Comprehensive type definitions
+ * - Documentation: Detailed JSDoc comments
  */
 interface HealthTabsProps { 
-  weightEntries: Array<{
-    id: string;
-    weight: number;
-    date: string;
-    unit: string;
-  }>;
-  healthMetrics: {
-    activity: Array<{ date: string; value: number }>;
-    heartRate: Array<{ date: string; value: number }>;
-    sleep: Array<{ date: string; value: number }>;
-    hydration: Array<{ date: string; value: number }>;
-    calories: Array<{ date: string; value: number }>;
-    glucose: Array<{ date: string; value: number }>;
-    bloodPressure: Array<{ date: string; systolic: number; diastolic: number }>;
-  };
-  displayUnit: "lbs" | "kg";
+  /** Array of weight entries for weight tracking */
+  weightEntries: WeightEntry[];
+  /** Comprehensive health metrics data */
+  healthMetrics: HealthMetricsData;
+  /** Current display unit for weight (lbs or kg) */
+  displayUnit: WeightUnit;
+  /** Handler for toggling between weight display units */
   onToggleDisplayUnit: () => void;
+  /** Handler for adding new weight entries */
   onAddWeightEntry: (data: { weight: number; date: string; unit: string }) => void;
 }
 
 /**
  * HealthTabs Component - Provides tab navigation for different health tracking sections
+ * Following CodeFarm architecture principles:
+ * - Modular Design: Separate tabs for different health domains
+ * - Composition: Delegating specialized functionality to child components
  * @param props Component props
  * @returns React component
  */
