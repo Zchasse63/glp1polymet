@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom'; // This import is necessary for toBeInTheDocument matcher
 import RecommendationList from './RecommendationList';
 import { renderWithProviders } from '@/utils/testing/renderWithProviders';
@@ -20,8 +20,9 @@ jest.mock('@/utils/performance', () => ({
   }),
 }));
 
+const mockToast = jest.fn();
 jest.mock('@/components/ui/use-toast', () => ({
-  toast: jest.fn(),
+  toast: (...args: any[]) => mockToast(...args),
 }));
 
 describe('RecommendationList', () => {
@@ -50,6 +51,10 @@ describe('RecommendationList', () => {
     }
   ];
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders recommendation cards', () => {
     renderWithProviders(<RecommendationList recommendations={mockRecommendations} />);
     
@@ -61,5 +66,40 @@ describe('RecommendationList', () => {
     renderWithProviders(<RecommendationList recommendations={[]} />);
     
     expect(screen.queryByText('Drink more water')).not.toBeInTheDocument();
+  });
+  
+  it('calls handleRecommendationClick when action button is clicked', () => {
+    renderWithProviders(<RecommendationList recommendations={mockRecommendations} />);
+    
+    // Find and click a recommendation action button
+    const actionButton = screen.getAllByText(/Learn more|Start now/)[0];
+    fireEvent.click(actionButton);
+    
+    // Check if toast was called
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: expect.any(String),
+        description: expect.stringContaining("saved this recommendation"),
+      })
+    );
+  });
+  
+  it('calls handleBookmarkToggle when bookmark button is clicked', () => {
+    const { toggleBookmark } = require('@/hooks/useBookmarks').useBookmarks();
+    renderWithProviders(<RecommendationList recommendations={mockRecommendations} />);
+    
+    // Find and click bookmark buttons (using aria-label)
+    const bookmarkButtons = screen.getAllByRole('button', { 
+      name: /Remove bookmark|Bookmark recommendation/
+    });
+    fireEvent.click(bookmarkButtons[0]);
+    
+    // Verify the bookmark toggle function was called
+    expect(toggleBookmark).toHaveBeenCalled();
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: expect.stringContaining("Bookmark"),
+      })
+    );
   });
 });
