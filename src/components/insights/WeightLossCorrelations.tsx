@@ -4,11 +4,14 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell, LabelList } from "recharts";
 import { analyzeWeightLossCorrelations, generateKeyInsights } from "@/utils/insightsAnalysis";
 import { Skeleton } from "@/components/ui/skeleton";
+import { fetchUserIntegrations } from "@/utils/appIntegrations";
+import { Badge } from "@/components/ui/badge";
 
 const WeightLossCorrelations = () => {
   const [correlationData, setCorrelationData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [insight, setInsight] = useState<string>("");
+  const [dataSources, setDataSources] = useState<string[]>([]);
   
   useEffect(() => {
     const fetchData = async () => {
@@ -19,6 +22,19 @@ const WeightLossCorrelations = () => {
         const correlations = await analyzeWeightLossCorrelations(userId);
         setCorrelationData(correlations);
         setInsight(generateKeyInsights(correlations));
+        
+        // Fetch user's connected integrations
+        const integrations = await fetchUserIntegrations(userId);
+        const activeIntegrations = integrations
+          .filter(integration => integration.status === 'active')
+          .map(integration => integration.provider);
+          
+        if (activeIntegrations.length > 0) {
+          setDataSources(activeIntegrations);
+        } else {
+          // Default if no integrations
+          setDataSources(['App Data']);
+        }
       } catch (error) {
         console.error("Error fetching correlation data:", error);
         // Fallback to sample data if there's an error
@@ -31,6 +47,7 @@ const WeightLossCorrelations = () => {
           { factor: "Carb Intake", correlation: -0.45, color: "hsl(0, 84%, 60%)" },
         ]);
         setInsight("Your weight loss is most strongly correlated with <span class=\"font-semibold text-green-600 dark:text-green-400\"> medication adherence</span> and <span class=\"font-semibold text-green-600 dark:text-green-400\"> protein intake</span>. Focus on these areas for maximum results.");
+        setDataSources(['Sample Data']);
       } finally {
         setLoading(false);
       }
@@ -73,9 +90,18 @@ const WeightLossCorrelations = () => {
   return (
     <Card className="border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-medium">
-          Weight Loss Correlations
-        </CardTitle>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+          <CardTitle className="text-lg font-medium">
+            Weight Loss Correlations
+          </CardTitle>
+          <div className="flex flex-wrap gap-1 mt-2 sm:mt-0">
+            {dataSources.map(source => (
+              <Badge key={source} variant="secondary" className="text-xs">
+                {source.charAt(0).toUpperCase() + source.slice(1)}
+              </Badge>
+            ))}
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="pt-2">
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
@@ -173,6 +199,10 @@ const WeightLossCorrelations = () => {
           </p>
           <p className="text-gray-600 dark:text-gray-400" dangerouslySetInnerHTML={{ __html: insight }}>
           </p>
+        </div>
+        
+        <div className="mt-4 text-xs text-muted-foreground">
+          <p>Insights are based on your historical data from all connected apps, even if you've disconnected them.</p>
         </div>
       </CardContent>
     </Card>
