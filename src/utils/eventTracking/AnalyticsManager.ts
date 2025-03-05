@@ -18,190 +18,155 @@ import {
 import { ErrorLogger } from '../errorHandling';
 
 class AnalyticsManager {
-  private providers: Map<string, AnalyticsProvider> = new Map();
-  private initialized = false;
-  private initializing = false;
-  private userId: string | null = null;
-  private userProperties: Record<string, any> = {};
-  private queue: Array<() => void> = [];
+  private providers: AnalyticsProvider[] = [];
   private config: AnalyticsConfig = {
     enabled: true,
-    debugMode: process.env.NODE_ENV === 'development'
+    debug: false,
+    disabledProviders: [],
+    respectDoNotTrack: true,
+    samplingRate: 1.0, // 100% by default
+    anonymizeIp: true
   };
+  private userId: string | null = null;
+  private userProperties: Record<string, any> = {};
+  private initialized = false;
   
   // Add a new analytics provider
   addProvider(provider: AnalyticsProvider): void {
-    if (this.providers.has(provider.name)) {
-      this.debug(`Provider '${provider.name}' already exists. Replacing.`);
+    // Check if provider already exists
+    const existingProvider = this.providers.find(p => p.name === provider.name);
+    if (existingProvider) {
+      console.warn(`Provider ${provider.name} already exists. Skipping.`);
+      return;
     }
     
-    this.providers.set(provider.name, {
-      ...provider,
-      status: ProviderStatus.PENDING
-    });
-    
-    // Auto-initialize if manager is already initialized
-    if (this.initialized && !this.initializing) {
-      this.initializeProvider(provider)
-        .catch(err => {
-          ErrorLogger.error(
-            `Failed to initialize provider '${provider.name}'`,
-            'ANALYTICS_PROVIDER_INIT_ERROR', 
-            { providerName: provider.name },
-            err
-          );
-        });
-    }
+    this.providers.push(provider);
+    this.debug(`Provider ${provider.name} added`);
   }
   
   // Remove a provider by name
   removeProvider(providerName: string): boolean {
-    return this.providers.delete(providerName);
+    const initialLength = this.providers.length;
+    this.providers = this.providers.filter(p => p.name !== providerName);
+    
+    const removed = initialLength > this.providers.length;
+    if (removed) {
+      this.debug(`Provider ${providerName} removed`);
+    }
+    
+    return removed;
   }
   
   // Get a provider by name
   getProvider(providerName: string): AnalyticsProvider | undefined {
-    return this.providers.get(providerName);
+    return this.providers.find(p => p.name === providerName);
   }
   
   // Initialize all providers
   async initialize(): Promise<boolean> {
-    if (this.initializing) {
-      this.debug('Analytics initialization already in progress');
-      return false;
+    if (this.initialized) {
+      return true;
     }
     
+    // Skip if analytics is disabled
     if (!this.config.enabled) {
-      this.debug('Analytics is disabled by configuration');
+      this.debug('Analytics disabled, skipping initialization');
       return false;
     }
     
-    this.initializing = true;
-    
-    try {
-      if (this.providers.size === 0) {
-        this.debug('No analytics providers registered');
-        this.initialized = true;
-        return true;
-      }
-      
-      const initPromises = Array.from(this.providers.entries()).map(
-        async ([name, provider]) => {
-          try {
-            return await this.initializeProvider(provider);
-          } catch (error) {
-            ErrorLogger.error(
-              `Failed to initialize provider '${name}'`,
-              'ANALYTICS_PROVIDER_INIT_ERROR', 
-              { providerName: name },
-              error
-            );
-            return false;
-          }
-        }
-      );
-      
-      const results = await Promise.all(initPromises);
-      this.initialized = results.some(result => result);
-      
-      // Process queued events once initialized
-      if (this.initialized && this.queue.length > 0) {
-        this.debug(`Processing ${this.queue.length} queued events`);
-        this.queue.forEach(fn => fn());
-        this.queue = [];
-      }
-      
-      return this.initialized;
-    } catch (error) {
-      ErrorLogger.error(
-        'Failed to initialize analytics providers',
-        'ANALYTICS_INIT_ERROR', 
-        {},
-        error
-      );
+    // Respect Do Not Track browser setting
+    if (this.config.respectDoNotTrack && this.isDoNotTrackEnabled()) {
+      this.debug('Do Not Track enabled in browser, skipping initialization');
       return false;
-    } finally {
-      this.initializing = false;
     }
+    
+    // Initialize each provider
+    const results = await Promise.all(
+      this.providers.map(provider => this.initializeProvider(provider))
+    );
+    
+    // Check if all providers initialized successfully
+    this.initialized = results.every(result => result);
+    
+    if (this.initialized) {
+      this.debug('All providers initialized successfully');
+    } else {
+      this.debug('Some providers failed to initialize');
+    }
+    
+    return this.initialized;
   }
   
   // Initialize a single provider
   private async initializeProvider(provider: AnalyticsProvider): Promise<boolean> {
+    // Skip if provider is disabled
+    if (this.isProviderDisabled(provider.name)) {
+      this.debug(`Provider ${provider.name} is disabled, skipping initialization`);
+      return false;
+    }
+    
     try {
-      const result = await provider.initialize();
+      // Initialize the provider
+      const success = await provider.initialize();
       
-      // Update provider status
-      this.providers.set(provider.name, {
-        ...provider,
-        status: result ? ProviderStatus.INITIALIZED : ProviderStatus.FAILED
-      });
+      if (success) {
+        this.debug(`Provider ${provider.name} initialized successfully`);
+        
+        // Set user ID and properties if already available
+        if (this.userId) {
+          this.doIdentify();
+        }
+        
+        if (Object.keys(this.userProperties).length > 0) {
+          this.doSetUserProperties();
+        }
+      } else {
+        this.debug(`Provider ${provider.name} initialization failed`);
+      }
       
-      return result;
+      return success;
     } catch (error) {
-      // Update provider status to failed
-      this.providers.set(provider.name, {
-        ...provider,
-        status: ProviderStatus.FAILED
-      });
-      
-      throw error;
+      this.handleProviderError(provider.name, 'initialize', error);
+      return false;
     }
   }
   
   // Configure analytics manager
   configure(config: Partial<AnalyticsConfig>): void {
     this.config = { ...this.config, ...config };
-    
-    // Apply immediate configuration changes
-    if (config.userId !== undefined) {
-      this.userId = config.userId;
-      
-      if (this.initialized) {
-        this.doIdentify();
-      }
-    }
-    
-    this.debug(`Analytics configuration updated: ${JSON.stringify(config)}`);
+    this.debug('Configuration updated', this.config);
   }
   
   // Track an event across all providers
   trackEvent(event: TrackingEvent): void {
-    if (!this.config.enabled) return;
-    
-    const enrichedEvent = {
-      ...event,
-      timestamp: event.timestamp || Date.now(),
-      priority: event.priority || EventPriority.MEDIUM,
-      userId: event.userId || this.userId || undefined
-    };
-    
-    if (!this.initialized) {
-      this.queue.push(() => this.doTrackEvent(enrichedEvent));
+    // Skip if analytics is disabled
+    if (!this.config.enabled) {
       return;
     }
     
-    this.doTrackEvent(enrichedEvent);
+    // Skip if event doesn't meet sampling rate
+    if (Math.random() > this.config.samplingRate) {
+      return;
+    }
+    
+    this.doTrackEvent(event);
   }
   
   private doTrackEvent(event: TrackingEvent): void {
-    this.debug(`Tracking event: ${event.name}`, event);
-    
-    for (const [name, provider] of this.providers.entries()) {
-      if (this.isProviderDisabled(name)) {
-        continue;
+    // Track across all providers
+    this.providers.forEach(provider => {
+      // Skip if provider is disabled
+      if (this.isProviderDisabled(provider.name) || provider.status !== ProviderStatus.INITIALIZED) {
+        return;
       }
       
       try {
         provider.trackEvent(event);
+        this.debug(`Event ${event.name} tracked with ${provider.name}`, event);
       } catch (error) {
-        this.handleProviderError(
-          name, 
-          'track event', 
-          error,
-          { eventName: event.name, category: event.category }
-        );
+        this.handleProviderError(provider.name, 'trackEvent', error, { event });
       }
-    }
+    });
     
     // For critical errors, ensure they're also logged to our error system
     if (
@@ -220,7 +185,7 @@ class AnalyticsManager {
   
   // Identify a user across all providers
   identify(userId: string, traits?: Record<string, any>): void {
-    if (!this.config.enabled) return;
+    if (!userId) return;
     
     this.userId = userId;
     
@@ -228,8 +193,8 @@ class AnalyticsManager {
       this.userProperties = { ...this.userProperties, ...traits };
     }
     
-    if (!this.initialized) {
-      this.queue.push(() => this.doIdentify());
+    // Skip if analytics is disabled
+    if (!this.config.enabled) {
       return;
     }
     
@@ -239,33 +204,30 @@ class AnalyticsManager {
   private doIdentify(): void {
     if (!this.userId) return;
     
-    this.debug(`Identifying user: ${this.userId}`, this.userProperties);
-    
-    for (const [name, provider] of this.providers.entries()) {
-      if (this.isProviderDisabled(name)) {
-        continue;
+    // Identify across all providers
+    this.providers.forEach(provider => {
+      // Skip if provider is disabled
+      if (this.isProviderDisabled(provider.name) || provider.status !== ProviderStatus.INITIALIZED) {
+        return;
       }
       
       try {
         provider.identify(this.userId!, this.userProperties);
+        this.debug(`User ${this.userId} identified with ${provider.name}`);
       } catch (error) {
-        this.handleProviderError(
-          name, 
-          'identify user', 
-          error
-        );
+        this.handleProviderError(provider.name, 'identify', error);
       }
-    }
+    });
   }
   
   // Set user properties across all providers
   setUserProperties(properties: Record<string, any>): void {
-    if (!this.config.enabled) return;
+    if (!properties || Object.keys(properties).length === 0) return;
     
     this.userProperties = { ...this.userProperties, ...properties };
     
-    if (!this.initialized) {
-      this.queue.push(() => this.doSetUserProperties());
+    // Skip if analytics is disabled
+    if (!this.config.enabled) {
       return;
     }
     
@@ -273,31 +235,33 @@ class AnalyticsManager {
   }
   
   private doSetUserProperties(): void {
-    this.debug('Setting user properties', this.userProperties);
+    // Skip if no user properties
+    if (Object.keys(this.userProperties).length === 0) return;
     
-    for (const [name, provider] of this.providers.entries()) {
-      if (this.isProviderDisabled(name)) {
-        continue;
+    // Set user properties across all providers
+    this.providers.forEach(provider => {
+      // Skip if provider is disabled
+      if (this.isProviderDisabled(provider.name) || provider.status !== ProviderStatus.INITIALIZED) {
+        return;
       }
       
       try {
-        provider.setUserProperties(this.userProperties);
+        if (provider.setUserProperties) {
+          provider.setUserProperties(this.userProperties);
+          this.debug(`User properties set with ${provider.name}`, this.userProperties);
+        }
       } catch (error) {
-        this.handleProviderError(
-          name, 
-          'set user properties', 
-          error
-        );
+        this.handleProviderError(provider.name, 'setUserProperties', error);
       }
-    }
+    });
   }
   
   // Track page view across all providers
   pageView(path: string, properties?: Record<string, any>): void {
-    if (!this.config.enabled) return;
+    if (!path) return;
     
-    if (!this.initialized) {
-      this.queue.push(() => this.doPageView(path, properties));
+    // Skip if analytics is disabled
+    if (!this.config.enabled) {
       return;
     }
     
@@ -305,40 +269,48 @@ class AnalyticsManager {
   }
   
   private doPageView(path: string, properties?: Record<string, any>): void {
-    this.debug(`Tracking page view: ${path}`, properties);
-    
-    for (const [name, provider] of this.providers.entries()) {
-      if (this.isProviderDisabled(name)) {
-        continue;
+    // Track page view across all providers
+    this.providers.forEach(provider => {
+      // Skip if provider is disabled
+      if (this.isProviderDisabled(provider.name) || provider.status !== ProviderStatus.INITIALIZED) {
+        return;
       }
       
       try {
-        provider.pageView(path, properties);
+        if (provider.pageView) {
+          provider.pageView(path, properties);
+          this.debug(`Page view tracked for ${path} with ${provider.name}`);
+        } else {
+          // Fall back to trackEvent if pageView not implemented
+          provider.trackEvent({
+            name: 'page_view',
+            category: EventCategory.USER_JOURNEY,
+            priority: EventPriority.MEDIUM,
+            properties: {
+              path,
+              ...properties
+            }
+          });
+        }
       } catch (error) {
-        this.handleProviderError(
-          name, 
-          'track page view', 
-          error,
-          { path }
-        );
+        this.handleProviderError(provider.name, 'pageView', error, { path, properties });
       }
+    });
+  }
+  
+  // Check if Do Not Track is enabled in the browser
+  private isDoNotTrackEnabled(): boolean {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return false;
     }
+    
+    const dnt = navigator.doNotTrack || (window as any).doNotTrack;
+    return dnt === '1' || dnt === 'yes' || dnt === true;
   }
   
   // Check if a provider is disabled in configuration
   private isProviderDisabled(providerName: string): boolean {
-    const providerStatus = this.providers.get(providerName)?.status;
-    
-    // Provider is explicitly disabled in config or failed to initialize
-    if (
-      (this.config.providers && this.config.providers[providerName] === false) ||
-      providerStatus === ProviderStatus.FAILED ||
-      providerStatus === ProviderStatus.DISABLED
-    ) {
-      return true;
-    }
-    
-    return false;
+    return this.config.disabledProviders.includes(providerName);
   }
   
   // Handle provider errors consistently
@@ -350,24 +322,28 @@ class AnalyticsManager {
   ): void {
     const errorMessage = error instanceof Error ? error.message : String(error);
     
-    ErrorLogger.warning(
-      `Analytics provider '${providerName}' failed to ${operation}: ${errorMessage}`,
-      'ANALYTICS_PROVIDER_ERROR',
-      {
-        providerName,
-        operation,
-        ...context
-      },
-      error
-    );
+    console.error(`Error in ${providerName} provider during ${operation}: ${errorMessage}`, error);
     
-    this.debug(`Provider error (${providerName}): ${errorMessage}`, { error, context });
+    if (this.config.debug) {
+      console.error('Context:', context);
+    }
+    
+    // Log to error system
+    ErrorLogger.warning(
+      `Analytics error: ${errorMessage}`,
+      `ANALYTICS_${operation.toUpperCase()}_ERROR`,
+      {
+        provider: providerName,
+        operation,
+        context
+      }
+    );
   }
   
   // Debug logging (only in development or when debug mode is enabled)
   private debug(message: string, data?: any): void {
-    if (this.config.debugMode) {
-      console.debug(`[Analytics] ${message}`, data !== undefined ? data : '');
+    if (this.config.debug) {
+      console.debug(`[Analytics] ${message}`, data);
     }
   }
 }
