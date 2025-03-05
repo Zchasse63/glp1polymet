@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronRightIcon } from "lucide-react";
+import { ChevronRightIcon, BookmarkIcon } from "lucide-react";
 import { useRecommendations } from "@/hooks/useRecommendations";
 import { RecommendationType } from "@/types/insightTypes";
 import RecommendationsLoadingState from "./RecommendationsLoadingState";
@@ -10,6 +10,7 @@ import { toast } from "@/components/ui/use-toast";
 import RecommendationCard from "./recommendations/RecommendationCard";
 import RecommendationFilters from "./recommendations/RecommendationFilters";
 import NoRecommendationsState from "./recommendations/NoRecommendationsState";
+import { useBookmarks } from "@/hooks/useBookmarks";
 
 /**
  * PersonalizedRecommendations Component
@@ -23,7 +24,8 @@ import NoRecommendationsState from "./recommendations/NoRecommendationsState";
  */
 const PersonalizedRecommendations: React.FC = () => {
   const { data: recommendations = [], isLoading, error } = useRecommendations();
-  const [activeFilter, setActiveFilter] = useState<RecommendationType | 'all'>('all');
+  const [activeFilter, setActiveFilter] = useState<RecommendationType | 'all' | 'bookmarked'>('all');
+  const { isBookmarked, toggleBookmark, bookmarkedIds } = useBookmarks();
 
   // Show loading state while data is being fetched
   if (isLoading) {
@@ -52,7 +54,9 @@ const PersonalizedRecommendations: React.FC = () => {
   // Filter recommendations based on active filter
   const filteredRecommendations = activeFilter === 'all' 
     ? recommendations 
-    : recommendations.filter(rec => rec.type === activeFilter);
+    : activeFilter === 'bookmarked' 
+      ? recommendations.filter(rec => isBookmarked(rec.id))
+      : recommendations.filter(rec => rec.type === activeFilter);
 
   // Handle recommendation click
   const handleRecommendationClick = (recommendationId: string, title: string) => {
@@ -62,6 +66,22 @@ const PersonalizedRecommendations: React.FC = () => {
       description: "We've saved this recommendation to your activity feed.",
     });
   };
+
+  // Handle bookmark toggle
+  const handleBookmarkToggle = (recommendationId: string) => {
+    toggleBookmark(recommendationId);
+    const isNowBookmarked = !isBookmarked(recommendationId);
+    
+    toast({
+      title: isNowBookmarked ? "Recommendation bookmarked" : "Bookmark removed",
+      description: isNowBookmarked 
+        ? "You can access your bookmarked recommendations anytime."
+        : "The recommendation has been removed from your bookmarks.",
+    });
+  };
+
+  // Check if we have any bookmarks to determine whether to show the bookmark filter
+  const hasBookmarks = bookmarkedIds.length > 0;
 
   return (
     <div className="space-y-4">
@@ -83,6 +103,7 @@ const PersonalizedRecommendations: React.FC = () => {
         activeFilter={activeFilter}
         setActiveFilter={setActiveFilter}
         recommendationTypes={recommendationTypes}
+        hasBookmarks={hasBookmarks}
       />
 
       <motion.div 
@@ -97,6 +118,8 @@ const PersonalizedRecommendations: React.FC = () => {
             recommendation={recommendation}
             onActionClick={() => handleRecommendationClick(recommendation.id, recommendation.title)}
             index={index}
+            isBookmarked={isBookmarked(recommendation.id)}
+            onBookmarkToggle={handleBookmarkToggle}
           />
         ))}
         

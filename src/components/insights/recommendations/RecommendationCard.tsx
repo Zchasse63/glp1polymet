@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRightIcon } from "lucide-react";
+import { ArrowRightIcon, BookmarkIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Recommendation, RecommendationIconType } from "@/types/insightTypes";
 import { motion } from "framer-motion";
@@ -19,6 +19,8 @@ interface RecommendationCardProps {
   recommendation: Recommendation;
   onActionClick: () => void;
   index: number;
+  isBookmarked: boolean;
+  onBookmarkToggle: (id: string) => void;
 }
 
 /**
@@ -89,7 +91,9 @@ const getIconComponent = (iconType: RecommendationIconType) => {
 const RecommendationCard: React.FC<RecommendationCardProps> = ({ 
   recommendation, 
   onActionClick,
-  index
+  index,
+  isBookmarked,
+  onBookmarkToggle
 }) => {
   const colors = colorMap[recommendation.color as keyof typeof colorMap] || colorMap.blue;
   const Icon = () => getIconComponent(recommendation.iconType);
@@ -115,9 +119,23 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 <h3 className="font-medium">
                   {recommendation.title}
                 </h3>
-                <Badge variant="outline" className="text-xs">
-                  {formatRecType(recommendation.type)}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={`h-7 w-7 ${isBookmarked ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}`}
+                    onClick={() => onBookmarkToggle(recommendation.id)}
+                    aria-label={isBookmarked ? "Remove bookmark" : "Bookmark recommendation"}
+                  >
+                    <BookmarkIcon 
+                      className="h-4 w-4" 
+                      fill={isBookmarked ? "currentColor" : "none"} 
+                    />
+                  </Button>
+                  <Badge variant="outline" className="text-xs">
+                    {formatRecType(recommendation.type)}
+                  </Badge>
+                </div>
               </div>
               <p
                 className="text-sm text-gray-500 dark:text-gray-400 mt-1"
