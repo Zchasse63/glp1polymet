@@ -1,104 +1,108 @@
 
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { TrendingUpIcon, RefreshCwIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useWeeklyProgress } from "@/hooks/useWeeklyProgress";
-import { ProgressBadge } from "@/types/insightTypes";
 import WeeklyProgressLoadingState from "./WeeklyProgressLoadingState";
+import { BarChart3 } from "lucide-react";
+import { useInsightsContext } from "@/contexts/InsightsContext";
 
 /**
  * WeeklyProgressSummary Component
  * 
- * Displays a summary of the user's weekly progress with key achievements
+ * Shows a summary of the user's progress over the selected time period.
  * Following CodeFarm principles:
- * - Separation of concerns: Data fetching handled by custom hook
- * - Error handling: Graceful fallbacks and user notifications
- * - Documentation: Comprehensive JSDoc comments
- * - Single Responsibility: Each subcomponent has a focused purpose
+ * - User-Centric Design: Clean, informative summary with visual hierarchy
+ * - Separation of Concerns: Data loading and UI rendering separated
+ * - Holistic Development: Part of the broader insights ecosystem
  */
 const WeeklyProgressSummary: React.FC = () => {
-  const { progressData, loading, error, refreshProgress } = useWeeklyProgress();
-
-  // Show loading state while data is being fetched
+  const { progressData, loading, error } = useWeeklyProgress();
+  const { timePeriod } = useInsightsContext();
+  
+  // Get an appropriate title based on the selected time period
+  const getTimeBasedTitle = () => {
+    switch (timePeriod) {
+      case '7days': return 'Weekly Progress Summary';
+      case '30days': return 'Monthly Progress Summary';
+      case '90days': return '90-Day Progress Summary';
+      case '6months': return '6-Month Progress Summary';
+      case '1year': return 'Yearly Progress Summary';
+      default: return 'Progress Summary';
+    }
+  };
+  
   if (loading) {
     return <WeeklyProgressLoadingState />;
   }
-
-  // Show error state if there was an error
+  
   if (error || !progressData) {
     return (
-      <Card className="bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-800/50 overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex flex-col items-center text-center py-4">
-            <div className="bg-red-100 dark:bg-red-800/50 p-3 rounded-full mb-4">
-              <RefreshCwIcon className="h-6 w-6 text-red-600 dark:text-red-400" />
-            </div>
-            <h3 className="text-lg font-medium mb-2">Unable to load progress summary</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              We couldn't retrieve your weekly progress data. Please try again later.
-            </p>
-            <Button onClick={() => refreshProgress()} variant="outline" size="sm">
-              Retry
-            </Button>
-          </div>
+      <Card className="border border-gray-200 dark:border-gray-700">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-medium">
+            {getTimeBasedTitle()}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            Unable to load progress data. Please try again later.
+          </p>
         </CardContent>
       </Card>
     );
   }
-
+  
+  const { summaryText, comparisonText, badges, period } = progressData;
+  
+  const getBadgeColorClass = (colorTheme: string) => {
+    switch (colorTheme) {
+      case 'green': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+      case 'blue': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+      case 'purple': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400';
+      case 'orange': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400';
+      case 'red': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+    }
+  };
+  
   return (
-    <Card
-      className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-100 dark:border-blue-800 overflow-hidden"
-    >
-      <CardContent className="p-6">
-        <div className="flex items-start gap-4">
-          <div
-            className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center flex-shrink-0"
-          >
-            <TrendingUpIcon
-              className="h-6 w-6 text-blue-600 dark:text-blue-400"
-            />
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold mb-2">
-              Weekly Progress Summary
-            </h2>
-            <p className="text-gray-700 dark:text-gray-300 mb-4">
-              {progressData.summaryText} {progressData.comparisonText}
+    <Card className="border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg font-medium">
+          {getTimeBasedTitle()}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-2">
+        <div className="flex flex-col md:flex-row gap-6">
+          <div className="flex-1">
+            <div className="text-xl font-medium mb-1">
+              {summaryText}
+            </div>
+            <p className="text-muted-foreground text-sm mb-3">
+              {comparisonText}
             </p>
-            <div className="flex flex-wrap gap-2">
-              {progressData.badges.map((badge: ProgressBadge, index: number) => (
-                <ProgressBadgeComponent key={index} badge={badge} />
+            
+            <div className="flex flex-wrap gap-2 mt-3">
+              {badges.map((badge, index) => (
+                <span 
+                  key={index}
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium ${getBadgeColorClass(badge.colorTheme)}`}
+                >
+                  {badge.text}
+                </span>
               ))}
+            </div>
+          </div>
+          
+          <div className="w-full md:w-32 flex items-center justify-center">
+            <div className="bg-primary/10 rounded-full p-6">
+              <BarChart3 className="w-12 h-12 text-primary" />
             </div>
           </div>
         </div>
       </CardContent>
     </Card>
   );
-};
-
-/**
- * ProgressBadgeComponent - Displays an achievement badge with appropriate styling
- */
-interface ProgressBadgeProps {
-  badge: ProgressBadge;
-}
-
-const ProgressBadgeComponent: React.FC<ProgressBadgeProps> = ({ badge }) => {
-  const colorMap: Record<string, string> = {
-    green: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border-0",
-    blue: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 border-0",
-    purple: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 border-0",
-    orange: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300 border-0",
-    red: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border-0"
-  };
-
-  const className = colorMap[badge.colorTheme] || colorMap.blue;
-
-  return <Badge className={className}>{badge.text}</Badge>;
 };
 
 export default WeeklyProgressSummary;

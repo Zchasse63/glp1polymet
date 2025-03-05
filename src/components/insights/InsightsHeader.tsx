@@ -1,10 +1,4 @@
 
-import React from "react";
-import { CalendarIcon, RefreshCwIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { format } from "date-fns";
-
 /**
  * InsightsHeader Component
  * 
@@ -17,11 +11,21 @@ import { format } from "date-fns";
  * @param onRefresh - Optional callback function to trigger data refresh
  * @returns React component that renders the Insights page header
  */
+import React from "react";
+import { CalendarIcon, RefreshCwIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { format, subDays } from "date-fns";
+import TimePeriodSelector from "./TimePeriodSelector";
+import { useInsightsContext } from "@/contexts/InsightsContext";
+
 interface InsightsHeaderProps {
   onRefresh?: () => void;
 }
 
 const InsightsHeader: React.FC<InsightsHeaderProps> = ({ onRefresh }) => {
+  const { timePeriod, setTimePeriod, getDaysFromTimePeriod } = useInsightsContext();
+
   /**
    * Handles the refresh action when user clicks the refresh button
    * In a production environment, this would trigger a data refresh from multiple sources
@@ -37,14 +41,14 @@ const InsightsHeader: React.FC<InsightsHeaderProps> = ({ onRefresh }) => {
 
   /**
    * Calculates and formats the date range to display in the header
-   * Shows the last 30 days by default
+   * Shows the date range based on selected time period
    * 
    * @returns Formatted date range string
    */
   const getDateRangeText = (): string => {
     const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 30);
+    const days = getDaysFromTimePeriod();
+    const startDate = subDays(endDate, days);
     
     return `${format(startDate, "MMM d")} - ${format(endDate, "MMM d, yyyy")}`;
   };
@@ -58,15 +62,21 @@ const InsightsHeader: React.FC<InsightsHeaderProps> = ({ onRefresh }) => {
             Personalized health analyses and recommendations based on your data
           </p>
         </div>
-        <Button 
-          onClick={handleRefresh} 
-          variant="outline" 
-          size="sm" 
-          className="flex items-center gap-2"
-        >
-          <RefreshCwIcon className="w-4 h-4" />
-          <span>Refresh Data</span>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <TimePeriodSelector 
+            selectedPeriod={timePeriod}
+            onChange={setTimePeriod}
+          />
+          <Button 
+            onClick={handleRefresh} 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-2"
+          >
+            <RefreshCwIcon className="w-4 h-4" />
+            <span>Refresh Data</span>
+          </Button>
+        </div>
       </div>
 
       <Card className="bg-muted/40 border-muted">

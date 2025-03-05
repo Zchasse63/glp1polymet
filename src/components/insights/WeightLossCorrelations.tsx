@@ -8,6 +8,7 @@ import CorrelationLoadingState from "./CorrelationLoadingState";
 import { toast } from "@/components/ui/use-toast";
 import { useCorrelationData } from "@/hooks/useCorrelationData";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { useInsightsContext } from "@/contexts/InsightsContext";
 
 /**
  * WeightLossCorrelations Component
@@ -19,6 +20,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
  * - Single Responsibility: Each subcomponent has a focused purpose
  */
 const WeightLossCorrelations: React.FC = () => {
+  const { timePeriod } = useInsightsContext();
   const { 
     correlationData, 
     loading, 
@@ -56,6 +58,18 @@ const WeightLossCorrelations: React.FC = () => {
     }));
   }, [correlationData]);
   
+  // Get period label for display
+  const getPeriodLabel = () => {
+    switch (timePeriod) {
+      case '7days': return 'Last 7 days';
+      case '30days': return 'Last 30 days';
+      case '90days': return 'Last 90 days';
+      case '6months': return 'Last 6 months';
+      case '1year': return 'Last year';
+      default: return 'Last 30 days';
+    }
+  };
+  
   if (loading) {
     return <CorrelationLoadingState />;
   }
@@ -79,7 +93,7 @@ const WeightLossCorrelations: React.FC = () => {
         </CardHeader>
         <CardContent className="pt-2">
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            Factors most strongly correlated with your weight loss success
+            Factors most strongly correlated with your weight loss success over the {getPeriodLabel().toLowerCase()}
           </p>
 
           <CorrelationBarChart formattedData={formattedData} />

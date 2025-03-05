@@ -20,6 +20,7 @@ import WeeklyProgressSummary from "./insights/WeeklyProgressSummary";
 import WeightLossCorrelations from "./insights/WeightLossCorrelations";
 import PersonalizedRecommendations from "./insights/PersonalizedRecommendations";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { InsightsProvider } from "@/contexts/InsightsContext";
 
 // Animation variants for staggered entry
 const containerVariants = {
@@ -95,46 +96,48 @@ const Insights: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <ErrorBoundary>
-        <InsightsHeader onRefresh={handleRefreshData} />
-      </ErrorBoundary>
-      
-      <AnimatePresence>
-        {isDataLoaded ? (
-          <motion.div 
-            className="space-y-6"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <motion.div variants={itemVariants}>
-              <ErrorBoundary>
-                <WeeklyProgressSummary />
-              </ErrorBoundary>
+    <InsightsProvider>
+      <div className="space-y-6">
+        <ErrorBoundary>
+          <InsightsHeader onRefresh={handleRefreshData} />
+        </ErrorBoundary>
+        
+        <AnimatePresence>
+          {isDataLoaded ? (
+            <motion.div 
+              className="space-y-6"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <motion.div variants={itemVariants}>
+                <ErrorBoundary>
+                  <WeeklyProgressSummary />
+                </ErrorBoundary>
+              </motion.div>
+              
+              <motion.div variants={itemVariants}>
+                <ErrorBoundary>
+                  <WeightLossCorrelations />
+                </ErrorBoundary>
+              </motion.div>
+              
+              <motion.div variants={itemVariants}>
+                <ErrorBoundary>
+                  <PersonalizedRecommendations />
+                </ErrorBoundary>
+              </motion.div>
             </motion.div>
-            
-            <motion.div variants={itemVariants}>
-              <ErrorBoundary>
-                <WeightLossCorrelations />
-              </ErrorBoundary>
-            </motion.div>
-            
-            <motion.div variants={itemVariants}>
-              <ErrorBoundary>
-                <PersonalizedRecommendations />
-              </ErrorBoundary>
-            </motion.div>
-          </motion.div>
-        ) : (
-          <div className="space-y-6">
-            <Skeleton className="h-60 w-full" />
-            <Skeleton className="h-80 w-full" />
-            <Skeleton className="h-96 w-full" />
-          </div>
-        )}
-      </AnimatePresence>
-    </div>
+          ) : (
+            <div className="space-y-6">
+              <Skeleton className="h-60 w-full" />
+              <Skeleton className="h-80 w-full" />
+              <Skeleton className="h-96 w-full" />
+            </div>
+          )}
+        </AnimatePresence>
+      </div>
+    </InsightsProvider>
   );
 };
 

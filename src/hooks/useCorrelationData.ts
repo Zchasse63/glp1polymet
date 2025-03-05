@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CorrelationFactor } from "@/types/insightTypes";
 import { analyzeWeightLossCorrelations, generateKeyInsights } from "@/utils/insights/correlationAnalysis";
 import { fetchUserIntegrations } from "@/utils/appIntegrations";
+import { useInsightsContext } from "@/contexts/InsightsContext";
 
 interface CorrelationDataResult {
   /** Array of correlation factors */
@@ -27,9 +28,9 @@ interface CorrelationDataResult {
   dataSources: string[];
 }
 
-const fetchCorrelationData = async (userId: string) => {
+const fetchCorrelationData = async (userId: string, days: number) => {
   // Fetch correlation data
-  const correlations = await analyzeWeightLossCorrelations(userId);
+  const correlations = await analyzeWeightLossCorrelations(userId, days);
   
   // Generate insights based on correlations
   const insight = generateKeyInsights(correlations);
@@ -51,10 +52,12 @@ const fetchCorrelationData = async (userId: string) => {
  */
 export const useCorrelationData = (): CorrelationDataResult => {
   const userId = "demo-user"; // In production, this would come from auth context
+  const { getDaysFromTimePeriod } = useInsightsContext();
+  const days = getDaysFromTimePeriod();
   
   const { data, error, isLoading } = useQuery({
-    queryKey: ['correlationData', userId],
-    queryFn: () => fetchCorrelationData(userId),
+    queryKey: ['correlationData', userId, days],
+    queryFn: () => fetchCorrelationData(userId, days),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
   });

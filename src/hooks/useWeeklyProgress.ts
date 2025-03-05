@@ -12,6 +12,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { WeeklyProgressData } from "@/types/insightTypes";
 import { delay } from "@/lib/utils";
+import { useInsightsContext } from "@/contexts/InsightsContext";
 
 interface WeeklyProgressResult {
   /** Weekly progress data */
@@ -27,21 +28,41 @@ interface WeeklyProgressResult {
 /**
  * Fetches weekly progress data from API or returns mock data
  */
-const fetchProgressData = async (): Promise<WeeklyProgressData> => {
+const fetchProgressData = async (days: number): Promise<WeeklyProgressData> => {
   // In production, this would be an API call to your backend
   // For now, we'll simulate a delay and return mock data
   await delay(600);
   
+  // Adjust the period text based on the selected time period
+  let periodText: string;
+  if (days <= 7) {
+    periodText = "Last 7 days";
+  } else if (days <= 30) {
+    periodText = "Last 30 days";
+  } else if (days <= 90) {
+    periodText = "Last 90 days";
+  } else if (days <= 180) {
+    periodText = "Last 6 months";
+  } else {
+    periodText = "Last year";
+  }
+  
+  // Adjust weight loss based on time period
+  const weightLoss = (days / 30) * 2.3; // Simplified calculation
+  
+  // Adjust badges based on time period
+  const badges = [
+    { text: `-${weightLoss.toFixed(1)} lbs this ${days <= 30 ? "month" : "period"}`, colorTheme: "green" },
+    { text: "100% medication adherence", colorTheme: "blue" },
+    { text: `+${Math.round(12 * (days / 30))}% activity level`, colorTheme: "purple" }
+  ];
+  
   // Mock data for weekly progress
   const mockProgressData: WeeklyProgressData = {
     summaryText: "You're making excellent progress!",
-    comparisonText: "Your weight loss is 15% faster than the average GLP-1 user at this stage.",
-    badges: [
-      { text: "-2.3 lbs this week", colorTheme: "green" },
-      { text: "100% medication adherence", colorTheme: "blue" },
-      { text: "+12% activity level", colorTheme: "purple" }
-    ],
-    period: "Last 7 days",
+    comparisonText: `Your weight loss is 15% faster than the average GLP-1 user at this stage.`,
+    badges: badges as any, // Type assertion needed here
+    period: periodText,
     metadata: {
       startDate: "2023-09-01",
       endDate: "2023-09-07",
@@ -58,10 +79,12 @@ const fetchProgressData = async (): Promise<WeeklyProgressData> => {
  */
 export const useWeeklyProgress = (): WeeklyProgressResult => {
   const queryClient = useQueryClient();
+  const { getDaysFromTimePeriod } = useInsightsContext();
+  const days = getDaysFromTimePeriod();
 
   const { data, error, isLoading } = useQuery({
-    queryKey: ['weeklyProgress'],
-    queryFn: fetchProgressData,
+    queryKey: ['weeklyProgress', days],
+    queryFn: () => fetchProgressData(days),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
   });

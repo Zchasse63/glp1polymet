@@ -1,126 +1,103 @@
 
+import { useQuery } from "@tanstack/react-query";
+import { Recommendation } from "@/types/insightTypes";
+import { useInsightsContext } from "@/contexts/InsightsContext";
+
 /**
- * useRecommendations Hook
- * 
- * Custom hook for fetching and processing personalized health recommendations
+ * Custom hook for fetching personalized recommendations based on user data
  * Following CodeFarm architecture principles:
- * - Separation of Concerns: Data fetching logic separate from UI
+ * - Separation of Concerns: Data fetching logic separated from UI
  * - Error Handling: Comprehensive error management with React Query
  * - Type Safety: Strong TypeScript typing
  * - Caching: Efficient data caching through React Query
+ * 
+ * @returns Object containing recommendations data, loading state, and error state
  */
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Recommendation } from "@/types/insightTypes";
-import { delay } from "@/lib/utils";
-
-interface RecommendationsResult {
-  /** Array of personalized recommendations */
-  recommendations: Recommendation[];
-  /** Loading state */
-  loading: boolean;
-  /** Error state */
-  error: Error | null;
-  /** Function to refresh recommendations */
-  refreshRecommendations: () => Promise<void>;
-  /** Function to mark a recommendation as viewed */
-  markAsViewed: (id: string) => void;
-}
-
-/**
- * Fetches recommendations from API or returns mock data
- */
-const fetchRecommendations = async (): Promise<Recommendation[]> => {
-  // In production, this would be an API call to your backend
-  // For now, we'll simulate a delay and return mock data
-  await delay(800);
+export const useRecommendations = () => {
+  const userId = "demo-user"; // In a real app, this would come from auth context
+  const { getDaysFromTimePeriod } = useInsightsContext();
+  const days = getDaysFromTimePeriod();
   
-  // Mock data for recommendations
-  const mockRecommendations: Recommendation[] = [
-    {
-      id: "rec-1",
-      title: "Increase Protein Intake",
-      description: "Based on your data, increasing protein to 100g daily could accelerate your progress by 15%.",
-      type: "nutrition",
-      iconType: "nutrition",
-      color: "green",
-      impact: "high",
-      actionLabel: "View meal suggestions",
-      actionLink: "/nutrition/suggestions"
+  return useQuery({
+    queryKey: ['recommendations', userId, days],
+    queryFn: async () => {
+      // In a real app, this would be an API call to get personalized recommendations
+      // based on the user's health data
+      
+      // For now, we'll simulate an API call with a delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Sample recommendations - in a real app, these would be dynamically generated
+      // based on the user's health data and the selected time period
+      return [
+        {
+          id: "rec-1",
+          title: "Increase Protein Intake",
+          description: "Based on your data from the past " + (days <= 30 ? "month" : "period") + ", increasing your protein intake by 15% could improve your weight loss rate by up to 20%.",
+          type: "nutrition",
+          iconType: "nutrition",
+          color: "green",
+          impact: "high",
+          actionLabel: "View Meal Plans",
+          actionLink: "/nutrition/meal-plans"
+        },
+        {
+          id: "rec-2",
+          title: "Maintain Medication Schedule",
+          description: "Your medication adherence has been excellent! Continue taking your medication at the same time each day for optimal results.",
+          type: "medication",
+          iconType: "medication",
+          color: "blue",
+          impact: "high",
+          actionLabel: "View Schedule",
+          actionLink: "/medications"
+        },
+        {
+          id: "rec-3",
+          title: "Improve Sleep Quality",
+          description: "Your sleep patterns show a correlation with weight loss success. Aim for 7-8 hours of uninterrupted sleep per night.",
+          type: "sleep",
+          iconType: "sleep",
+          color: "purple",
+          impact: "medium",
+          actionLabel: "Sleep Tips",
+          actionLink: "/health/sleep"
+        },
+        {
+          id: "rec-4",
+          title: "Reduce Evening Carbohydrates",
+          description: "Your data shows that reducing carbohydrate intake after 6pm may improve your weight loss results.",
+          type: "nutrition",
+          iconType: "nutrition",
+          color: "orange",
+          impact: "medium",
+          actionLabel: "Low-Carb Dinner Ideas",
+          actionLink: "/nutrition/low-carb"
+        },
+        {
+          id: "rec-5",
+          title: "Increase Daily Steps",
+          description: "Adding 2,000 more steps to your daily routine could accelerate your weight loss by 10% based on your current activity levels.",
+          type: "activity",
+          iconType: "activity",
+          color: "green",
+          impact: "medium",
+          actionLabel: "Activity Suggestions",
+          actionLink: "/health/activity"
+        },
+        {
+          id: "rec-6",
+          title: "Practice Stress Reduction",
+          description: "Lower stress levels correlate with better weight loss outcomes. Consider adding 10 minutes of meditation to your daily routine.",
+          type: "stress",
+          iconType: "stress",
+          color: "blue",
+          impact: "low",
+          actionLabel: "Stress Management",
+          actionLink: "/health/stress"
+        }
+      ] as Recommendation[];
     },
-    {
-      id: "rec-2",
-      title: "Optimize Medication Timing",
-      description: "Taking your medication in the morning may improve effectiveness based on your activity patterns.",
-      type: "medication",
-      iconType: "medication",
-      color: "blue",
-      impact: "medium",
-      actionLabel: "Adjust schedule",
-      actionLink: "/medication/schedule"
-    },
-    {
-      id: "rec-3",
-      title: "Add Strength Training",
-      description: "Users with similar profiles saw 20% better results when adding 2x weekly strength training.",
-      type: "activity",
-      iconType: "activity",
-      color: "purple",
-      impact: "high",
-      actionLabel: "View workout plan",
-      actionLink: "/activity/workouts"
-    }
-  ];
-  
-  return mockRecommendations;
-};
-
-/**
- * Mark a recommendation as viewed (API call)
- */
-const markRecommendationAsViewed = async (id: string): Promise<void> => {
-  // In production, this would be an API call to update the recommendation status
-  console.log(`Marking recommendation ${id} as viewed`);
-  await delay(300);
-  // API call would go here
-  return;
-};
-
-/**
- * Custom hook for fetching and managing personalized health recommendations
- * @returns Object containing recommendations data and utility functions
- */
-export const useRecommendations = (): RecommendationsResult => {
-  const queryClient = useQueryClient();
-
-  // Query for fetching recommendations
-  const { data = [], error, isLoading } = useQuery({
-    queryKey: ['recommendations'],
-    queryFn: fetchRecommendations,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
   });
-  
-  // Mutation for marking a recommendation as viewed
-  const { mutate } = useMutation({
-    mutationFn: markRecommendationAsViewed,
-    // When successful, update the recommendations in the cache
-    onSuccess: (_, recommendationId) => {
-      queryClient.setQueryData(['recommendations'], (old: Recommendation[] | undefined) => 
-        old ? old.filter(rec => rec.id !== recommendationId) : []
-      );
-    },
-  });
-
-  const refreshRecommendations = async (): Promise<void> => {
-    // Invalidate the cache to trigger a refetch
-    await queryClient.invalidateQueries({ queryKey: ['recommendations'] });
-  };
-
-  return { 
-    recommendations: data, 
-    loading: isLoading, 
-    error: error instanceof Error ? error : null, 
-    refreshRecommendations,
-    markAsViewed: (id: string) => mutate(id)
-  };
 };
