@@ -22,7 +22,8 @@ interface RecommendationCardProps {
   index: number;
   isBookmarked: boolean;
   onBookmarkToggle: (id: string) => void;
-  bookmarkIcon: React.ReactNode; // Add the bookmarkIcon prop
+  bookmarkIcon: React.ReactNode;
+  bookmarkFilledIcon: React.ReactNode; // Added the missing prop
 }
 
 /**
@@ -99,14 +100,15 @@ const getIconComponent = (iconType: RecommendationIconType) => {
   }
 };
 
-const RecommendationCard: React.FC<RecommendationCardProps> = ({ 
+const RecommendationCard = ({ 
   recommendation, 
   onActionClick,
   index,
   isBookmarked,
   onBookmarkToggle,
-  bookmarkIcon  // Use the bookmarkIcon prop
-}) => {
+  bookmarkIcon,
+  bookmarkFilledIcon
+}: RecommendationCardProps) => {
   const colors = colorMap[recommendation.color as keyof typeof colorMap] || colorMap.blue;
   const Icon = () => getIconComponent(recommendation.iconType);
   const impactStyle = impactLevelMap[recommendation.impact];
@@ -124,6 +126,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
   return (
     <motion.div
       {...motionProps}
+      role="region"
       aria-label={`Recommendation: ${recommendation.title}`}
     >
       <Card
@@ -143,12 +146,14 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   {recommendation.title}
                 </h3>
                 <div className="flex items-center gap-2">
-                  <div 
+                  <button 
                     onClick={() => onBookmarkToggle(recommendation.id)}
                     className="cursor-pointer"
+                    aria-label={isBookmarked ? "Remove bookmark" : "Bookmark recommendation"}
+                    aria-pressed={isBookmarked}
                   >
-                    {bookmarkIcon}
-                  </div>
+                    {isBookmarked ? bookmarkFilledIcon : bookmarkIcon}
+                  </button>
                   <Badge variant="outline" className="text-xs">
                     {formatRecType(recommendation.type)}
                   </Badge>

@@ -1,123 +1,167 @@
 
 /**
- * Insight Types Definition
+ * Insight Types
+ * 
  * Following CodeFarm architecture principles:
  * - Strong Typing: Comprehensive type definitions
  * - Documentation: Detailed JSDoc comments
- * - Modularity: Separation of types into dedicated files
+ * - Modularity: Separation of concerns
  */
 
+import { ReactNode } from "react";
+
 /**
- * Represents a single correlation factor and its strength
+ * Types of health recommendations
  */
-export interface CorrelationFactor {
-  /** Name of the factor being correlated */
-  factor: string;
-  /** Correlation coefficient (-1 to 1) */
-  correlation: number;
-  /** Color for visualization */
-  color: string;
-  /** Optional additional metadata */
-  metadata?: Record<string, any>;
+export enum RecommendationType {
+  EXERCISE = "exercise",
+  NUTRITION = "nutrition",
+  SLEEP = "sleep",
+  MEDICATION = "medication",
+  STRESS = "stress",
+  GENERAL = "general"
 }
 
 /**
- * Formatted correlation data for chart display
+ * Icons for health recommendations
  */
-export interface FormattedCorrelationData extends CorrelationFactor {
-  /** Value scaled for visualization (typically percentage) */
-  value: number;
-  /** Formatted value for display */
-  formattedValue: number;
+export enum RecommendationIconType {
+  ACTIVITY = "activity",
+  NUTRITION = "nutrition",
+  MEDICATION = "medication",
+  SLEEP = "sleep",
+  STRESS = "stress",
+  GENERAL = "general"
 }
 
 /**
- * Data source information
- */
-export interface DataSource {
-  /** Unique identifier for the data source */
-  id: string;
-  /** Display name of the data source */
-  provider: string;
-  /** Current connection status */
-  status: 'active' | 'inactive' | 'error';
-  /** Last sync time */
-  lastSync?: string;
-}
-
-/**
- * Status of correlation analysis
- */
-export type AnalysisStatus = 'idle' | 'loading' | 'success' | 'error';
-
-/**
- * Recommendation type based on health data analysis
- */
-export type RecommendationType = 'nutrition' | 'activity' | 'medication' | 'sleep' | 'stress' | 'general';
-
-/**
- * Icon type for recommendation display
- */
-export type RecommendationIconType = 'nutrition' | 'activity' | 'medication' | 'sleep' | 'stress' | 'general';
-
-/**
- * Impact level of a recommendation
+ * Impact levels for recommendations
  */
 export type ImpactLevel = 'high' | 'medium' | 'low';
 
 /**
- * Individual recommendation item
+ * Health recommendation model
  */
 export interface Recommendation {
-  /** Unique identifier for the recommendation */
+  /** Unique identifier */
   id: string;
-  /** Short title for the recommendation */
+  /** Title of the recommendation */
   title: string;
-  /** Detailed description of the recommendation */
+  /** Detailed description */
   description: string;
-  /** Type category for grouping and filtering */
-  type: RecommendationType;
-  /** Icon to display with the recommendation */
-  iconType: RecommendationIconType;
-  /** Color theme for UI elements (should match design system) */
+  /** Type of recommendation */
+  type: RecommendationType | string;
+  /** Icon type for the recommendation */
+  iconType: RecommendationIconType | string;
+  /** Color theme for the recommendation */
   color: string;
-  /** Expected impact if implemented */
+  /** Impact level */
   impact: ImpactLevel;
-  /** Action label for recommendation button */
+  /** Action button label */
   actionLabel: string;
-  /** URL or action identifier for the recommendation */
+  /** Action link */
   actionLink: string;
-  /** Optional additional metadata for additional information */
-  metadata?: Record<string, any>;
 }
 
 /**
- * All possible filter types for recommendations
+ * Health insight model
  */
-export type RecommendationFilterType = 'all' | RecommendationType | 'bookmarked';
-
-/**
- * Weekly progress achievement badge
- */
-export interface ProgressBadge {
-  /** Text to display on the badge */
-  text: string;
-  /** Color theme for the badge (used for styling) */
-  colorTheme: 'green' | 'blue' | 'purple' | 'orange' | 'red';
+export interface Insight {
+  /** Unique identifier */
+  id: string;
+  /** Title of the insight */
+  title: string;
+  /** Detailed description */
+  description: string;
+  /** Type of insight */
+  type: string;
+  /** Creation date */
+  createdAt: string;
+  /** Relevance score */
+  relevanceScore: number;
+  /** Whether the insight is new/unread */
+  isNew: boolean;
+  /** Optional link to more information */
+  link?: string;
 }
 
 /**
- * Weekly progress summary data
+ * Health correlation model
  */
-export interface WeeklyProgressData {
-  /** Main insight text */
-  summaryText: string;
-  /** Comparison to reference group (e.g., "+15% faster than average") */
-  comparisonText: string;
-  /** List of achievement badges */
-  badges: ProgressBadge[];
-  /** Reference period for the data */
-  period: string;
-  /** Optional additional metadata */
-  metadata?: Record<string, any>;
+export interface Correlation {
+  /** Unique identifier */
+  id: string;
+  /** Primary metric */
+  primaryMetric: string;
+  /** Secondary metric that correlates with primary */
+  secondaryMetric: string;
+  /** Correlation strength: -1.0 to 1.0 */
+  strength: number;
+  /** Statistical confidence: 0-1 */
+  confidence: number;
+  /** Human-readable explanation */
+  explanation: string;
+  /** When the correlation was discovered */
+  discoveredAt: string;
+  /** Action recommendations */
+  recommendations?: Recommendation[];
+}
+
+/**
+ * Weekly progress model
+ */
+export interface WeeklyProgress {
+  /** Week start date */
+  weekStarting: string;
+  /** Week ending date */
+  weekEnding: string;
+  /** Primary metric progress */
+  primaryMetricProgress: number;
+  /** Goal achievement percentage */
+  goalAchievement: number;
+  /** Top performing metric */
+  topPerformer: string;
+  /** Area needing improvement */
+  improvementArea: string;
+  /** Next week recommendations */
+  recommendations: Recommendation[];
+}
+
+/**
+ * Time period for insights analysis
+ */
+export type InsightTimePeriod = '7d' | '30d' | '90d' | 'custom';
+
+/**
+ * Insight filter criteria
+ */
+export interface InsightFilter {
+  /** Types to include */
+  types?: string[];
+  /** Minimum relevance score */
+  minRelevance?: number;
+  /** Show only new insights */
+  onlyNew?: boolean;
+  /** Time period */
+  period?: InsightTimePeriod;
+}
+
+/**
+ * Properties for recommendation components
+ */
+export interface RecommendationProps {
+  /** The recommendation data */
+  recommendation: Recommendation;
+  /** Handler for the main action */
+  onActionClick: () => void;
+  /** Animation order index */
+  index: number;
+  /** Whether the recommendation is bookmarked */
+  isBookmarked: boolean;
+  /** Handler for toggling bookmark state */
+  onBookmarkToggle: (id: string) => void;
+  /** Icon for unbookmarked state */
+  bookmarkIcon: ReactNode;
+  /** Icon for bookmarked state */
+  bookmarkFilledIcon: ReactNode;
 }

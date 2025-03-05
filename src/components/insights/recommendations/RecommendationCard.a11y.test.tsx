@@ -3,7 +3,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe } from 'jest-axe';
-import { RecommendationCard } from './RecommendationCard';
+import RecommendationCard from './RecommendationCard';
 import { 
   Recommendation, 
   RecommendationType, 

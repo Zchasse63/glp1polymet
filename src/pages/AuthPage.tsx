@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoginForm } from "@/components/LoginForm";
 import { RegisterForm } from "@/components/RegisterForm";
-import { ErrorBoundary } from "@/utils/errorHandling/EnhancedErrorBoundary";
+import { EnhancedErrorBoundary } from "@/utils/errorHandling/EnhancedErrorBoundary";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { ErrorGroup } from "@/utils/errorHandling/types";
 
@@ -48,7 +48,7 @@ const AuthPage = () => {
           </p>
         </div>
         
-        <ErrorBoundary 
+        <EnhancedErrorBoundary 
           name="AuthPage" 
           group={ErrorGroup.AUTH}
         >
@@ -103,7 +103,7 @@ const AuthPage = () => {
               </Card>
             </TabsContent>
           </Tabs>
-        </ErrorBoundary>
+        </EnhancedErrorBoundary>
         
         <p className="px-8 text-center text-sm text-muted-foreground">
           Demo credentials: <code>test@example.com</code> / <code>password</code>
