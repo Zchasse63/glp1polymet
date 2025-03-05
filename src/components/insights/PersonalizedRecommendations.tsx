@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRightIcon, BookmarkIcon } from "lucide-react";
 import { useRecommendations } from "@/hooks/useRecommendations";
-import { RecommendationType } from "@/types/insightTypes";
+import { RecommendationType, RecommendationFilterType } from "@/types/insightTypes";
 import RecommendationsLoadingState from "./RecommendationsLoadingState";
 import { motion } from "framer-motion";
 import { toast } from "@/components/ui/use-toast";
@@ -24,7 +24,7 @@ import { useBookmarks } from "@/hooks/useBookmarks";
  */
 const PersonalizedRecommendations: React.FC = () => {
   const { data: recommendations = [], isLoading, error } = useRecommendations();
-  const [activeFilter, setActiveFilter] = useState<RecommendationType | 'all' | 'bookmarked'>('all');
+  const [activeFilter, setActiveFilter] = useState<RecommendationFilterType>('all');
   const { isBookmarked, toggleBookmark, bookmarkedIds } = useBookmarks();
 
   // Show loading state while data is being fetched

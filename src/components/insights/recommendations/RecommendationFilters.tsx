@@ -1,13 +1,13 @@
 
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import { RecommendationType } from "@/types/insightTypes";
+import { RecommendationType, RecommendationFilterType } from "@/types/insightTypes";
 import { formatRecType } from "./RecommendationCard";
 import { BookmarkIcon } from "lucide-react";
 
 interface RecommendationFiltersProps {
-  activeFilter: RecommendationType | 'all' | 'bookmarked';
-  setActiveFilter: (filter: RecommendationType | 'all' | 'bookmarked') => void;
+  activeFilter: RecommendationFilterType;
+  setActiveFilter: (filter: RecommendationFilterType) => void;
   recommendationTypes: (RecommendationType)[];
   hasBookmarks?: boolean;
 }

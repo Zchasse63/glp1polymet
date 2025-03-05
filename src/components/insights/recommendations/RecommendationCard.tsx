@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRightIcon, BookmarkIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Recommendation, RecommendationIconType } from "@/types/insightTypes";
+import { Recommendation, RecommendationIconType, ImpactLevel } from "@/types/insightTypes";
 import { motion } from "framer-motion";
 import { 
   UserIcon, 
@@ -55,6 +55,15 @@ const colorMap = {
 };
 
 /**
+ * Impact level styling and labels
+ */
+const impactLevelMap: Record<ImpactLevel, { color: string, label: string }> = {
+  high: { color: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-400", label: "High Impact" },
+  medium: { color: "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-400", label: "Medium Impact" },
+  low: { color: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-400", label: "Low Impact" },
+};
+
+/**
  * Format recommendation type for display
  */
 export const formatRecType = (type: string): string => {
@@ -97,6 +106,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
 }) => {
   const colors = colorMap[recommendation.color as keyof typeof colorMap] || colorMap.blue;
   const Icon = () => getIconComponent(recommendation.iconType);
+  const impactStyle = impactLevelMap[recommendation.impact];
 
   return (
     <motion.div
@@ -142,14 +152,22 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
               >
                 {recommendation.description}
               </p>
-              <Button
-                variant="link"
-                className={`p-0 h-auto mt-2 ${colors.text} flex items-center`}
-                onClick={onActionClick}
-              >
-                {recommendation.actionLabel}{" "}
-                <ArrowRightIcon className="h-3 w-3 ml-1" />
-              </Button>
+              <div className="flex justify-between items-center mt-3">
+                <Button
+                  variant="link"
+                  className={`p-0 h-auto ${colors.text} flex items-center`}
+                  onClick={onActionClick}
+                >
+                  {recommendation.actionLabel}{" "}
+                  <ArrowRightIcon className="h-3 w-3 ml-1" />
+                </Button>
+                <Badge 
+                  variant="secondary" 
+                  className={`text-xs ${impactStyle.color}`}
+                >
+                  {impactStyle.label}
+                </Badge>
+              </div>
             </div>
           </div>
         </CardContent>
