@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { generateId } from "@/lib/utils";
+import authService, { AuthCredentials, RegistrationData, ServiceResponse } from "@/services/authService";
 
 export interface User {
   id: string;
@@ -28,115 +28,86 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Initialize auth state on mount
   useEffect(() => {
-    // Check if user is stored in localStorage
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error("Failed to parse stored user:", e);
-        localStorage.removeItem("user");
-      }
+    // Check if user is already authenticated
+    const currentUser = authService.getCurrentUser();
+    if (currentUser) {
+      setUser(currentUser);
     }
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  /**
+   * Standardized error handler for auth operations
+   */
+  const handleAuthResponse = async <T,>(
+    authOperation: () => Promise<ServiceResponse<T>>
+  ): Promise<T> => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      setError(null);
+      const response = await authOperation();
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // For demo purposes, just check if email contains "test" and password is "password"
-      if (email.includes("test") && password === "password") {
-        const mockUser: User = {
-          id: generateId(),
-          username: email.split("@")[0],
-          email,
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`
-        };
-        
-        localStorage.setItem("user", JSON.stringify(mockUser));
-        setUser(mockUser);
-        return mockUser; // Return the user to help with navigation
-      } else {
-        throw new Error("Invalid credentials");
+      if (response.error) {
+        setError(response.error);
+        throw new Error(response.error);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred");
-      console.error("Login error:", err);
-      throw err;
+      
+      if (!response.data) {
+        const genericError = "Operation failed with no data returned";
+        setError(genericError);
+        throw new Error(genericError);
+      }
+      
+      return response.data;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const loginWithSSO = async (provider: string) => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  const login = async (email: string, password: string): Promise<User> => {
+    return handleAuthResponse(async () => {
+      const credentials: AuthCredentials = { email, password };
+      const response = await authService.login(credentials);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      if (response.data) {
+        setUser(response.data);
+      }
       
-      // In a real app, this would redirect to the provider's OAuth flow
-      // For demo purposes, we'll just create a mock user with the provider info
-      const mockEmail = `user_${generateId()}@example.com`;
-      const mockUser: User = {
-        id: generateId(),
-        username: `user_${generateId()}`,
-        email: mockEmail,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${mockEmail}`,
-        provider
-      };
-      
-      localStorage.setItem("user", JSON.stringify(mockUser));
-      setUser(mockUser);
-      return mockUser; // Return the user to help with navigation
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred");
-      console.error(`${provider} login error:`, err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
+      return response;
+    });
   };
 
-  const register = async (username: string, email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  const loginWithSSO = async (provider: string): Promise<User> => {
+    return handleAuthResponse(async () => {
+      const response = await authService.loginWithSSO(provider);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      if (response.data) {
+        setUser(response.data);
+      }
       
-      // In a real app, this would be an API call to register the user
-      // For demo purposes, just create a mock user
-      const mockUser: User = {
-        id: generateId(),
-        username,
-        email,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`
-      };
+      return response;
+    });
+  };
+
+  const register = async (username: string, email: string, password: string): Promise<User> => {
+    return handleAuthResponse(async () => {
+      const registrationData: RegistrationData = { username, email, password };
+      const response = await authService.register(registrationData);
       
-      localStorage.setItem("user", JSON.stringify(mockUser));
-      setUser(mockUser);
-      return mockUser; // Return the user to help with navigation
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred");
-      console.error("Registration error:", err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
+      if (response.data) {
+        setUser(response.data);
+      }
+      
+      return response;
+    });
   };
 
   const logout = () => {
+    authService.logout();
     setUser(null);
-    localStorage.removeItem("user");
   };
 
   return (

@@ -1,23 +1,56 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginForm } from "@/components/LoginForm";
 import { RegisterForm } from "@/components/RegisterForm";
 import { SSOButtons } from "@/components/SSOButtons";
 import { Layout } from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
 
+/**
+ * Authentication Page
+ * 
+ * Implements the Facade Pattern to provide a simple interface
+ * for the complex authentication subsystem
+ */
 const AuthPage = () => {
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
   const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
+  
+  // Get the intended destination from the location state, if any
+  const from = location.state?.from?.pathname || "/";
 
-  // Show loading state if still determining auth status
+  // Initialize the active tab based on URL parameters
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const tab = searchParams.get("tab");
+    
+    if (tab === "register" || tab === "login") {
+      setActiveTab(tab);
+    }
+  }, [location]);
+
+  // Loading state component using Skeleton UI
   if (isLoading) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          <div className="w-full max-w-md space-y-8 p-6">
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-3/4 mx-auto" />
+              <Skeleton className="h-4 w-1/2 mx-auto" />
+            </div>
+            <Skeleton className="h-10 w-full" />
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </div>
         </div>
       </Layout>
     );
@@ -25,42 +58,70 @@ const AuthPage = () => {
 
   // Redirect if already authenticated
   if (isAuthenticated) {
-    return <Navigate to="/" />;
+    return <Navigate to={from} replace />;
   }
 
   return (
     <Layout>
-      <div className="flex flex-col justify-center items-center p-6 min-h-screen">
+      <motion.div 
+        className="flex flex-col justify-center items-center p-6 min-h-screen"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="w-full max-w-md space-y-4">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold mb-2">Welcome</h1>
-            <p className="text-muted-foreground">
+            <motion.h1 
+              className="text-2xl font-bold mb-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              Welcome
+            </motion.h1>
+            <motion.p 
+              className="text-muted-foreground"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
               {activeTab === "login" 
                 ? "Sign in to continue to your health journey" 
                 : "Create an account to start your health journey"}
-            </p>
+            </motion.p>
           </div>
 
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "login" | "register")}>
+          <Tabs 
+            value={activeTab} 
+            onValueChange={(value) => setActiveTab(value as "login" | "register")}
+            className="w-full"
+          >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="register">Register</TabsTrigger>
             </TabsList>
-            <TabsContent value="login" className="mt-6">
-              <LoginForm />
-              <div className="mt-6">
-                <SSOButtons />
-              </div>
-            </TabsContent>
-            <TabsContent value="register" className="mt-6">
-              <RegisterForm />
-              <div className="mt-6">
-                <SSOButtons />
-              </div>
-            </TabsContent>
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, x: activeTab === "login" ? -20 : 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <TabsContent value="login" className="mt-6">
+                <LoginForm />
+                <div className="mt-6">
+                  <SSOButtons />
+                </div>
+              </TabsContent>
+              <TabsContent value="register" className="mt-6">
+                <RegisterForm />
+                <div className="mt-6">
+                  <SSOButtons />
+                </div>
+              </TabsContent>
+            </motion.div>
           </Tabs>
         </div>
-      </div>
+      </motion.div>
     </Layout>
   );
 };
