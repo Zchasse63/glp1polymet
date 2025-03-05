@@ -14,6 +14,7 @@ import {
   BrainIcon,
   SparklesIcon
 } from "lucide-react";
+import { useReducedMotion } from "@/utils/accessibility/useReducedMotion";
 
 interface RecommendationCardProps {
   recommendation: Recommendation;
@@ -83,17 +84,17 @@ export const formatRecType = (type: string): string => {
 const getIconComponent = (iconType: RecommendationIconType) => {
   switch (iconType) {
     case 'nutrition':
-      return <UserIcon />;
+      return <UserIcon aria-hidden="true" />;
     case 'medication':
-      return <PillIcon />;
+      return <PillIcon aria-hidden="true" />;
     case 'activity':
-      return <ActivityIcon />;
+      return <ActivityIcon aria-hidden="true" />;
     case 'sleep':
-      return <MoonIcon />;
+      return <MoonIcon aria-hidden="true" />;
     case 'stress':
-      return <BrainIcon />;
+      return <BrainIcon aria-hidden="true" />;
     default:
-      return <SparklesIcon />;
+      return <SparklesIcon aria-hidden="true" />;
   }
 };
 
@@ -107,12 +108,21 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
   const colors = colorMap[recommendation.color as keyof typeof colorMap] || colorMap.blue;
   const Icon = () => getIconComponent(recommendation.iconType);
   const impactStyle = impactLevelMap[recommendation.impact];
+  const prefersReducedMotion = useReducedMotion();
+
+  // Create appropriate motion props based on user preferences
+  const motionProps = prefersReducedMotion 
+    ? { initial: { opacity: 1 }, animate: { opacity: 1 } }
+    : { 
+        initial: { opacity: 0, y: 20 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.3, delay: index * 0.1 }
+      };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.1 }}
+      {...motionProps}
+      aria-label={`Recommendation: ${recommendation.title}`}
     >
       <Card
         className={`overflow-hidden border-l-4 ${colors.border} hover:shadow-md transition-shadow`}
@@ -121,6 +131,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
           <div className="flex items-start gap-3">
             <div
               className={`w-8 h-8 rounded-full ${colors.bg} flex items-center justify-center flex-shrink-0`}
+              aria-hidden="true"
             >
               <Icon />
             </div>
@@ -136,10 +147,12 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                     className={`h-7 w-7 ${isBookmarked ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}`}
                     onClick={() => onBookmarkToggle(recommendation.id)}
                     aria-label={isBookmarked ? "Remove bookmark" : "Bookmark recommendation"}
+                    aria-pressed={isBookmarked}
                   >
                     <BookmarkIcon 
                       className="h-4 w-4" 
-                      fill={isBookmarked ? "currentColor" : "none"} 
+                      fill={isBookmarked ? "currentColor" : "none"}
+                      aria-hidden="true"
                     />
                   </Button>
                   <Badge variant="outline" className="text-xs">
@@ -157,13 +170,15 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   variant="link"
                   className={`p-0 h-auto ${colors.text} flex items-center`}
                   onClick={onActionClick}
+                  aria-label={`${recommendation.actionLabel} about ${recommendation.title}`}
                 >
                   {recommendation.actionLabel}{" "}
-                  <ArrowRightIcon className="h-3 w-3 ml-1" />
+                  <ArrowRightIcon className="h-3 w-3 ml-1" aria-hidden="true" />
                 </Button>
                 <Badge 
                   variant="secondary" 
                   className={`text-xs ${impactStyle.color}`}
+                  aria-label={`${impactStyle.label} recommendation`}
                 >
                   {impactStyle.label}
                 </Badge>
