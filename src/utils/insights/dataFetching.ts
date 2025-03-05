@@ -10,18 +10,51 @@ import { generateMockHealthData } from "./mockData";
 export const fetchUserHealthData = async (userId: string, days: number = 90): Promise<UserHealthData[]> => {
   try {
     // First try to get data from app integrations
-    const weightData = await fetchIntegrationData(userId, 'weight', { limit: days });
-    const sleepData = await fetchIntegrationData(userId, 'sleep', { limit: days });
-    const activityData = await fetchIntegrationData(userId, 'activity', { limit: days });
-    const nutritionData = await fetchIntegrationData(userId, 'nutrition', { limit: days });
+    let weightData: any[] = [];
+    let sleepData: any[] = [];
+    let activityData: any[] = [];
+    let nutritionData: any[] = [];
+    let medicationData: any[] | null = null;
+    
+    try {
+      weightData = await fetchIntegrationData(userId, 'weight', { limit: days });
+    } catch (error) {
+      console.error("Error fetching weight data:", error);
+    }
+    
+    try {
+      sleepData = await fetchIntegrationData(userId, 'sleep', { limit: days });
+    } catch (error) {
+      console.error("Error fetching sleep data:", error);
+    }
+    
+    try {
+      activityData = await fetchIntegrationData(userId, 'activity', { limit: days });
+    } catch (error) {
+      console.error("Error fetching activity data:", error);
+    }
+    
+    try {
+      nutritionData = await fetchIntegrationData(userId, 'nutrition', { limit: days });
+    } catch (error) {
+      console.error("Error fetching nutrition data:", error);
+    }
     
     // Also get medication adherence data
-    const { data: medicationData, error: medError } = await supabase
-      .from('medication_logs')
-      .select('*')
-      .eq('user_id', userId)
-      .order('date', { ascending: false })
-      .limit(days);
+    try {
+      const { data, error } = await supabase
+        .from('medication_logs')
+        .select('*')
+        .eq('user_id', userId)
+        .order('date', { ascending: false })
+        .limit(days);
+        
+      if (!error) {
+        medicationData = data;
+      }
+    } catch (error) {
+      console.error("Error fetching medication data:", error);
+    }
     
     // If we have some data from app integrations, combine it
     if (weightData.length > 0 || sleepData.length > 0 || activityData.length > 0 || nutritionData.length > 0) {
@@ -29,19 +62,24 @@ export const fetchUserHealthData = async (userId: string, days: number = 90): Pr
     }
     
     // Fallback to the direct health_logs table if no integration data
-    const { data, error } = await supabase
-      .from('health_logs')
-      .select('*')
-      .eq('user_id', userId)
-      .order('date', { ascending: false })
-      .limit(days);
+    try {
+      const { data, error } = await supabase
+        .from('health_logs')
+        .select('*')
+        .eq('user_id', userId)
+        .order('date', { ascending: false })
+        .limit(days);
+        
+      if (error || !data || data.length === 0) {
+        console.error("Error fetching health data or no data found:", error);
+        return generateMockHealthData(days);
+      }
       
-    if (error || !data || data.length === 0) {
-      console.error("Error fetching health data or no data found:", error);
+      return data;
+    } catch (err) {
+      console.error("Error querying health_logs table:", err);
       return generateMockHealthData(days);
     }
-    
-    return data;
     
   } catch (error) {
     console.error("Error in fetchUserHealthData:", error);
