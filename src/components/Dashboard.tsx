@@ -16,6 +16,20 @@ const Dashboard = () => {
     healthMetrics 
   } = useDashboardData();
   
+  // Transform the health metrics to include the JSX elements
+  const transformedHealthMetrics = healthMetrics.map(metric => {
+    const Icon = metric.icon;
+    const TrendIcon = metric.trendIcon;
+    
+    return {
+      ...metric,
+      icon: <Icon className={`h-4 w-4 ${metric.title === 'Heart Rate' ? 'text-rose-500 animate-pulse-subtle' : 
+                              metric.title === 'Weight' ? 'text-green-500' : 
+                              metric.title === 'Sleep' ? 'text-indigo-500' : 'text-primary'}`} />,
+      trendIcon: TrendIcon ? <TrendIcon className="h-3 w-3 mr-1" /> : undefined
+    };
+  });
+  
   useEffect(() => {
     setIsLoaded(true);
   }, []);
@@ -50,7 +64,7 @@ const Dashboard = () => {
 
       {/* Today's Metrics */}
       <HealthMetrics 
-        metrics={healthMetrics} 
+        metrics={transformedHealthMetrics} 
         isLoaded={isLoaded} 
         onViewAll={handleNavigateToHealth} 
       />
