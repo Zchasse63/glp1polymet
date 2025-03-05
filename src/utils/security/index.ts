@@ -62,6 +62,10 @@ export {
  * @param environment Application environment
  */
 export function initSecurity(environment: 'development' | 'production' = 'production'): void {
+  // We need to import these functions from their respective files
+  const { initCSRFProtection } = require('./csrfProtection');
+  const { initContentSecurity } = require('./contentSecurity');
+  
   // Initialize CSRF protection
   initCSRFProtection();
   

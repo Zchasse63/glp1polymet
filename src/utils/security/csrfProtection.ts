@@ -73,16 +73,29 @@ export function createCSRFProtectedFetch(
       modifiedInit.headers = {};
     }
     
-    // Fix: Explicitly handle the headers as either Headers or Record<string, string>
+    // Handle the headers based on their type
     if (modifiedInit.headers instanceof Headers) {
-      // It's already a Headers object, use it directly
       addCSRFToken(modifiedInit.headers);
     } else {
-      // It's a record object or HeadersInit, convert to Record<string, string>
+      // Convert HeadersInit to Record<string, string> safely
+      const headerRecord: Record<string, string> = {};
+      
+      // Handle different types of HeadersInit
+      if (Array.isArray(modifiedInit.headers)) {
+        // It's an array of [name, value] pairs
+        modifiedInit.headers.forEach(([key, value]) => {
+          headerRecord[key] = value;
+        });
+      } else {
+        // It's a record object
+        Object.entries(modifiedInit.headers).forEach(([key, value]) => {
+          headerRecord[key] = value;
+        });
+      }
+      
+      // Add CSRF token
       modifiedInit.headers = {
-        ...(typeof modifiedInit.headers === 'object' ? Object.fromEntries(
-          Object.entries(modifiedInit.headers)
-        ) : {}),
+        ...headerRecord,
         [csrfConfig.headerName]: getCSRFToken() || ''
       };
     }
