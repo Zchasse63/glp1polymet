@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom'; // This import is necessary for toBeInTheDocument matcher
 import RecommendationList from './RecommendationList';
 import { renderWithProviders } from '@/utils/testing/renderWithProviders';
 import { Recommendation } from '@/types/insightTypes';

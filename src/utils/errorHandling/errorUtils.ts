@@ -1,5 +1,5 @@
 
-import { ErrorSeverity, ErrorContext } from "./types";
+import { ErrorSeverity, AppError } from "./types";
 import { ErrorLogger } from "./ErrorLogger";
 
 /**
@@ -9,11 +9,11 @@ import { ErrorLogger } from "./ErrorLogger";
 export const handleError = (
   message: string,
   code: string,
-  context: ErrorContext,
+  context: Record<string, any>,
   originalError: unknown,
   displayToUser: boolean = false,
   userMessage?: string,
-  severity: ErrorSeverity = "error"
+  severity: ErrorSeverity = ErrorSeverity.ERROR
 ) => {
   // Log the error
   ErrorLogger.error(
@@ -22,8 +22,7 @@ export const handleError = (
     context,
     originalError,
     displayToUser,
-    userMessage,
-    severity
+    userMessage
   );
 
   // Return a formatted error object that can be used by components
@@ -40,7 +39,7 @@ export const handleError = (
  * Helper to determine if an error should be reported based on its severity
  */
 export const shouldReportError = (severity: ErrorSeverity): boolean => {
-  return ["error", "critical"].includes(severity);
+  return [ErrorSeverity.ERROR, ErrorSeverity.CRITICAL].includes(severity);
 };
 
 /**

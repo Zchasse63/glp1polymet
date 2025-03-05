@@ -51,11 +51,6 @@ export function createMockQueryClient() {
       queries: {
         retry: false,
       },
-    },
-    logger: {
-      log: console.log,
-      warn: console.warn,
-      error: () => {},
-    },
+    }
   });
 }
