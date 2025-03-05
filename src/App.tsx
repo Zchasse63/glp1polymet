@@ -8,30 +8,46 @@ import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import AppRoutes from "./routes/AppRoutes";
-import ErrorBoundary from "./components/ErrorBoundary";
+import { EnhancedErrorBoundary } from "./utils/errorHandling";
 import { createQueryClient } from "./lib/queryClient";
+import { useEffect } from "react";
+import { setupGlobalErrorHandlers } from "./utils/errorHandling";
+import { useSkipLink } from "./utils/accessibilityUtils";
 
 // Create a QueryClient instance with enhanced configuration
 const queryClient = createQueryClient();
 
-const App = () => (
-  <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <ThemeProvider>
-            <HelmetProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <AppRoutes />
-              </BrowserRouter>
-            </HelmetProvider>
-          </ThemeProvider>
-        </AuthProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </ErrorBoundary>
-);
+const App = () => {
+  // Set up global error handlers
+  useEffect(() => {
+    setupGlobalErrorHandlers();
+  }, []);
+  
+  // Add skip link for keyboard accessibility
+  const { skipLinkComponent } = useSkipLink('app-main-content');
+  
+  return (
+    <EnhancedErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <AuthProvider>
+            <ThemeProvider>
+              <HelmetProvider>
+                {skipLinkComponent}
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <main id="app-main-content">
+                    <AppRoutes />
+                  </main>
+                </BrowserRouter>
+              </HelmetProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </EnhancedErrorBoundary>
+  );
+};
 
 export default App;

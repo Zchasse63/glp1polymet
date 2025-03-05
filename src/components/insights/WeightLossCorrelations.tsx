@@ -1,111 +1,112 @@
 
-import React, { useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import CorrelationBarChart from "./charts/CorrelationBarChart";
-import InsightDisplay from "./InsightDisplay";
-import CorrelationLoadingState from "./CorrelationLoadingState";
-import { toast } from "@/components/ui/use-toast";
-import { useCorrelationData } from "@/hooks/useCorrelationData";
-import ErrorBoundary from "@/components/ErrorBoundary";
-import { useInsightsContext } from "@/contexts/InsightsContext";
+import React, { useMemo, useRef } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Correlation } from "@/utils/insights/types";
+import { CorrelationBarChart } from "./charts/CorrelationBarChart";
+import { CorrelationLoadingState } from "./CorrelationLoadingState";
+import { ErrorDisplay } from "@/utils/errorHandling";
+import { useIntersectionObserver } from "@/utils/performanceUtils";
 
-/**
- * WeightLossCorrelations Component
- * 
- * Displays factors correlated with weight loss success, following CodeFarm principles:
- * - Separation of concerns: Data fetching handled by custom hook
- * - Error handling: Graceful fallbacks and user notifications
- * - Documentation: Comprehensive JSDoc comments
- * - Single Responsibility: Each subcomponent has a focused purpose
- */
-const WeightLossCorrelations: React.FC = () => {
-  const { timePeriod } = useInsightsContext();
-  const { 
-    correlationData, 
-    loading, 
-    error, 
-    insight, 
-    dataSources 
-  } = useCorrelationData();
+interface WeightLossCorrelationsProps {
+  correlations: Correlation[] | undefined;
+  isLoading: boolean;
+  error: Error | null;
+  insight: string | null;
+}
+
+// Use React.memo to prevent unnecessary re-renders
+const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo(({
+  correlations,
+  isLoading,
+  error,
+  insight
+}) => {
+  // Use a ref to track when the component is visible
+  const cardRef = useRef<HTMLDivElement>(null);
+  const isVisible = useIntersectionObserver(cardRef, { threshold: 0.1 });
   
-  // Inform user of errors via toast
-  useEffect(() => {
+  // Only compute sorted correlations when data changes
+  const sortedCorrelations = useMemo(() => {
+    if (!correlations) return [];
+    
+    // First sort by absolute value of correlation to get strongest factors first
+    return [...correlations].sort((a, b) => 
+      Math.abs(b.correlation) - Math.abs(a.correlation)
+    );
+  }, [correlations]);
+  
+  // Only prepare chart data when component is visible and data exists
+  const chartData = useMemo(() => {
+    if (!isVisible || !sortedCorrelations.length) return [];
+    return sortedCorrelations;
+  }, [sortedCorrelations, isVisible]);
+
+  const renderContent = () => {
+    if (isLoading) {
+      return <CorrelationLoadingState />;
+    }
+
     if (error) {
-      toast({
-        title: "Unable to load correlation data",
-        description: "Showing sample data instead. Please try again later.",
-        variant: "destructive"
-      });
+      return (
+        <ErrorDisplay 
+          title="Couldn't load correlations" 
+          message="We're having trouble analyzing your health data. Please try again later."
+        />
+      );
     }
-  }, [error]);
-  
-  // Sort data for optimal display
-  const formattedData = React.useMemo(() => {
-    if (!correlationData.length) return [];
-    
-    // Sort by positive correlations first, then by absolute correlation strength
-    const sortedData = [...correlationData].sort((a, b) => {
-      if (a.correlation >= 0 && b.correlation < 0) return -1;
-      if (a.correlation < 0 && b.correlation >= 0) return 1;
-      return Math.abs(b.correlation) - Math.abs(a.correlation);
-    });
-    
-    return sortedData.map(item => ({
-      ...item,
-      value: item.correlation * 100,
-      formattedValue: Math.round(item.correlation * 100)
-    }));
-  }, [correlationData]);
-  
-  // Get period label for display
-  const getPeriodLabel = () => {
-    switch (timePeriod) {
-      case '7days': return 'Last 7 days';
-      case '30days': return 'Last 30 days';
-      case '90days': return 'Last 90 days';
-      case '6months': return 'Last 6 months';
-      case '1year': return 'Last year';
-      default: return 'Last 30 days';
-    }
-  };
-  
-  if (loading) {
-    return <CorrelationLoadingState />;
-  }
-  
-  return (
-    <ErrorBoundary>
-      <Card className="border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
-        <CardHeader className="pb-2">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-            <CardTitle className="text-lg font-medium">
-              Weight Loss Correlations
-            </CardTitle>
-            <div className="flex flex-wrap gap-1 mt-2 sm:mt-0">
-              {dataSources.map(source => (
-                <Badge key={source} variant="secondary" className="text-xs">
-                  {source.charAt(0).toUpperCase() + source.slice(1)}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-2">
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            Factors most strongly correlated with your weight loss success over the {getPeriodLabel().toLowerCase()}
-          </p>
 
-          <CorrelationBarChart formattedData={formattedData} />
-          <InsightDisplay insight={insight} />
-          
-          <div className="mt-4 text-xs text-muted-foreground">
-            <p>Insights are based on your historical data from all connected apps, even if you've disconnected them.</p>
+    if (!correlations || correlations.length === 0) {
+      return (
+        <div className="py-8 text-center">
+          <p className="text-muted-foreground">
+            Not enough data to analyze correlations.
+            <br />
+            Continue tracking your health metrics to see what affects your progress.
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        {insight && (
+          <div className="mb-4 p-3 bg-primary/10 rounded-md">
+            <p dangerouslySetInnerHTML={{ __html: insight }} />
           </div>
-        </CardContent>
-      </Card>
-    </ErrorBoundary>
+        )}
+        
+        <div className="h-[300px]">
+          <CorrelationBarChart data={chartData} />
+        </div>
+        
+        <div className="mt-4 text-sm text-muted-foreground">
+          <p>
+            <span className="inline-block w-3 h-3 bg-green-600 mr-1 rounded-sm"></span>
+            <span className="mr-3">Positive correlation</span>
+            <span className="inline-block w-3 h-3 bg-red-600 mr-1 rounded-sm"></span>
+            <span>Negative correlation</span>
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <Card ref={cardRef} className="shadow-md">
+      <CardHeader>
+        <CardTitle className="text-xl">Weight Loss Correlations</CardTitle>
+        <CardDescription>
+          See which factors have the strongest relationship with your weight loss
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {renderContent()}
+      </CardContent>
+    </Card>
   );
-};
+});
+
+// Add display name for debugging
+WeightLossCorrelations.displayName = "WeightLossCorrelations";
 
 export default WeightLossCorrelations;
