@@ -15,11 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { SSOButtons } from "./SSOButtons";
-import { ErrorLogger } from "@/utils/errorHandling";
-
-interface LoginFormProps {
-  onSuccess: () => void;
-}
+import { LoginFormProps } from "@/types/authentication";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),

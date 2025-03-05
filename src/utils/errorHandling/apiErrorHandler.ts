@@ -1,37 +1,35 @@
 
 import { toast } from '@/hooks/use-toast';
-import { ErrorSeverity, ErrorGroup } from './types';
 import { ErrorLogger } from './ErrorLogger';
+import { ErrorSeverity, ErrorGroup } from './types';
 
 /**
- * Handle API errors consistently across the application
- * 
- * @param error The error that occurred during the API call
- * @param context Additional context information to aid debugging
- * @param showToast Whether to show a user-facing toast notification
- * @returns The processed error message
+ * Handles API errors consistently across the application
+ * Following CodeFarm Development Methodology:
+ * - Sustainable Code: Centralized error handling
+ * - User-Centric Design: Appropriate user feedback
  */
 export const handleApiError = (
-  error: unknown, 
-  context: Record<string, any> = {},
-  showToast = true
-): string => {
-  let errorMessage = 'An unexpected error occurred';
-  let errorCode = 'API_ERROR';
+  error: unknown,
+  {
+    fallbackMessage = 'An error occurred while communicating with the server',
+    context = {},
+    errorCode = 'API_ERROR',
+    showToast = true,
+  } = {}
+) => {
+  // Extract error message if available
+  let errorMessage = fallbackMessage;
   
-  // Attempt to extract message and status from the error
   if (error instanceof Error) {
     errorMessage = error.message;
   } else if (typeof error === 'string') {
     errorMessage = error;
   } else if (error && typeof error === 'object' && 'message' in error) {
     errorMessage = String((error as any).message);
-    if ('code' in error) {
-      errorCode = String((error as any).code);
-    }
   }
-
-  // Log the error with full context
+  
+  // Log the error with consistent structure
   ErrorLogger.error(
     errorMessage,
     errorCode,
@@ -43,32 +41,26 @@ export const handleApiError = (
   // Show a toast notification if requested
   if (showToast) {
     toast({
-      title: 'Error',
+      variant: "destructive",
+      title: "Error",
       description: errorMessage,
-      variant: 'destructive',
     });
   }
-
+  
+  // Return the error message for possible display in the UI
   return errorMessage;
 };
 
 /**
- * Wrap an API call with consistent error handling
- * 
- * @param apiCall The async API function to call
- * @param errorContext Context information for error reporting
- * @param showToast Whether to show a toast on error
- * @returns The result of the API call, or throws an error
+ * Formats a validation error response for display
  */
-export async function withErrorHandling<T>(
-  apiCall: () => Promise<T>,
-  errorContext: Record<string, any> = {},
-  showToast = true
-): Promise<T> {
-  try {
-    return await apiCall();
-  } catch (error) {
-    handleApiError(error, errorContext, showToast);
-    throw error;
-  }
-}
+export const formatValidationErrors = (errors: Record<string, string[]>) => {
+  // Convert the errors object to a flat array of messages
+  return Object.entries(errors)
+    .map(([field, messages]) => {
+      // Join multiple messages for the same field
+      const fieldMessages = messages.join(', ');
+      return `${field}: ${fieldMessages}`;
+    })
+    .join('\n');
+};

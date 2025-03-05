@@ -1,125 +1,83 @@
 
-import React from 'react';
-import { UseFormReturn } from 'react-hook-form';
-import { RegisterFormData } from '@/types/authentication';
-import { 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormControl, 
-  FormMessage,
-  FormDescription
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { PasswordStrengthIndicator } from './PasswordStrengthIndicator';
-import { AccessibleLabel } from '@/utils/accessibility';
+import React from "react";
+import { UseFormReturn } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { PasswordStrengthIndicator } from "./PasswordStrengthIndicator";
+import { RegisterFormValues } from "@/components/RegisterForm";
 
 interface RegisterFormFieldsProps {
-  form: UseFormReturn<RegisterFormData>;
-  showPasswordStrength: boolean;
+  form: UseFormReturn<RegisterFormValues>;
 }
 
-/**
- * RegisterFormFields Component
- * 
- * Separates form fields from the main RegisterForm component for better maintainability
- * Following CodeFarm Development Methodology:
- * - Single Responsibility: Focuses only on form field rendering
- * - User-Centric Design: Includes accessibility enhancements
- */
-export function RegisterFormFields({ form, showPasswordStrength }: RegisterFormFieldsProps) {
+export function RegisterFormFields({ form }: RegisterFormFieldsProps) {
   return (
     <>
       <FormField
         control={form.control}
-        name="name"
+        name="username"
         render={({ field }) => (
           <FormItem>
-            <AccessibleLabel htmlFor={field.name} className="text-sm font-medium">
-              Full Name
-            </AccessibleLabel>
+            <FormLabel>Username</FormLabel>
             <FormControl>
-              <Input
-                id={field.name}
-                placeholder="Enter your full name"
-                {...field}
-                aria-describedby="name-description"
+              <Input 
+                placeholder="Enter your username" 
+                {...field} 
               />
             </FormControl>
-            <FormDescription id="name-description">
-              This is how we'll address you in the app.
-            </FormDescription>
             <FormMessage />
           </FormItem>
         )}
       />
-
+      
       <FormField
         control={form.control}
         name="email"
         render={({ field }) => (
           <FormItem>
-            <AccessibleLabel htmlFor={field.name} className="text-sm font-medium">
-              Email
-            </AccessibleLabel>
+            <FormLabel>Email</FormLabel>
             <FormControl>
-              <Input
-                id={field.name}
-                type="email"
-                placeholder="Enter your email address"
-                autoComplete="email"
-                {...field}
+              <Input 
+                type="email" 
+                placeholder="Enter your email" 
+                {...field} 
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-
+      
       <FormField
         control={form.control}
         name="password"
         render={({ field }) => (
           <FormItem>
-            <AccessibleLabel htmlFor={field.name} className="text-sm font-medium">
-              Password
-            </AccessibleLabel>
+            <FormLabel>Password</FormLabel>
             <FormControl>
-              <Input
-                id={field.name}
-                type="password"
-                autoComplete="new-password"
-                placeholder="Create a password"
-                {...field}
-                aria-describedby="password-description"
+              <Input 
+                type="password" 
+                placeholder="Create a strong password" 
+                {...field} 
               />
             </FormControl>
-            <FormDescription id="password-description">
-              Use 8+ characters with a mix of letters, numbers & symbols.
-            </FormDescription>
-            {showPasswordStrength && (
-              <PasswordStrengthIndicator password={field.value} />
-            )}
+            <PasswordStrengthIndicator password={field.value} />
             <FormMessage />
           </FormItem>
         )}
       />
-
+      
       <FormField
         control={form.control}
         name="confirmPassword"
         render={({ field }) => (
           <FormItem>
-            <AccessibleLabel htmlFor={field.name} className="text-sm font-medium">
-              Confirm Password
-            </AccessibleLabel>
+            <FormLabel>Confirm Password</FormLabel>
             <FormControl>
-              <Input
-                id={field.name}
-                type="password"
-                autoComplete="new-password"
-                placeholder="Confirm your password"
-                {...field}
+              <Input 
+                type="password" 
+                placeholder="Confirm your password" 
+                {...field} 
               />
             </FormControl>
             <FormMessage />

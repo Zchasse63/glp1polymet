@@ -1,168 +1,189 @@
 
-/**
- * Accessibility Tests for RecommendationCard
- * 
- * Following CodeFarm Development Methodology:
- * - User-Centric Design: Ensure accessibility
- * - Quality Assurance: Comprehensive testing
- */
-
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
-import RecommendationCard from './RecommendationCard';
-import { testAccessibility, checkKeyboardAccessibility } from '@/utils/testing/a11yTestUtils';
-import { Recommendation } from '@/types/insightTypes';
-import { BookmarkIcon } from 'lucide-react';
+import { axe } from 'jest-axe';
+import { RecommendationCard } from './RecommendationCard';
+import { 
+  Recommendation, 
+  RecommendationType, 
+  RecommendationIconType 
+} from '@/types/insightTypes';
+import { vi } from 'vitest';
+import { BookmarkIcon, BookmarkFilledIcon } from '@radix-ui/react-icons';
 
 describe('RecommendationCard Accessibility', () => {
   const mockRecommendation: Recommendation = {
-    id: 'rec1',
-    title: 'Drink more water',
-    description: 'Stay hydrated for better health',
-    type: 'general',
-    iconType: 'general',
-    color: 'blue',
+    id: '123',
+    title: 'Sample Recommendation',
+    description: 'This is a description of the recommendation',
+    type: RecommendationType.EXERCISE,
+    iconType: RecommendationIconType.ACTIVITY,
+    color: 'green',
     impact: 'medium',
-    actionLabel: 'Learn more',
-    actionLink: '/water'
-  };
-  
-  const mockBookmarkIcon = <BookmarkIcon className="h-4 w-4" data-testid="bookmark-icon" />;
-  
-  const defaultProps = {
-    recommendation: mockRecommendation,
-    onActionClick: jest.fn(),
-    index: 0,
-    isBookmarked: false,
-    onBookmarkToggle: jest.fn(),
-    bookmarkIcon: mockBookmarkIcon
+    actionLabel: 'Learn More',
+    actionLink: '/recommendations/123'
   };
 
-  it('should not have accessibility violations', async () => {
-    await testAccessibility(<RecommendationCard {...defaultProps} />);
+  const mockOnActionClick = vi.fn();
+  const mockOnBookmarkToggle = vi.fn();
+
+  // Define bookmark icons
+  const bookmarkIcon = <BookmarkIcon className="h-4 w-4" />;
+  const bookmarkFilledIcon = <BookmarkFilledIcon className="h-4 w-4" />;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
-  
-  it('should have proper keyboard navigation', () => {
-    const { container } = render(<RecommendationCard {...defaultProps} />);
-    checkKeyboardAccessibility(container);
+
+  it('should not have any accessibility violations', async () => {
+    const { container } = render(
+      <RecommendationCard
+        recommendation={mockRecommendation}
+        onActionClick={mockOnActionClick}
+        index={0}
+        isBookmarked={false}
+        onBookmarkToggle={mockOnBookmarkToggle}
+        bookmarkIcon={bookmarkIcon}
+        bookmarkFilledIcon={bookmarkFilledIcon}
+      />
+    );
+
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
-  
-  it('should have accessible button labels', () => {
-    render(<RecommendationCard {...defaultProps} />);
-    
-    // Action button should have accessible name
-    const actionButton = screen.getByText('Learn more');
-    expect(actionButton).toHaveAccessibleName();
-    
-    // Bookmark button should have accessible name
-    const bookmarkButton = screen.getByRole('button', { name: /Bookmark recommendation/i });
-    expect(bookmarkButton).toHaveAccessibleName();
-  });
-  
-  it('should convey impact information accessibly', () => {
-    render(<RecommendationCard {...defaultProps} />);
-    
-    // Impact information should be accessible
-    const impactElement = screen.getByText(/medium impact/i);
-    expect(impactElement).toBeInTheDocument();
-    
-    // The parent element should have an appropriate role or aria attribute
-    // or be a semantic HTML element that conveys its purpose
-    const impactParent = impactElement.closest('div, span');
-    expect(impactParent).toBeTruthy();
-  });
-  
-  it('should handle different states appropriately', () => {
-    // Test bookmarked state
-    render(<RecommendationCard {...{...defaultProps, isBookmarked: true}} />);
-    const bookmarkedButton = screen.getByRole('button', { name: /Remove bookmark/i });
-    expect(bookmarkedButton).toBeInTheDocument();
-    
-    // Verify the bookmark icon has appropriate fill when bookmarked
-    const bookmarkIcon = bookmarkedButton.querySelector('svg');
-    expect(bookmarkIcon).toHaveClass('text-yellow-500');
-  });
-  
-  it('should be accessible when using keyboard to interact with buttons', async () => {
-    const user = userEvent.setup();
-    const handleBookmarkToggle = jest.fn();
-    const handleActionClick = jest.fn();
-    
+
+  it('should have appropriate ARIA roles and labels', () => {
     render(
-      <RecommendationCard 
-        {...defaultProps} 
-        onBookmarkToggle={handleBookmarkToggle}
-        onActionClick={handleActionClick}
+      <RecommendationCard
+        recommendation={mockRecommendation}
+        onActionClick={mockOnActionClick}
+        index={0}
+        isBookmarked={false}
+        onBookmarkToggle={mockOnBookmarkToggle}
+        bookmarkIcon={bookmarkIcon}
+        bookmarkFilledIcon={bookmarkFilledIcon}
       />
     );
-    
-    // Test keyboard interaction with bookmark button
-    const bookmarkButton = screen.getByRole('button', { name: /Bookmark recommendation/i });
-    await user.tab(); // First tab should focus on the first interactive element
-    
-    // Navigate to bookmark button using Tab
-    let foundBookmarkButton = false;
-    for (let i = 0; i < 5; i++) { // Try a reasonable number of tabs
-      if (document.activeElement === bookmarkButton) {
-        foundBookmarkButton = true;
-        break;
-      }
-      await user.tab();
-    }
-    
-    expect(foundBookmarkButton).toBe(true);
-    await user.keyboard('{enter}'); // Press Enter to activate
-    expect(handleBookmarkToggle).toHaveBeenCalledWith(mockRecommendation.id);
-    
-    // Test keyboard interaction with action button
-    const actionButton = screen.getByText('Learn more');
-    
-    // Continue tabbing to reach action button
-    let foundActionButton = false;
-    for (let i = 0; i < 5; i++) {
-      if (document.activeElement === actionButton) {
-        foundActionButton = true;
-        break;
-      }
-      await user.tab();
-    }
-    
-    expect(foundActionButton).toBe(true);
-    await user.keyboard('{enter}'); // Press Enter to activate
-    expect(handleActionClick).toHaveBeenCalled();
+
+    // Card should have appropriate region role
+    const card = screen.getByRole('region');
+    expect(card).toBeInTheDocument();
+    expect(card).toHaveAccessibleName(mockRecommendation.title);
+
+    // Action button should have accessible name
+    const actionButton = screen.getByRole('button', { name: mockRecommendation.actionLabel });
+    expect(actionButton).toBeInTheDocument();
   });
-  
-  it('should apply appropriate ARIA attributes for different impacts', () => {
-    // Test high impact
-    const highImpactRec = {
-      ...mockRecommendation,
-      impact: 'high' as const
-    };
+
+  it('should have proper keyboard navigation', async () => {
+    render(
+      <RecommendationCard
+        recommendation={mockRecommendation}
+        onActionClick={mockOnActionClick}
+        index={0}
+        isBookmarked={false}
+        onBookmarkToggle={mockOnBookmarkToggle}
+        bookmarkIcon={bookmarkIcon}
+        bookmarkFilledIcon={bookmarkFilledIcon}
+      />
+    );
+
+    const user = userEvent.setup();
     
+    // Tab to the bookmark button
+    await user.tab();
+    const bookmarkButton = document.activeElement;
+    expect(bookmarkButton).toHaveAttribute('aria-label', 'Bookmark recommendation');
+    
+    // Press the bookmark button
+    await user.keyboard('{Enter}');
+    expect(mockOnBookmarkToggle).toHaveBeenCalledTimes(1);
+    
+    // Tab to the action button
+    await user.tab();
+    const actionButton = document.activeElement;
+    expect(actionButton).toHaveTextContent(mockRecommendation.actionLabel);
+    
+    // Press the action button
+    await user.keyboard('{Enter}');
+    expect(mockOnActionClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('should display bookmarked state correctly', () => {
+    render(
+      <RecommendationCard
+        isBookmarked={true}
+        recommendation={mockRecommendation}
+        onActionClick={mockOnActionClick}
+        index={0}
+        onBookmarkToggle={mockOnBookmarkToggle}
+        bookmarkIcon={bookmarkIcon}
+        bookmarkFilledIcon={bookmarkFilledIcon}
+      />
+    );
+
+    const bookmarkButton = screen.getByRole('button', { name: /bookmark/i });
+    expect(bookmarkButton).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('should announce impact level through appropriate visual and aria properties', () => {
     const { rerender } = render(
-      <RecommendationCard 
-        {...defaultProps} 
-        recommendation={highImpactRec}
+      <RecommendationCard
+        onBookmarkToggle={mockOnBookmarkToggle}
+        onActionClick={mockOnActionClick}
+        recommendation={mockRecommendation}
+        index={0}
+        isBookmarked={false}
+        bookmarkIcon={bookmarkIcon}
+        bookmarkFilledIcon={bookmarkFilledIcon}
       />
     );
-    
-    expect(screen.getByText(/high impact/i)).toBeInTheDocument();
-    
-    // Test low impact
-    const lowImpactRec = {
+
+    // Check medium impact (default in our mock)
+    const impactBadge = screen.getByText(/medium impact/i);
+    expect(impactBadge).toBeInTheDocument();
+
+    // Rerender with high impact
+    const highImpactRecommendation = {
       ...mockRecommendation,
-      impact: 'low' as const
+      impact: 'high'
     };
-    
+
     rerender(
-      <RecommendationCard 
-        {...defaultProps} 
-        recommendation={lowImpactRec}
+      <RecommendationCard
+        recommendation={highImpactRecommendation}
+        onActionClick={mockOnActionClick}
+        index={0}
+        isBookmarked={false}
+        onBookmarkToggle={mockOnBookmarkToggle}
+        bookmarkIcon={bookmarkIcon}
+        bookmarkFilledIcon={bookmarkFilledIcon}
       />
     );
-    
-    expect(screen.getByText(/low impact/i)).toBeInTheDocument();
+
+    const highImpactBadge = screen.getByText(/high impact/i);
+    expect(highImpactBadge).toBeInTheDocument();
+
+    // Rerender with low impact
+    const lowImpactRecommendation = {
+      ...mockRecommendation,
+      impact: 'low'
+    };
+
+    rerender(
+      <RecommendationCard
+        recommendation={lowImpactRecommendation}
+        onActionClick={mockOnActionClick}
+        index={0}
+        isBookmarked={false}
+        onBookmarkToggle={mockOnBookmarkToggle}
+        bookmarkIcon={bookmarkIcon}
+        bookmarkFilledIcon={bookmarkFilledIcon}
+      />
+    );
+
+    const lowImpactBadge = screen.getByText(/low impact/i);
+    expect(lowImpactBadge).toBeInTheDocument();
   });
 });

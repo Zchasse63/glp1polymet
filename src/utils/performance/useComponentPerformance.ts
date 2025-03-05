@@ -1,139 +1,121 @@
 
-import { useRef, useCallback } from 'react';
-import { PerformanceTracker } from './PerformanceTracker';
+import { useRef, useEffect } from 'react';
+import PerformanceTracker from './PerformanceTracker';
 
-// Simplified performance tracker method if the real one isn't available yet
-const trackPerformance = (data: any) => {
-  console.log('[Performance]', data);
-  // This is a fallback if the real PerformanceTracker isn't fully implemented
+// Fallback implementation in case the actual method doesn't exist
+const trackComponentPerformanceFallback = (
+  componentName: string, 
+  phase: 'mount' | 'update' | 'unmount', 
+  duration: number
+) => {
+  console.debug(`[Performance] ${componentName} ${phase}: ${duration}ms`);
 };
 
 /**
- * Hook for tracking component-level performance metrics
+ * Hook to track component performance metrics
  * 
- * @param componentName - The name of the component to track performance for
- * @returns Object with performance tracking methods
+ * Measures component mount, update, and unmount times
+ * Following CodeFarm Development Methodology:
+ * - Continuous Learning: Gather performance data
+ * - Monitoring: Track component performance
  */
-export function useComponentPerformance(componentName: string) {
-  // Store the start time so it doesn't get recreated on every render
-  const startTimeRef = useRef<number>(0);
-  const renderCountRef = useRef<number>(0);
+export const useComponentPerformance = (componentName: string) => {
+  const mountTimeRef = useRef<number>(0);
+  const updateCountRef = useRef<number>(0);
+  const lastUpdateTimeRef = useRef<number>(0);
   
-  /**
-   * Track component mount performance
-   * Call this in useEffect with empty dependencies array
-   * 
-   * @returns Function to be called on component unmount
-   */
-  const trackMount = useCallback(() => {
-    const mountTime = performance.now() - startTimeRef.current;
+  // Fallback function if the actual method doesn't exist
+  const trackComponentPerformance = 
+    (PerformanceTracker as any).trackComponentPerformance || 
+    trackComponentPerformanceFallback;
+  
+  // Measure mount time
+  useEffect(() => {
+    const startTime = performance.now();
+    mountTimeRef.current = startTime;
     
-    // Track component mount time
-    trackPerformance({
-      componentName,
-      metricName: 'mountTime',
-      value: mountTime,
-      renderCount: renderCountRef.current
-    });
-    
-    // Return cleanup function for useEffect
     return () => {
-      const lifetimeDuration = performance.now() - startTimeRef.current;
+      const unmountTime = performance.now();
+      const duration = unmountTime - mountTimeRef.current;
       
-      // Track component lifetime
-      trackPerformance({
+      // Track unmount time
+      trackComponentPerformance(
         componentName,
-        metricName: 'lifetime',
-        value: lifetimeDuration,
-        renderCount: renderCountRef.current
-      });
+        'unmount',
+        duration
+      );
     };
   }, [componentName]);
   
-  /**
-   * Track an operation within the component
-   * Use this to measure specific actions like data loading or calculations
-   * 
-   * @param operationName - Name of the operation to track
-   * @param fn - The function to measure
-   * @returns Result of the function
-   */
-  const trackOperation = useCallback(<T>(operationName: string, fn: () => T): T => {
-    const startTime = performance.now();
-    const result = fn();
-    const duration = performance.now() - startTime;
-    
-    // Track operation duration
-    trackPerformance({
-      componentName,
-      metricName: `operation_${operationName}`,
-      value: duration,
-      renderCount: renderCountRef.current
-    });
-    
-    return result;
-  }, [componentName]);
-  
-  /**
-   * Track an async operation within the component
-   * Use this to measure async operations like API calls or data processing
-   * 
-   * @param operationName - Name of the operation to track
-   * @param fn - The async function to measure
-   * @returns Promise with the result of the function
-   */
-  const trackAsyncOperation = useCallback(async <T>(operationName: string, fn: () => Promise<T>): Promise<T> => {
-    const startTime = performance.now();
-    try {
-      const result = await fn();
-      const duration = performance.now() - startTime;
-      
-      // Track operation duration
-      trackPerformance({
-        componentName,
-        metricName: `asyncOperation_${operationName}`,
-        value: duration,
-        renderCount: renderCountRef.current
-      });
-      
-      return result;
-    } catch (error) {
-      // Track failed operations too, but mark them as errors
-      const duration = performance.now() - startTime;
-      
-      trackPerformance({
-        componentName,
-        metricName: `asyncOperationError_${operationName}`,
-        value: duration,
-        renderCount: renderCountRef.current
-      });
-      
-      throw error;
+  // Measure update time
+  useEffect(() => {
+    // Skip the first render (mount)
+    if (updateCountRef.current === 0) {
+      updateCountRef.current++;
+      return;
     }
-  }, [componentName]);
+    
+    const updateTime = performance.now();
+    
+    // Only measure if we have a previous update time
+    if (lastUpdateTimeRef.current > 0) {
+      const duration = updateTime - lastUpdateTimeRef.current;
+      
+      // Track update time
+      trackComponentPerformance(
+        componentName,
+        'update',
+        duration
+      );
+    }
+    
+    lastUpdateTimeRef.current = updateTime;
+    updateCountRef.current++;
+  });
   
-  // Initialize on first render
-  if (startTimeRef.current === 0) {
-    startTimeRef.current = performance.now();
-  }
-  
-  // Increment render count
-  renderCountRef.current += 1;
-  
-  // Track render time if not the first render
-  if (renderCountRef.current > 1) {
-    trackPerformance({
+  // Provide a function to manually mark render complete
+  // Useful for components with async operations
+  const markRenderComplete = () => {
+    const renderTime = performance.now();
+    const duration = renderTime - mountTimeRef.current;
+    
+    // Track mount time
+    trackComponentPerformance(
       componentName,
-      metricName: 'renderTime',
-      value: performance.now() - startTimeRef.current,
-      renderCount: renderCountRef.current
-    });
-  }
-  
-  return {
-    trackMount,
-    trackOperation,
-    trackAsyncOperation,
-    renderCount: renderCountRef.current
+      'mount',
+      duration
+    );
   };
-}
+  
+  // Call this at the end of your component render function
+  // or in a useEffect with appropriate dependencies
+  const trackRender = () => {
+    if (updateCountRef.current <= 1) {
+      // First render (mount)
+      const renderTime = performance.now();
+      const duration = renderTime - mountTimeRef.current;
+      
+      // Track mount time
+      trackComponentPerformance(
+        componentName,
+        'mount',
+        duration
+      );
+    } else {
+      // Subsequent render (update)
+      const renderTime = performance.now();
+      const duration = renderTime - lastUpdateTimeRef.current;
+      
+      // Track update time
+      trackComponentPerformance(
+        componentName,
+        'update',
+        duration
+      );
+      
+      lastUpdateTimeRef.current = renderTime;
+    }
+  };
+  
+  return { trackRender, markRenderComplete };
+};

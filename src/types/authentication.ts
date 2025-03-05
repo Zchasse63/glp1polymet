@@ -116,3 +116,25 @@ export interface AuthState {
   /** Whether authentication is in progress */
   isLoading: boolean;
 }
+
+/**
+ * Login form data structure
+ */
+export interface LoginFormData {
+  email: string;
+  password: string;
+}
+
+/**
+ * Login form props
+ */
+export interface LoginFormProps {
+  onSuccess: () => void;
+}
+
+/**
+ * Register form props
+ */
+export interface RegisterFormProps {
+  onSuccess: () => void;
+}
