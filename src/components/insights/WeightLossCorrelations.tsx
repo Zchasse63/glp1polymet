@@ -34,14 +34,46 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
       ErrorLogger.error(
         "Failed to load correlation data", 
         "CORRELATION_LOAD_ERROR",
-        { componentName: "WeightLossCorrelations" },
+        { 
+          componentName: "WeightLossCorrelations",
+          visible: isVisible,
+          errorMessage: error.message 
+        },
         error
       );
     }
-  }, [error]);
+  }, [error, isVisible]);
+  
+  // Determine error severity based on error message
+  const getErrorSeverity = useCallback((err: Error | null): ErrorSeverity => {
+    if (!err) return ErrorSeverity.ERROR;
+    
+    const message = err.message.toLowerCase();
+    
+    if (message.includes('network') || message.includes('connection')) {
+      return ErrorSeverity.WARNING;
+    }
+    
+    if (message.includes('timeout')) {
+      return ErrorSeverity.WARNING;
+    }
+    
+    if (message.includes('permission') || message.includes('forbidden') || message.includes('unauthorized')) {
+      return ErrorSeverity.CRITICAL;
+    }
+    
+    return ErrorSeverity.ERROR;
+  }, []);
   
   // Memoized retry handler to avoid unnecessary re-renders
   const handleRetry = useCallback(() => {
+    // Log retry attempt
+    ErrorLogger.info(
+      "User initiated correlation data retry", 
+      "CORRELATION_RETRY",
+      { componentName: "WeightLossCorrelations" }
+    );
+    
     if (onRetry) {
       onRetry();
     }
@@ -73,7 +105,7 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
         <CorrelationErrorState 
           error={error}
           onRetry={handleRetry}
-          severity={ErrorSeverity.ERROR}
+          severity={getErrorSeverity(error)}
         />
       );
     }
