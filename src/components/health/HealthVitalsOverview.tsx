@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
@@ -12,7 +11,6 @@ import {
   TrendingDown,
   HeartPulse
 } from "lucide-react";
-import MetricCard from "@/components/dashboard/MetricCard";
 
 interface HealthVitalsOverviewProps {
   vitals: {
@@ -163,14 +161,14 @@ export const HealthVitalsOverview = ({ vitals }: HealthVitalsOverviewProps) => {
   return (
     <section className="space-y-4">
       <h2 className="text-xl font-semibold">Today's Vitals</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {metricsData.map((metric, index) => (
           <Card key={metric.title} className="overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800">
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start mb-2">
-                <p className="text-xs font-medium text-muted-foreground">{metric.title}</p>
+            <CardContent className="p-3">
+              <div className="flex justify-between items-start mb-1.5">
+                <p className="text-xs font-medium text-muted-foreground truncate mr-2">{metric.title}</p>
                 <div 
-                  className="w-7 h-7 rounded-full flex items-center justify-center"
+                  className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center"
                   style={{ backgroundColor: metric.iconBgColor }}
                 >
                   {metric.icon}
@@ -178,16 +176,16 @@ export const HealthVitalsOverview = ({ vitals }: HealthVitalsOverviewProps) => {
               </div>
               
               <div className="flex items-baseline">
-                <span className="text-xl font-bold">{metric.value}</span>
+                <span className="text-lg font-bold truncate">{metric.value}</span>
                 {metric.unit && (
-                  <span className="text-xs ml-1 text-muted-foreground">{metric.unit}</span>
+                  <span className="text-xs ml-1 text-muted-foreground whitespace-nowrap">{metric.unit}</span>
                 )}
               </div>
               
               {metric.trend && metric.trendIcon && (
                 <div className={`flex items-center text-xs mt-1 ${metric.trendColor}`}>
                   {metric.trendIcon}
-                  <span>{metric.trend}</span>
+                  <span className="whitespace-nowrap">{metric.trend}</span>
                 </div>
               )}
             </CardContent>
