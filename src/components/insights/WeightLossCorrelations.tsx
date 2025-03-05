@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell, LabelList } from "recharts";
-import { analyzeWeightLossCorrelations, generateKeyInsights } from "@/utils/insightsAnalysis";
+import { analyzeWeightLossCorrelations, generateKeyInsights } from "@/utils/insights/correlationAnalysis";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchUserIntegrations } from "@/utils/appIntegrations";
 import { Badge } from "@/components/ui/badge";
