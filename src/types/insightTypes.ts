@@ -1,3 +1,4 @@
+
 /**
  * Insight Types Definition
  * Following CodeFarm architecture principles:
@@ -119,4 +120,4 @@ export interface WeeklyProgressData {
 /**
  * All possible filter types for recommendations
  */
-export type RecommendationFilterType = RecommendationType | 'all' | 'bookmarked';
+export type RecommendationFilterType = 'all' | RecommendationType | 'bookmarked';
