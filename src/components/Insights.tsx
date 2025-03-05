@@ -1,4 +1,3 @@
-
 /**
  * Insights Component
  * 
@@ -17,7 +16,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import InsightsHeader from "./insights/InsightsHeader";
 import WeeklyProgressSummary from "./insights/WeeklyProgressSummary";
-import WeightLossCorrelations from "./insights/WeightLossCorrelations";
+import WeightLossCorrelations from "./insights/correlations/WeightLossCorrelations";
 import PersonalizedRecommendations from "./insights/PersonalizedRecommendations";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { InsightsProvider, useInsights } from "@/contexts/InsightsContext";

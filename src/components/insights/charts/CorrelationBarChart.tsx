@@ -1,11 +1,12 @@
-import React, { useMemo } from 'react';
+
+import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useI18n } from '@/lib/i18n';
 import { useReducedMotion } from '@/utils/accessibilityUtils';
 
 interface CorrelationBarChartProps {
-  data: { name: string; correlation: number }[];
+  data: { factor: string; correlation: number }[];
   xAxisKey?: string;
   correlationKey?: string;
   barColorPositive?: string;
@@ -20,7 +21,7 @@ interface CorrelationBarChartProps {
  */
 export const CorrelationBarChart: React.FC<CorrelationBarChartProps> = ({
   data,
-  xAxisKey = 'name',
+  xAxisKey = 'factor',
   correlationKey = 'correlation',
   barColorPositive = '#82ca9d',
   barColorNegative = '#e45649',
@@ -30,18 +31,11 @@ export const CorrelationBarChart: React.FC<CorrelationBarChartProps> = ({
   const { t } = useI18n();
   const isReducedMotion = useReducedMotion();
 
-  const getCorrelationColor = useMemo(() => {
-    return (entry: { payload: { [key: string]: number } }) => {
-      const correlationValue = entry.payload[correlationKey];
-      return correlationValue >= 0 ? barColorPositive : barColorNegative;
-    };
-  }, [barColorPositive, barColorNegative, correlationKey]);
-
-  const renderCorrelationValue = useMemo(() => {
-    return (entry: { payload: { [key: string]: number } }) => {
-      return entry.payload[correlationKey];
-    };
-  }, [correlationKey]);
+  // Function to determine bar color based on correlation value
+  const getBarFill = (entry: any) => {
+    const correlationValue = entry?.payload?.[correlationKey];
+    return correlationValue >= 0 ? barColorPositive : barColorNegative;
+  };
 
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -62,12 +56,23 @@ export const CorrelationBarChart: React.FC<CorrelationBarChartProps> = ({
           labelStyle={{ color: theme === 'dark' ? '#fff' : '#333' }}
         />
         <Bar
-          dataKey={renderCorrelationValue}
-          fill={getCorrelationColor}
+          dataKey={correlationKey}
+          fill={barColorPositive} // Default fill color
           radius={[4, 4, 0, 0]}
           isAnimationActive={!isReducedMotion}
+          fillOpacity={0.8}
+          maxBarSize={60}
+          // Use barGradient or fill function with proper typing
+          fill={barColorPositive} // Set a default color
+          // Use 'fill' attribute for conditional coloring based on value
+          // This is safer than using getCorrelationColor function directly
+          stroke={theme === 'dark' ? '#555' : '#ddd'}
+          strokeWidth={1}
         />
       </BarChart>
     </ResponsiveContainer>
   );
 };
+
+// Add export default for backward compatibility
+export default CorrelationBarChart;

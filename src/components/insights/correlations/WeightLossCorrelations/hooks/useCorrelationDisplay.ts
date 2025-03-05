@@ -1,44 +1,28 @@
-import React, { useMemo, useRef, useCallback, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { Correlation } from "@/utils/insights/types";
-import CorrelationBarChart from "./charts/CorrelationBarChart";
-import CorrelationLoadingState from "./CorrelationLoadingState";
-import CorrelationErrorState from "./CorrelationErrorState";
 import { ErrorLogger } from "@/utils/errorHandling";
-import { useIntersectionObserver } from "@/utils/performanceUtils";
-import { cn } from "@/lib/utils";
-import { getErrorSeverity } from "./correlations/ErrorSeverityUtils";
-import CorrelationInsight from "./correlations/CorrelationInsight";
-import CorrelationLegend from "./correlations/CorrelationLegend";
-import CorrelationActions from "./correlations/CorrelationActions";
-import NoSignificantCorrelations from "./correlations/NoSignificantCorrelations";
-import NoCorrelationsState from "./correlations/NoCorrelationsState";
 
-interface WeightLossCorrelationsProps {
+interface UseCorrelationDisplayProps {
   correlations: Correlation[] | undefined;
-  isLoading: boolean;
-  error: Error | null;
-  insight: string | null;
   onRetry?: () => void;
+  isVisible: boolean;
+  error: Error | null;
 }
 
-// Use React.memo to prevent unnecessary re-renders
-const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo(({
+/**
+ * Custom hook for handling correlation display logic
+ */
+const useCorrelationDisplay = ({
   correlations,
-  isLoading,
-  error,
-  insight,
-  onRetry
-}) => {
-  // Use a ref to track when the component is visible
-  const cardRef = useRef<HTMLDivElement>(null);
-  const isVisible = useIntersectionObserver(cardRef, { threshold: 0.1 });
-  
+  onRetry,
+  isVisible,
+  error
+}: UseCorrelationDisplayProps) => {
   // State for visualization options
   const [showAllFactors, setShowAllFactors] = useState(false);
   
   // Log errors to our centralized error logger
-  React.useEffect(() => {
+  useEffect(() => {
     if (error) {
       ErrorLogger.error(
         "Failed to load correlation data", 
@@ -135,69 +119,15 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
     document.body.removeChild(link);
   }, [correlations, sortedCorrelations]);
 
-  const renderContent = () => {
-    if (isLoading) {
-      return <CorrelationLoadingState />;
-    }
-
-    if (error) {
-      return (
-        <CorrelationErrorState 
-          error={error}
-          onRetry={handleRetry}
-          severity={getErrorSeverity(error)}
-        />
-      );
-    }
-
-    if (!correlations || correlations.length === 0) {
-      return <NoCorrelationsState />;
-    }
-
-    return (
-      <div>
-        <CorrelationInsight insight={insight} />
-        
-        <div className={cn(
-          "h-[300px]", 
-          !hasSignificantCorrelations && "opacity-80"
-        )}>
-          <CorrelationBarChart data={displayedCorrelations} />
-        </div>
-        
-        {!hasSignificantCorrelations && <NoSignificantCorrelations />}
-        
-        <div className="mt-4 flex flex-col space-y-2">
-          <CorrelationLegend />
-          
-          <CorrelationActions 
-            showAllFactors={showAllFactors}
-            toggleFactorDisplay={toggleFactorDisplay}
-            handleExportData={handleExportData}
-            hasExportData={Boolean(correlations && correlations.length > 0)}
-            hasMoreItems={sortedCorrelations.length > 5}
-          />
-        </div>
-      </div>
-    );
+  return {
+    sortedCorrelations,
+    displayedCorrelations,
+    hasSignificantCorrelations,
+    showAllFactors,
+    toggleFactorDisplay,
+    handleExportData,
+    handleRetry
   };
+};
 
-  return (
-    <Card ref={cardRef} className="shadow-md">
-      <CardHeader>
-        <CardTitle className="text-xl">Weight Loss Correlations</CardTitle>
-        <CardDescription>
-          See which factors have the strongest relationship with your weight loss
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {renderContent()}
-      </CardContent>
-    </Card>
-  );
-});
-
-// Add display name for debugging
-WeightLossCorrelations.displayName = "WeightLossCorrelations";
-
-export default WeightLossCorrelations;
+export default useCorrelationDisplay;

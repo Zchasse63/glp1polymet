@@ -1,10 +1,10 @@
-
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useWeeklyProgress } from "@/hooks/useWeeklyProgress";
 import WeeklyProgressLoadingState from "./WeeklyProgressLoadingState";
 import { BarChart3 } from "lucide-react";
 import { useInsightsContext } from "@/contexts/InsightsContext";
+import WeightLossCorrelations from "./correlations/WeightLossCorrelations";
 
 /**
  * WeeklyProgressSummary Component
