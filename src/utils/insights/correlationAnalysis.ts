@@ -1,147 +1,71 @@
-
 /**
  * Correlation Analysis Utilities
  * 
  * Following CodeFarm Development Methodology:
- * - Holistic Development: Comprehensive analysis of health factors
- * - Sustainable Code: Well-documented, maintainable utilities
- * - User-Centric: Focus on actionable insights
+ * - Data Analysis: Specialized utilities for correlation analysis
+ * - Calculation Logic: Separated from data fetching
  */
-import { Correlation, UserHealthData } from './types';
+import { UserHealthData, Correlation } from './types';
 import { TimePeriod } from '@/components/insights/TimePeriodSelector';
 
 /**
- * Analyzes user health data to find correlations with weight loss.
+ * Analyzes user health data to find correlations with weight loss
  * 
- * @param data - The user's health data
+ * @param userData - The user health data to analyze
  * @param period - Time period to analyze
- * @returns Array of correlation objects sorted by correlation strength
+ * @returns Array of correlation data
  */
 export const analyzeWeightLossCorrelations = (
-  data: UserHealthData,
+  userData: UserHealthData,
   period: TimePeriod
 ): Correlation[] => {
-  if (!data || !data.weightMeasurements || data.weightMeasurements.length < 7) {
-    console.warn('Insufficient weight data for correlation analysis');
-    return [];
-  }
-
-  // Sort weight measurements by date
-  const sortedWeights = [...data.weightMeasurements].sort(
-    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-  );
-
-  // Calculate weight changes (day-to-day differences)
-  const weightChanges = [];
-  for (let i = 1; i < sortedWeights.length; i++) {
-    weightChanges.push({
-      date: sortedWeights[i].timestamp,
-      change: sortedWeights[i-1].value - sortedWeights[i].value // Positive value = weight loss
-    });
-  }
-
-  // Analyze sleep correlation
-  const sleepCorrelation = analyzeSleepCorrelation(data, weightChanges);
+  // This is a placeholder for actual correlation analysis logic
+  // In a real implementation, you would:
+  // 1. Extract weight measurements
+  // 2. Calculate weight change over time
+  // 3. Correlate with other health factors
   
-  // Analyze water intake correlation
-  const waterCorrelation = analyzeWaterIntakeCorrelation(data, weightChanges);
-  
-  // Analyze step count correlation
-  const stepCorrelation = analyzeStepCountCorrelation(data, weightChanges);
-  
-  // Analyze meal frequency correlation
-  const mealFrequencyCorrelation = analyzeMealFrequencyCorrelation(data, weightChanges);
-  
-  // Analyze protein intake correlation
-  const proteinCorrelation = analyzeProteinIntakeCorrelation(data, weightChanges);
-  
-  // Analyze processed foods correlation
-  const processedFoodsCorrelation = analyzeProcessedFoodsCorrelation(data, weightChanges);
-  
-  // Analyze stress level correlation
-  const stressCorrelation = analyzeStressLevelCorrelation(data, weightChanges);
-  
-  // Analyze alcohol consumption correlation (if available)
-  const alcoholCorrelation = {
-    factor: "Alcohol Consumption",
-    correlation: -0.35,
-    color: "#ef4444"
-  };
-
-  // Collect all correlations
+  // For simplicity, we'll return some mock correlations
   const correlations: Correlation[] = [
-    sleepCorrelation,
-    waterCorrelation,
-    stepCorrelation,
-    mealFrequencyCorrelation,
-    proteinCorrelation,
-    processedFoodsCorrelation,
-    stressCorrelation,
-    alcoholCorrelation
+    { 
+      factor: "Sleep Duration", 
+      correlation: calculateMockCorrelation(userData.sleepRecords.length > 0 ? 0.7 : 0.5),
+      color: "#22c55e" 
+    },
+    { 
+      factor: "Water Intake", 
+      correlation: calculateMockCorrelation(0.5),
+      color: "#22c55e" 
+    },
+    { 
+      factor: "Step Count", 
+      correlation: calculateMockCorrelation(0.45),
+      color: "#22c55e" 
+    },
+    { 
+      factor: "Processed Foods", 
+      correlation: calculateMockCorrelation(-0.6),
+      color: "#ef4444" 
+    },
+    { 
+      factor: "Stress Level", 
+      correlation: calculateMockCorrelation(-0.4),
+      color: "#ef4444" 
+    }
   ];
-
-  // Filter out undefined correlations and sort by absolute correlation strength
-  return correlations
-    .filter(c => c !== undefined) as Correlation[]
-    .sort((a, b) => Math.abs(b.correlation) - Math.abs(a.correlation));
+  
+  return correlations;
 };
 
-// Helper functions for individual factor analysis
-// In a real implementation, these would contain actual correlation calculation logic
-
-function analyzeSleepCorrelation(data: UserHealthData, weightChanges: any[]): Correlation {
-  // Implement actual correlation calculation logic
-  return {
-    factor: "Sleep Duration",
-    correlation: 0.68,
-    color: "#22c55e"
-  };
-}
-
-function analyzeWaterIntakeCorrelation(data: UserHealthData, weightChanges: any[]): Correlation {
-  return {
-    factor: "Water Intake",
-    correlation: 0.52,
-    color: "#22c55e"
-  };
-}
-
-function analyzeStepCountCorrelation(data: UserHealthData, weightChanges: any[]): Correlation {
-  return {
-    factor: "Step Count",
-    correlation: 0.47,
-    color: "#22c55e"
-  };
-}
-
-function analyzeMealFrequencyCorrelation(data: UserHealthData, weightChanges: any[]): Correlation {
-  return {
-    factor: "Meal Frequency",
-    correlation: -0.38,
-    color: "#ef4444"
-  };
-}
-
-function analyzeProteinIntakeCorrelation(data: UserHealthData, weightChanges: any[]): Correlation {
-  return {
-    factor: "Protein Intake",
-    correlation: 0.41,
-    color: "#22c55e"
-  };
-}
-
-function analyzeProcessedFoodsCorrelation(data: UserHealthData, weightChanges: any[]): Correlation {
-  return {
-    factor: "Processed Foods",
-    correlation: -0.62,
-    color: "#ef4444"
-  };
-}
-
-function analyzeStressLevelCorrelation(data: UserHealthData, weightChanges: any[]): Correlation {
-  return {
-    factor: "Stress Level",
-    correlation: -0.44,
-    color: "#ef4444"
-  };
-}
+/**
+ * Helper function to generate slightly randomized correlation values
+ * for demonstration purposes
+ * 
+ * @param baseValue - Base correlation value
+ * @returns Slightly randomized correlation value
+ */
+const calculateMockCorrelation = (baseValue: number): number => {
+  // Add a little randomization but keep within -1 to 1 range
+  const randomFactor = (Math.random() * 0.2) - 0.1;
+  return Math.max(-0.95, Math.min(0.95, baseValue + randomFactor));
+};
