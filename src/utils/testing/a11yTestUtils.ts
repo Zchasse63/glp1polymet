@@ -8,19 +8,28 @@
  */
 
 import { render, RenderResult } from '@testing-library/react';
-import { axe, toHaveNoViolations } from 'jest-axe';
+import { axe, toHaveNoViolations, JestAxeConfigureOptions } from 'jest-axe';
 import { ReactElement } from 'react';
 import { renderWithProviders } from './renderWithProviders';
 
-// Add jest-axe matchers
+// Add jest-axe matchers by extending expect
 expect.extend(toHaveNoViolations);
+
+// Properly declare the jest-axe matcher types
+declare global {
+  namespace jest {
+    interface Matchers<R> {
+      toHaveNoViolations(): R;
+    }
+  }
+}
 
 /**
  * Test component for accessibility violations
  */
-export async function testAccessibility(ui: ReactElement): Promise<void> {
+export async function testAccessibility(ui: ReactElement, options?: JestAxeConfigureOptions): Promise<void> {
   const { container } = renderWithProviders(ui);
-  const results = await axe(container);
+  const results = await axe(container, options);
   expect(results).toHaveNoViolations();
 }
 
