@@ -87,6 +87,33 @@ export interface Recommendation {
   actionLabel: string;
   /** URL or action identifier for the recommendation */
   actionLink: string;
-  /** Optional metadata for additional information */
+  /** Optional additional metadata for additional information */
   metadata?: Record<string, any>;
 }
+
+/**
+ * Weekly progress achievement badge
+ */
+export interface ProgressBadge {
+  /** Text to display on the badge */
+  text: string;
+  /** Color theme for the badge (used for styling) */
+  colorTheme: 'green' | 'blue' | 'purple' | 'orange' | 'red';
+}
+
+/**
+ * Weekly progress summary data
+ */
+export interface WeeklyProgressData {
+  /** Main insight text */
+  summaryText: string;
+  /** Comparison to reference group (e.g., "+15% faster than average") */
+  comparisonText: string;
+  /** List of achievement badges */
+  badges: ProgressBadge[];
+  /** Reference period for the data */
+  period: string;
+  /** Optional additional metadata */
+  metadata?: Record<string, any>;
+}
+
