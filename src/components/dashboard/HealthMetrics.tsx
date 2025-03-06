@@ -2,7 +2,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRightIcon } from "lucide-react";
-import MetricCard from "./MetricCard";
+import { MetricButton } from "../metrics/MetricButton";
+import { WeightDetail } from "../metrics/details/WeightDetail";
 
 type HealthMetricsProps = {
   metrics: {
@@ -43,20 +44,24 @@ export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsPro
 
       <div className="grid grid-cols-2 gap-3">
         {metrics.map((metric, index) => (
-          <MetricCard
+          <MetricButton
             key={metric.title}
-            title={metric.title}
-            value={metric.value}
-            unit={metric.unit}
-            icon={metric.icon}
-            iconBgColor={metric.iconBgColor}
-            trend={metric.trend}
-            trendIcon={metric.trendIcon}
-            trendColor={metric.trendColor}
-            status={metric.status}
-            statusColor={metric.statusColor}
+            {...metric}
             animationDelay={`${0.35 + index * 0.05}s`}
             isLoaded={isLoaded}
+            detailContent={
+              metric.title === "Weight" ? (
+                <WeightDetail 
+                  weightData={[]} 
+                  currentWeight={metric.value}
+                  weightUnit={metric.unit || "lbs"}
+                />
+              ) : (
+                <div className="p-4">
+                  <p>Detailed view for {metric.title} coming soon...</p>
+                </div>
+              )
+            }
           />
         ))}
       </div>
