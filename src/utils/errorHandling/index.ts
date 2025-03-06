@@ -7,9 +7,19 @@
  * - Documentation: Clear documentation at module level
  */
 
-// Re-export all error handling utilities
+// Export primary types
 export { ErrorSeverity, ErrorGroup, type AppError } from './types';
-export { ErrorLogger } from './ErrorLogger';
+
+// Export main error logger and related utilities
+export { ErrorLogger, withErrorHandling } from './ErrorLogger';
+
+// Export core functionality
+export { errorLoggerCore } from './core/ErrorLoggerCore';
+
+// Export helper functions
+export { fromException } from './helpers/exceptionHelpers';
+
+// Export other error handling utilities
 export { setupGlobalErrorHandlers } from './globalErrorHandlers';
 export { EnhancedErrorBoundary } from './EnhancedErrorBoundary';
 export { ErrorDisplay } from './ErrorDisplay';

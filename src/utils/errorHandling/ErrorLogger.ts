@@ -3,128 +3,33 @@
  * Error Logger Service
  * 
  * Following CodeFarm Development Methodology:
- * - Single Responsibility: Focus on error logging
- * - Sustainable Code: Consistent error recording
+ * - Single Responsibility: Orchestrate error logging components
+ * - Modular Architecture: Delegates to specialized modules
  * - Error Handling: Centralized error reporting
  */
-import { toast } from '@/hooks/use-toast';
-import analytics, { EventCategory, EventPriority } from '../eventTracking';
 import { AppError, ErrorSeverity, ErrorGroup } from './types';
-
-// Maximum number of errors to store in memory
-const MAX_ERROR_BUFFER_SIZE = 50;
+import { errorLoggerCore } from './core/ErrorLoggerCore';
+import { notifyUser } from './notifications/userNotifications';
+import { trackErrorInAnalytics } from './integrations/analyticsIntegration';
+import { fromException } from './helpers/exceptionHelpers';
+export { withErrorHandling } from './higherOrder/withErrorHandling';
 
 /**
  * Centralized error logging service
  * In production, this would send errors to a monitoring service
  */
 export const ErrorLogger = {
-  // In-memory buffer of recent errors for debugging
-  errorBuffer: [] as AppError[],
-  
-  // Add error to buffer, maintaining max size
-  addToBuffer(error: AppError): void {
-    this.errorBuffer.unshift(error);
-    
-    // Keep buffer size under control
-    if (this.errorBuffer.length > MAX_ERROR_BUFFER_SIZE) {
-      this.errorBuffer.pop();
-    }
-  },
-  
   // Central error logging function
   log(error: AppError): void {
-    // Add to in-memory buffer
-    this.addToBuffer(error);
+    // Log through core logger
+    errorLoggerCore.log(error);
     
-    // Prepare context for logging
-    const context = {
-      ...(error.context || {}),
-      timestamp: new Date().toISOString(),
-      errorCode: error.code || 'UNKNOWN',
-      severity: error.severity,
-      group: error.group || ErrorGroup.GENERAL,
-      url: typeof window !== 'undefined' ? window.location.href : undefined,
-      userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : undefined
-    };
-    
-    // Log to console with appropriate level
-    switch (error.severity) {
-      case ErrorSeverity.INFO:
-        console.info(`[INFO] ${error.code || 'INFO'}: ${error.message}`, context);
-        break;
-      case ErrorSeverity.WARNING:
-        console.warn(`[WARNING] ${error.code || 'WARN'}: ${error.message}`, context);
-        break;
-      case ErrorSeverity.ERROR:
-        console.error(`[ERROR] ${error.code || 'ERROR'}: ${error.message}`, context, error.originalError);
-        break;
-      case ErrorSeverity.CRITICAL:
-        console.error(`[CRITICAL] ${error.code || 'CRITICAL'}: ${error.message}`, context, error.originalError);
-        break;
-      default:
-        console.error(`[${error.severity}] ${error.code || 'UNKNOWN'}: ${error.message}`, context);
-    }
-    
-    // Track error in analytics for high-severity issues
-    if (error.severity === ErrorSeverity.ERROR || error.severity === ErrorSeverity.CRITICAL) {
-      analytics.trackEvent({
-        name: 'error_occurred',
-        category: EventCategory.ERROR,
-        priority: error.severity === ErrorSeverity.CRITICAL ? EventPriority.CRITICAL : EventPriority.HIGH,
-        properties: {
-          errorCode: error.code,
-          message: error.message,
-          severity: error.severity,
-          group: error.group,
-          timestamp: new Date().toISOString(),
-          // Don't include full context to avoid sensitive data
-          url: context.url
-        }
-      });
-    }
+    // Track in analytics
+    trackErrorInAnalytics(error);
     
     // Show user-facing notification based on settings
     if (error.shouldNotifyUser) {
-      this.notifyUser(error);
-    }
-  },
-  
-  // Show user-facing notification
-  notifyUser(error: AppError): void {
-    const variant = this.getSeverityVariant(error.severity);
-    
-    toast({
-      variant,
-      title: error.userTitle || this.getDefaultTitleForSeverity(error.severity),
-      description: error.userMessage || error.message,
-    });
-  },
-  
-  // Map severity to toast variant
-  getSeverityVariant(severity: ErrorSeverity): "default" | "destructive" {
-    switch (severity) {
-      case ErrorSeverity.ERROR:
-      case ErrorSeverity.CRITICAL:
-        return "destructive";
-      default:
-        return "default";
-    }
-  },
-  
-  // Get default title based on severity
-  getDefaultTitleForSeverity(severity: ErrorSeverity): string {
-    switch (severity) {
-      case ErrorSeverity.INFO:
-        return "Information";
-      case ErrorSeverity.WARNING:
-        return "Warning";
-      case ErrorSeverity.ERROR:
-        return "Error";
-      case ErrorSeverity.CRITICAL:
-        return "Critical Error";
-      default:
-        return "Notification";
+      notifyUser(error);
     }
   },
   
@@ -178,78 +83,15 @@ export const ErrorLogger = {
   },
   
   // Utility method for creating error from caught exceptions
-  fromException(error: unknown, options: {
-    code?: string;
-    severity?: ErrorSeverity;
-    group?: ErrorGroup;
-    context?: Record<string, any>;
-    shouldNotifyUser?: boolean;
-    userMessage?: string;
-    userTitle?: string;
-  } = {}): AppError {
-    const message = error instanceof Error ? error.message : String(error);
-    
-    return {
-      message,
-      code: options.code || 'EXCEPTION',
-      severity: options.severity || ErrorSeverity.ERROR,
-      group: options.group || ErrorGroup.GENERAL,
-      context: options.context,
-      originalError: error,
-      shouldNotifyUser: options.shouldNotifyUser !== false, // Default to true
-      userMessage: options.userMessage,
-      userTitle: options.userTitle
-    };
-  },
+  fromException,
   
   // Get recent errors for debugging
   getRecentErrors(): AppError[] {
-    return [...this.errorBuffer];
+    return errorLoggerCore.getRecentErrors();
   },
   
   // Clear error buffer
   clearBuffer(): void {
-    this.errorBuffer = [];
+    errorLoggerCore.clearBuffer();
   }
 };
-
-// Create a higher-order function to wrap any function with error handling
-export function withErrorHandling<T extends (...args: any[]) => any>(
-  fn: T,
-  options: {
-    errorCode?: string;
-    severity?: ErrorSeverity;
-    group?: ErrorGroup;
-    shouldNotifyUser?: boolean;
-    userMessage?: string;
-    userTitle?: string;
-    context?: Record<string, any> | ((...args: Parameters<T>) => Record<string, any>);
-  } = {}
-): (...args: Parameters<T>) => ReturnType<T> {
-  return (...args: Parameters<T>): ReturnType<T> => {
-    try {
-      return fn(...args);
-    } catch (error) {
-      // Prepare context
-      const contextData = typeof options.context === 'function'
-        ? options.context(...args)
-        : options.context || {};
-      
-      // Log the error
-      ErrorLogger.log({
-        message: error instanceof Error ? error.message : String(error),
-        code: options.errorCode || 'FUNCTION_ERROR',
-        severity: options.severity || ErrorSeverity.ERROR,
-        group: options.group || ErrorGroup.GENERAL,
-        context: contextData,
-        originalError: error,
-        shouldNotifyUser: options.shouldNotifyUser !== false, // Default to true
-        userMessage: options.userMessage,
-        userTitle: options.userTitle
-      });
-      
-      // Re-throw the error to maintain original behavior
-      throw error;
-    }
-  };
-}
