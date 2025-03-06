@@ -55,18 +55,18 @@ const Dashboard = () => {
         isLoaded={isLoaded} 
       />
 
-      {/* Medication Overview */}
-      <MedicationTracker 
-        medications={medications} 
-        isLoaded={isLoaded} 
-        onViewAll={handleNavigateToMedications} 
-      />
-
-      {/* Today's Metrics */}
+      {/* Today's Metrics - Moved to the top position where Medication Tracker was */}
       <HealthMetrics 
         metrics={transformedHealthMetrics} 
         isLoaded={isLoaded} 
         onViewAll={handleNavigateToHealth} 
+      />
+
+      {/* Medication Overview - Moved down to where Today's Metrics was */}
+      <MedicationTracker 
+        medications={medications} 
+        isLoaded={isLoaded} 
+        onViewAll={handleNavigateToMedications} 
       />
 
       {/* Weight Progress */}
