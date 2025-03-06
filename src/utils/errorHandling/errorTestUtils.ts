@@ -9,6 +9,7 @@
 
 import { ErrorLogger } from './ErrorLogger';
 import { ErrorSeverity } from './types';
+import { errorLoggerCore } from './core/ErrorLoggerCore';
 
 /**
  * Mock error logger for testing
@@ -21,9 +22,13 @@ export const mockErrorLogger = () => {
     warning: ErrorLogger.warning,
     error: ErrorLogger.error,
     critical: ErrorLogger.critical,
-    addToBuffer: ErrorLogger.addToBuffer,
     getRecentErrors: ErrorLogger.getRecentErrors,
     clearBuffer: ErrorLogger.clearBuffer
+  };
+  
+  // Store original core logger methods
+  const originalCoreLogger = {
+    addToBuffer: errorLoggerCore.addToBuffer,
   };
   
   // Create mock functions
@@ -33,7 +38,6 @@ export const mockErrorLogger = () => {
     warning: jest.fn(),
     error: jest.fn(),
     critical: jest.fn(),
-    addToBuffer: jest.fn(),
     getRecentErrors: jest.fn().mockReturnValue([]),
     clearBuffer: jest.fn(),
     restore: () => {
@@ -43,11 +47,16 @@ export const mockErrorLogger = () => {
       ErrorLogger.warning = originalLogger.warning;
       ErrorLogger.error = originalLogger.error;
       ErrorLogger.critical = originalLogger.critical;
-      ErrorLogger.addToBuffer = originalLogger.addToBuffer;
       ErrorLogger.getRecentErrors = originalLogger.getRecentErrors;
       ErrorLogger.clearBuffer = originalLogger.clearBuffer;
+      
+      // Restore core logger methods
+      errorLoggerCore.addToBuffer = originalCoreLogger.addToBuffer;
     }
   };
+  
+  // Mock core methods
+  errorLoggerCore.addToBuffer = jest.fn();
   
   // Replace with mock functions
   ErrorLogger.log = mockedLogger.log;
@@ -55,7 +64,6 @@ export const mockErrorLogger = () => {
   ErrorLogger.warning = mockedLogger.warning;
   ErrorLogger.error = mockedLogger.error;
   ErrorLogger.critical = mockedLogger.critical;
-  ErrorLogger.addToBuffer = mockedLogger.addToBuffer;
   ErrorLogger.getRecentErrors = mockedLogger.getRecentErrors;
   ErrorLogger.clearBuffer = mockedLogger.clearBuffer;
   
