@@ -1,11 +1,10 @@
-
 import React, { lazy, Suspense } from 'react';
 import { Spinner } from '@/components/ui/spinner';
 
 // Loading component for Suspense fallback
 const LoadingScreen = () => (
   <div className="flex h-screen w-full items-center justify-center">
-    <Spinner size="large" />
+    <Spinner size="lg" />
   </div>
 );
 
