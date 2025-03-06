@@ -7,6 +7,10 @@ import { WeightDetail } from "../metrics/details/WeightDetail";
 import { HeartRateDetail } from "../metrics/details/HeartRateDetail";
 import { SleepDetail } from "../metrics/details/SleepDetail";
 import { ActivityDetail } from "../metrics/details/ActivityDetail";
+import { BloodPressureDetail } from "../metrics/details/BloodPressureDetail";
+import { WaterIntakeDetail } from "../metrics/details/WaterIntakeDetail";
+import { CaloriesDetail } from "../metrics/details/CaloriesDetail";
+import { MoodDetail } from "../metrics/details/MoodDetail";
 import { useNavigate } from "react-router-dom";
 import { useMetricPreferences } from "@/hooks/useMetricPreferences";
 
@@ -61,6 +65,33 @@ export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsPro
           <ActivityDetail 
             currentActivity={metric.value}
             unit={metric.unit || "steps"}
+          />
+        );
+      case "blood-pressure":
+        return (
+          <BloodPressureDetail 
+            currentValue={metric.value}
+            unit={metric.unit || "mmHg"}
+          />
+        );
+      case "water-intake":
+        return (
+          <WaterIntakeDetail 
+            currentIntake={metric.value}
+            unit={metric.unit || "L"}
+          />
+        );
+      case "calories":
+        return (
+          <CaloriesDetail
+            currentCalories={metric.value}
+            unit={metric.unit || "kcal"}
+          />
+        );
+      case "mood":
+        return (
+          <MoodDetail
+            currentMood={metric.value}
           />
         );
       default:
