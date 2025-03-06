@@ -9,6 +9,9 @@ export interface MetricOption {
   title: string;
 }
 
+// Maximum number of metrics to show on dashboard
+export const MAX_METRICS = 4;
+
 // Default metrics to show
 const DEFAULT_METRICS = ["weight", "activity", "heart-rate", "sleep"];
 
@@ -42,7 +45,7 @@ export const useMetricPreferences = () => {
         return current.filter(id => id !== metricId);
       } else {
         // Add metric if under limit
-        if (current.length < 4) {
+        if (current.length < MAX_METRICS) {
           return [...current, metricId];
         }
         return current;
@@ -53,6 +56,7 @@ export const useMetricPreferences = () => {
   return {
     availableMetrics: ALL_METRICS,
     selectedMetrics,
-    toggleMetric
+    toggleMetric,
+    MAX_METRICS
   };
 };

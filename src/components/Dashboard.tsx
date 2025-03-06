@@ -36,6 +36,11 @@ const Dashboard = () => {
     };
   });
   
+  // Filter medications based on user preferences
+  const filteredMedications = medications.filter(medication => 
+    selectedMedications.includes(medication.id)
+  );
+
   useEffect(() => {
     setIsLoaded(true);
   }, []);
@@ -74,7 +79,7 @@ const Dashboard = () => {
 
       {/* Medication Overview */}
       <MedicationTracker 
-        medications={medications} 
+        medications={filteredMedications} 
         isLoaded={isLoaded} 
         onViewAll={handleNavigateToMedications} 
       />

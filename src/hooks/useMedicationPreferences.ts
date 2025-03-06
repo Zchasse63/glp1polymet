@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 // Define the default medications to show on dashboard
 const DEFAULT_MEDICATIONS = ['ozempic', 'mounjaro'];
 const STORAGE_KEY = 'dashboard-medications';
-const MAX_MEDICATIONS = 2; // Maximum number of medications on dashboard
+export const MAX_MEDICATIONS = 2; // Maximum number of medications on dashboard
 
 export const useMedicationPreferences = () => {
   // Initialize with either stored preferences or defaults
