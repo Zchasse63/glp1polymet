@@ -1,9 +1,11 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRightIcon } from "lucide-react";
 import { MetricButton } from "../metrics/MetricButton";
 import { WeightDetail } from "../metrics/details/WeightDetail";
+import { HeartRateDetail } from "../metrics/details/HeartRateDetail";
+import { SleepDetail } from "../metrics/details/SleepDetail";
+import { ActivityDetail } from "../metrics/details/ActivityDetail";
 
 type HealthMetricsProps = {
   metrics: {
@@ -23,6 +25,46 @@ type HealthMetricsProps = {
 };
 
 export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsProps) => {
+  const getDetailContent = (metric: { title: string; value: string; unit?: string }) => {
+    switch (metric.title) {
+      case "Weight":
+        return (
+          <WeightDetail 
+            weightData={[]} 
+            currentWeight={metric.value}
+            weightUnit={metric.unit || "lbs"}
+          />
+        );
+      case "Heart Rate":
+        return (
+          <HeartRateDetail 
+            currentRate={metric.value}
+            unit={metric.unit || "bpm"}
+          />
+        );
+      case "Sleep":
+        return (
+          <SleepDetail 
+            currentSleep={metric.value}
+            unit={metric.unit || "hrs"}
+          />
+        );
+      case "Activity":
+        return (
+          <ActivityDetail 
+            currentActivity={metric.value}
+            unit={metric.unit || "steps"}
+          />
+        );
+      default:
+        return (
+          <div className="p-4">
+            <p>Detailed view for {metric.title} coming soon...</p>
+          </div>
+        );
+    }
+  };
+
   return (
     <section 
       className={`space-y-5 opacity-0 ${isLoaded ? "animate-slide-up opacity-100" : ""}`}
@@ -49,19 +91,7 @@ export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsPro
             {...metric}
             animationDelay={`${0.35 + index * 0.05}s`}
             isLoaded={isLoaded}
-            detailContent={
-              metric.title === "Weight" ? (
-                <WeightDetail 
-                  weightData={[]} 
-                  currentWeight={metric.value}
-                  weightUnit={metric.unit || "lbs"}
-                />
-              ) : (
-                <div className="p-4">
-                  <p>Detailed view for {metric.title} coming soon...</p>
-                </div>
-              )
-            }
+            detailContent={getDetailContent(metric)}
           />
         ))}
       </div>
