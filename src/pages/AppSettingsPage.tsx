@@ -5,13 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MoonIcon, SunIcon, BellIcon, GlobeIcon, ClockIcon, LanguagesIcon } from "lucide-react";
+import { MoonIcon, SunIcon, BellIcon, GlobeIcon, ClockIcon, LanguagesIcon, GridIcon } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useMetricPreferences } from "@/hooks/useMetricPreferences";
 
 const AppSettingsPage = () => {
   const [currentPage, setCurrentPage] = React.useState("dashboard");
   const [theme, setTheme] = React.useState<"light" | "dark">("light");
+  const { availableMetrics, selectedMetrics, toggleMetric } = useMetricPreferences();
   
   React.useEffect(() => {
     // Get theme from localStorage
@@ -51,6 +54,44 @@ const AppSettingsPage = () => {
     <Layout currentPage={currentPage} setCurrentPage={setCurrentPage}>
       <div className="p-5 space-y-6">
         <h1 className="text-2xl font-bold">App Settings</h1>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Dashboard Metrics</CardTitle>
+            <CardDescription>Choose which metrics to display on your home screen (max 4)</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {availableMetrics.map((metric) => (
+                <div key={metric.id} className="flex items-center space-x-2">
+                  <Checkbox 
+                    id={`metric-${metric.id}`} 
+                    checked={selectedMetrics.includes(metric.id)}
+                    disabled={!selectedMetrics.includes(metric.id) && selectedMetrics.length >= 4}
+                    onCheckedChange={() => {
+                      toggleMetric(metric.id);
+                      toast({
+                        title: selectedMetrics.includes(metric.id) ? "Metric removed" : "Metric added",
+                        description: selectedMetrics.includes(metric.id) 
+                          ? `${metric.title} removed from dashboard.` 
+                          : `${metric.title} added to dashboard.`
+                      });
+                    }}
+                  />
+                  <Label 
+                    htmlFor={`metric-${metric.id}`}
+                    className="font-medium"
+                  >
+                    {metric.title}
+                  </Label>
+                </div>
+              ))}
+              <p className="text-sm text-muted-foreground mt-4">
+                {selectedMetrics.length} of 4 metrics selected. All metrics are always available on the Health page.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
         
         <Card>
           <CardHeader>

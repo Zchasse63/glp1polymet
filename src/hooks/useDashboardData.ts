@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { TrendingUpIcon, ActivityIcon, HeartIcon, MoonIcon } from "lucide-react";
+import { TrendingUpIcon, ActivityIcon, HeartIcon, MoonIcon, DropletIcon, BrainIcon, CupSodaIcon } from "lucide-react";
 
 export const useDashboardData = () => {
   const [data, setData] = useState({
@@ -50,9 +50,10 @@ export const useDashboardData = () => {
       },
     ];
 
-    // Health metrics data
+    // Health metrics data with IDs matching those in useMetricPreferences
     const healthMetrics = [
       {
+        id: "weight",
         title: "Weight",
         value: "185.6",
         unit: "lbs",
@@ -63,6 +64,7 @@ export const useDashboardData = () => {
         trendColor: "text-green-600 dark:text-green-400",
       },
       {
+        id: "activity",
         title: "Activity",
         value: "6,254",
         unit: "steps",
@@ -73,6 +75,7 @@ export const useDashboardData = () => {
         trendColor: "text-primary",
       },
       {
+        id: "heart-rate",
         title: "Heart Rate",
         value: "72",
         unit: "bpm",
@@ -82,11 +85,43 @@ export const useDashboardData = () => {
         statusColor: "text-green-600 dark:text-green-400",
       },
       {
+        id: "sleep",
         title: "Sleep",
         value: "7h 32m",
         icon: MoonIcon,
         iconBgColor: "hsl(var(--chart-2)/15)",
         trend: "+8%",
+        trendIcon: TrendingUpIcon,
+        trendColor: "text-green-600 dark:text-green-400",
+      },
+      {
+        id: "water-intake",
+        title: "Water Intake",
+        value: "1.5",
+        unit: "L",
+        icon: DropletIcon,
+        iconBgColor: "hsl(var(--chart-5)/15)",
+        trend: "-5%",
+        trendIcon: TrendingUpIcon,
+        trendColor: "text-red-500 dark:text-red-400",
+      },
+      {
+        id: "mood",
+        title: "Mood",
+        value: "Good",
+        icon: BrainIcon,
+        iconBgColor: "hsl(var(--chart-6)/15)",
+        status: "Positive",
+        statusColor: "text-green-600 dark:text-green-400",
+      },
+      {
+        id: "calories",
+        title: "Calories",
+        value: "1,850",
+        unit: "kcal",
+        icon: CupSodaIcon,
+        iconBgColor: "hsl(var(--chart-7)/15)",
+        trend: "-12%",
         trendIcon: TrendingUpIcon,
         trendColor: "text-green-600 dark:text-green-400",
       },
