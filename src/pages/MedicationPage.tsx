@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { useToast } from "@/components/ui/use-toast";
 import { 
@@ -44,8 +44,14 @@ const MedicationPage = () => {
     isLoading, 
     error, 
     addMedication, 
-    deleteMedication 
+    deleteMedication,
+    refetch 
   } = useMedications();
+
+  // Fetch medications on mount
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   // Sample trend data for medication effectiveness chart
   const trendData = [
@@ -121,6 +127,16 @@ const MedicationPage = () => {
         ) : error ? (
           <div className="text-center py-10 text-destructive">
             <p>Error loading medications. Please try again.</p>
+          </div>
+        ) : medications.length === 0 ? (
+          <div className="text-center py-10">
+            <p className="text-muted-foreground">No medications found. Add your first medication.</p>
+            <button 
+              onClick={() => setIsAddingMedication(true)}
+              className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+            >
+              Add Medication
+            </button>
           </div>
         ) : (
           <MedicationList 

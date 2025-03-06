@@ -130,15 +130,21 @@ export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsPro
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        {filteredMetrics.map((metric, index) => (
-          <MetricButton
-            key={metric.id}
-            {...metric}
-            animationDelay={`${0.35 + index * 0.05}s`}
-            isLoaded={isLoaded}
-            detailContent={getDetailContent(metric)}
-          />
-        ))}
+        {filteredMetrics.length > 0 ? (
+          filteredMetrics.map((metric, index) => (
+            <MetricButton
+              key={metric.id}
+              {...metric}
+              animationDelay={`${0.35 + index * 0.05}s`}
+              isLoaded={isLoaded}
+              detailContent={getDetailContent(metric)}
+            />
+          ))
+        ) : (
+          <div className="col-span-2 p-4 text-center text-muted-foreground border rounded-md">
+            No metrics selected for dashboard. Configure in App Settings.
+          </div>
+        )}
       </div>
     </section>
   );

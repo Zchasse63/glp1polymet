@@ -48,6 +48,28 @@ export const useDashboardData = () => {
         totalAmount: "5mg",
         color: "hsl(var(--chart-2))",
       },
+      {
+        id: "metformin",
+        name: "Metformin",
+        dose: "500mg",
+        frequency: "Daily",
+        lastTaken: "Yesterday",
+        nextDose: "Today",
+        level: "30mg",
+        totalAmount: "60mg",
+        color: "hsl(var(--chart-3))",
+      },
+      {
+        id: "vitamin-d",
+        name: "Vitamin D",
+        dose: "2000IU",
+        frequency: "Daily",
+        lastTaken: "Today",
+        nextDose: "Tomorrow",
+        level: "30 pills",
+        totalAmount: "60 pills",
+        color: "hsl(var(--chart-4))",
+      },
     ];
 
     // Health metrics data with IDs matching those in useMetricPreferences

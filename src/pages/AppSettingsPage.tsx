@@ -1,54 +1,38 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MoonIcon, SunIcon, BellIcon, GlobeIcon, ClockIcon, LanguagesIcon, GridIcon } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "@/components/ui/use-toast";
+import { useTheme } from "@/contexts/ThemeContext";
+import { Badge } from "@/components/ui/badge";
 import { useMetricPreferences } from "@/hooks/useMetricPreferences";
+import { useMedicationPreferences } from "@/hooks/useMedicationPreferences";
+import { useDashboardData } from "@/hooks/useDashboardData";
 
 const AppSettingsPage = () => {
-  const [currentPage, setCurrentPage] = React.useState("dashboard");
-  const [theme, setTheme] = React.useState<"light" | "dark">("light");
-  const { availableMetrics, selectedMetrics, toggleMetric } = useMetricPreferences();
-  
-  React.useEffect(() => {
-    // Get theme from localStorage
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      setTheme("dark");
-    } else {
-      setTheme("light");
-    }
-  }, []);
+  const [currentPage, setCurrentPage] = useState("settings");
+  const { theme, toggleTheme } = useTheme();
+  const { selectedMetrics, toggleMetric, MAX_METRICS } = useMetricPreferences();
+  const { selectedMedications, toggleMedication, MAX_MEDICATIONS } = useMedicationPreferences();
+  const { healthMetrics, medications } = useDashboardData();
 
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-    
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    
+  // Handle save settings
+  const handleSaveSettings = () => {
     toast({
-      title: "Theme updated",
-      description: `Changed to ${newTheme} theme.`
+      title: "Settings saved",
+      description: "Your preferences have been saved successfully."
     });
   };
 
-  const handleNotificationToggle = () => {
-    toast({
-      title: "Notifications updated",
-      description: "Your notification preferences have been saved."
-    });
-  };
+  // Create map of metrics for easy lookup
+  const metricsMap = healthMetrics.reduce((acc, metric) => {
+    acc[metric.id] = metric;
+    return acc;
+  }, {} as Record<string, any>);
 
   return (
     <Layout currentPage={currentPage} setCurrentPage={setCurrentPage}>
@@ -57,179 +41,132 @@ const AppSettingsPage = () => {
         
         <Card>
           <CardHeader>
-            <CardTitle>Dashboard Metrics</CardTitle>
-            <CardDescription>Choose which metrics to display on your home screen (max 4)</CardDescription>
+            <CardTitle>Theme</CardTitle>
+            <CardDescription>Customize the appearance of the app</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {availableMetrics.map((metric) => (
-                <div key={metric.id} className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={`metric-${metric.id}`} 
-                    checked={selectedMetrics.includes(metric.id)}
-                    disabled={!selectedMetrics.includes(metric.id) && selectedMetrics.length >= 4}
-                    onCheckedChange={() => {
-                      toggleMetric(metric.id);
-                      toast({
-                        title: selectedMetrics.includes(metric.id) ? "Metric removed" : "Metric added",
-                        description: selectedMetrics.includes(metric.id) 
-                          ? `${metric.title} removed from dashboard.` 
-                          : `${metric.title} added to dashboard.`
-                      });
-                    }}
-                  />
-                  <Label 
-                    htmlFor={`metric-${metric.id}`}
-                    className="font-medium"
-                  >
-                    {metric.title}
-                  </Label>
-                </div>
-              ))}
-              <p className="text-sm text-muted-foreground mt-4">
-                {selectedMetrics.length} of 4 metrics selected. All metrics are always available on the Health page.
-              </p>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="dark-mode">Dark Mode</Label>
+                <p className="text-sm text-muted-foreground">Enable dark mode for the app</p>
+              </div>
+              <Switch 
+                id="dark-mode" 
+                checked={theme === "dark"}
+                onCheckedChange={toggleTheme}
+              />
             </div>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader>
-            <CardTitle>Appearance</CardTitle>
-            <CardDescription>Customize how the app looks and feels</CardDescription>
+            <CardTitle>Dashboard Health Metrics</CardTitle>
+            <CardDescription>Select up to {MAX_METRICS} metrics to display on your dashboard</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                {theme === "light" ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
-                <div>
-                  <p className="font-medium">Dark Mode</p>
-                  <p className="text-sm text-muted-foreground">Toggle between light and dark theme</p>
+          <CardContent>
+            <div className="space-y-3">
+              {healthMetrics.map((metric) => (
+                <div key={metric.id} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center justify-center w-6 h-6 rounded-full" style={{ backgroundColor: metric.iconBgColor }}>
+                      {React.createElement(metric.icon, { className: 'h-3 w-3 text-primary' })}
+                    </div>
+                    <span>{metric.title}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {selectedMetrics.includes(metric.id) && (
+                      <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20">
+                        Selected
+                      </Badge>
+                    )}
+                    <Switch 
+                      checked={selectedMetrics.includes(metric.id)}
+                      onCheckedChange={() => toggleMetric(metric.id)}
+                      disabled={!selectedMetrics.includes(metric.id) && selectedMetrics.length >= MAX_METRICS}
+                    />
+                  </div>
                 </div>
-              </div>
-              <Switch checked={theme === "dark"} onCheckedChange={toggleTheme} />
+              ))}
             </div>
             
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <GlobeIcon className="h-5 w-5" />
-                <div>
-                  <p className="font-medium">Language</p>
-                  <p className="text-sm text-muted-foreground">Select your preferred language</p>
+            <p className="text-xs text-muted-foreground mt-4">
+              {selectedMetrics.length}/{MAX_METRICS} metrics selected
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Dashboard Medications</CardTitle>
+            <CardDescription>Select up to {MAX_MEDICATIONS} medications to display on your dashboard</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {medications.map((medication) => (
+                <div key={medication.id} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div 
+                      className="flex items-center justify-center w-6 h-6 rounded-full" 
+                      style={{ backgroundColor: `${medication.color}15` }}
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={medication.color} strokeWidth="2">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                      </svg>
+                    </div>
+                    <span>{medication.name}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {selectedMedications.includes(medication.id) && (
+                      <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20">
+                        Selected
+                      </Badge>
+                    )}
+                    <Switch 
+                      checked={selectedMedications.includes(medication.id)}
+                      onCheckedChange={() => toggleMedication(medication.id)}
+                      disabled={!selectedMedications.includes(medication.id) && selectedMedications.length >= MAX_MEDICATIONS}
+                    />
+                  </div>
                 </div>
-              </div>
-              <Select defaultValue="en">
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select language" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="es">Spanish</SelectItem>
-                  <SelectItem value="fr">French</SelectItem>
-                  <SelectItem value="de">German</SelectItem>
-                </SelectContent>
-              </Select>
+              ))}
             </div>
+            
+            <p className="text-xs text-muted-foreground mt-4">
+              {selectedMedications.length}/{MAX_MEDICATIONS} medications selected
+            </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader>
             <CardTitle>Notifications</CardTitle>
-            <CardDescription>Configure your notification preferences</CardDescription>
+            <CardDescription>Manage your notification preferences</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <BellIcon className="h-5 w-5" />
-                <div>
-                  <p className="font-medium">Push Notifications</p>
-                  <p className="text-sm text-muted-foreground">Receive notifications on your device</p>
-                </div>
+              <div>
+                <Label htmlFor="medication-reminder">Medication Reminders</Label>
+                <p className="text-sm text-muted-foreground">Receive reminders to take your medication</p>
               </div>
-              <Switch defaultChecked onCheckedChange={handleNotificationToggle} />
+              <Switch id="medication-reminder" defaultChecked />
             </div>
             
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <ClockIcon className="h-5 w-5" />
-                <div>
-                  <p className="font-medium">Medication Reminders</p>
-                  <p className="text-sm text-muted-foreground">Receive reminders for medication schedules</p>
-                </div>
-              </div>
-              <Switch defaultChecked onCheckedChange={handleNotificationToggle} />
-            </div>
+            <Separator />
             
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <LanguagesIcon className="h-5 w-5" />
-                <div>
-                  <p className="font-medium">Email Notifications</p>
-                  <p className="text-sm text-muted-foreground">Receive updates via email</p>
-                </div>
+              <div>
+                <Label htmlFor="weight-updates">Weight Updates</Label>
+                <p className="text-sm text-muted-foreground">Receive updates about your weight progress</p>
               </div>
-              <Switch onCheckedChange={handleNotificationToggle} />
+              <Switch id="weight-updates" defaultChecked />
             </div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Data & Privacy</CardTitle>
-            <CardDescription>Manage your data and privacy settings</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Data Export</p>
-                <p className="text-sm text-muted-foreground">Download all your personal data</p>
-              </div>
-              <Button 
-                variant="outline" 
-                onClick={() => toast({
-                  title: "Data export initiated",
-                  description: "Your data will be emailed to you shortly."
-                })}
-              >
-                Export Data
-              </Button>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Clear Local Data</p>
-                <p className="text-sm text-muted-foreground">Delete all locally stored data</p>
-              </div>
-              <Button 
-                variant="outline" 
-                onClick={() => toast({
-                  title: "Local data cleared",
-                  description: "All locally stored data has been deleted."
-                })}
-              >
-                Clear Data
-              </Button>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-red-500 dark:text-red-400">Delete Account</p>
-                <p className="text-sm text-muted-foreground">Permanently delete your account and all data</p>
-              </div>
-              <Button 
-                variant="destructive"
-                onClick={() => toast({
-                  variant: "destructive",
-                  title: "Account deletion",
-                  description: "Please contact support to delete your account."
-                })}
-              >
-                Delete Account
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex justify-end">
+          <Button onClick={handleSaveSettings}>Save Settings</Button>
+        </div>
       </div>
     </Layout>
   );

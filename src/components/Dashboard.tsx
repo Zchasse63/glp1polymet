@@ -6,6 +6,8 @@ import MedicationTracker from "./dashboard/MedicationTracker";
 import HealthMetrics from "./dashboard/HealthMetrics";
 import WeightProgress from "./dashboard/WeightProgress";
 import { useDashboardData } from "../hooks/useDashboardData";
+import { useMetricPreferences } from "@/hooks/useMetricPreferences";
+import { useMedicationPreferences } from "@/hooks/useMedicationPreferences";
 
 const Dashboard = () => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -15,6 +17,10 @@ const Dashboard = () => {
     medications, 
     healthMetrics 
   } = useDashboardData();
+  
+  // Use preferences hooks for metrics and medications
+  const { selectedMetrics } = useMetricPreferences();
+  const { selectedMedications } = useMedicationPreferences();
   
   // Transform the health metrics to include the JSX elements
   const transformedHealthMetrics = healthMetrics.map(metric => {
@@ -43,6 +49,10 @@ const Dashboard = () => {
     navigate("/health");
   };
   
+  const handleNavigateToSettings = () => {
+    navigate("/settings");
+  };
+  
   const handleViewDetails = () => {
     navigate("/health");
   };
@@ -55,14 +65,14 @@ const Dashboard = () => {
         isLoaded={isLoaded} 
       />
 
-      {/* Today's Metrics - Moved to the top position where Medication Tracker was */}
+      {/* Today's Metrics */}
       <HealthMetrics 
         metrics={transformedHealthMetrics} 
         isLoaded={isLoaded} 
         onViewAll={handleNavigateToHealth} 
       />
 
-      {/* Medication Overview - Moved down to where Today's Metrics was */}
+      {/* Medication Overview */}
       <MedicationTracker 
         medications={medications} 
         isLoaded={isLoaded} 
