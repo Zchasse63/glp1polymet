@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronRightIcon, SlidersIcon } from "lucide-react";
+import { ChevronRightIcon } from "lucide-react";
 import { MetricButton } from "../metrics/MetricButton";
 import { WeightDetail } from "../metrics/details/WeightDetail";
 import { HeartRateDetail } from "../metrics/details/HeartRateDetail";
@@ -12,6 +12,7 @@ import { useMetricPreferences } from "@/hooks/useMetricPreferences";
 
 type HealthMetricsProps = {
   metrics: {
+    id: string;
     title: string;
     value: string;
     unit?: string;
@@ -31,9 +32,9 @@ export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsPro
   const navigate = useNavigate();
   const { selectedMetrics } = useMetricPreferences();
   
-  const getDetailContent = (metric: { title: string; value: string; unit?: string }) => {
-    switch (metric.title) {
-      case "Weight":
+  const getDetailContent = (metric: { id: string; title: string; value: string; unit?: string }) => {
+    switch (metric.id) {
+      case "weight":
         return (
           <WeightDetail 
             weightData={[]} 
@@ -41,21 +42,21 @@ export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsPro
             weightUnit={metric.unit || "lbs"}
           />
         );
-      case "Heart Rate":
+      case "heart-rate":
         return (
           <HeartRateDetail 
             currentRate={metric.value}
             unit={metric.unit || "bpm"}
           />
         );
-      case "Sleep":
+      case "sleep":
         return (
           <SleepDetail 
             currentSleep={metric.value}
             unit={metric.unit || "hrs"}
           />
         );
-      case "Activity":
+      case "activity":
         return (
           <ActivityDetail 
             currentActivity={metric.value}
@@ -72,14 +73,9 @@ export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsPro
   };
 
   // Filter metrics based on user preferences
-  const filteredMetrics = metrics.filter(metric => {
-    const metricId = metric.title.toLowerCase().replace(/\s+/g, '-');
-    return selectedMetrics.includes(metricId);
-  });
-
-  const handleConfigureMetrics = () => {
-    navigate("/settings");
-  };
+  const filteredMetrics = metrics.filter(metric => 
+    selectedMetrics.includes(metric.id)
+  );
 
   return (
     <section 
@@ -91,14 +87,6 @@ export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsPro
           Today's Metrics
         </h2>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center hover:bg-secondary/10"
-            onClick={handleConfigureMetrics}
-          >
-            <SlidersIcon className="h-4 w-4 mr-1" /> Configure
-          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -113,7 +101,7 @@ export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsPro
       <div className="grid grid-cols-2 gap-3">
         {filteredMetrics.map((metric, index) => (
           <MetricButton
-            key={metric.title}
+            key={metric.id}
             {...metric}
             animationDelay={`${0.35 + index * 0.05}s`}
             isLoaded={isLoaded}

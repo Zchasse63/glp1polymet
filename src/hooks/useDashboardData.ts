@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { TrendingUpIcon, ActivityIcon, HeartIcon, MoonIcon, DropletIcon, BrainIcon, CupSodaIcon } from "lucide-react";
+import { TrendingUpIcon, ActivityIcon, HeartIcon, MoonIcon, DropletIcon, BrainIcon, CupSodaIcon, ActivitySquareIcon } from "lucide-react";
 
 export const useDashboardData = () => {
   const [data, setData] = useState({
@@ -124,6 +124,16 @@ export const useDashboardData = () => {
         trend: "-12%",
         trendIcon: TrendingUpIcon,
         trendColor: "text-green-600 dark:text-green-400",
+      },
+      {
+        id: "blood-pressure",
+        title: "Blood Pressure",
+        value: "120/80",
+        unit: "mmHg",
+        icon: ActivitySquareIcon,
+        iconBgColor: "hsl(var(--chart-8)/15)",
+        status: "Normal",
+        statusColor: "text-green-600 dark:text-green-400",
       },
     ];
 
