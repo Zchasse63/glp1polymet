@@ -1,4 +1,3 @@
-
 /**
  * Main Application Component
  * 
@@ -21,13 +20,14 @@ import { AppRoutes } from "./routes/AppRoutes";
 import { EnhancedErrorBoundary, setupGlobalErrorHandlers } from "./utils/errorHandling";
 import { createQueryClient } from "./lib/queryClient";
 import { useEffect } from "react";
-import { initPerformanceMonitoring } from "./utils/performance"; // Updated import path
+import { initPerformanceMonitoring } from "./utils/performance";
 import { useSkipLink } from "./utils/accessibilityUtils";
+import { initMobileListeners } from './utils/mobileUtils';
 
 // Create a QueryClient instance with enhanced configuration
 const queryClient = createQueryClient();
 
-const App = () => {
+function App() {
   // Set up global error handlers
   useEffect(() => {
     setupGlobalErrorHandlers();
