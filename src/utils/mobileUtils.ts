@@ -7,13 +7,13 @@
  * - Sustainable Code: Consistent mobile integration
  */
 import { App } from '@capacitor/app';
-import { isPlatform } from '@capacitor/core';
+import { Capacitor } from '@capacitor/core';
 
 /**
  * Check if app is running on a mobile device via Capacitor
  */
 export const isMobileApp = (): boolean => {
-  return isPlatform('ios') || isPlatform('android');
+  return Capacitor.isNativePlatform() && (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android');
 };
 
 /**
