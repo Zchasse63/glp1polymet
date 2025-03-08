@@ -1,3 +1,4 @@
+
 /**
  * Main Application Component
  * 
@@ -32,6 +33,9 @@ function App() {
   useEffect(() => {
     setupGlobalErrorHandlers();
     initPerformanceMonitoring();
+    
+    // Initialize mobile listeners for Capacitor
+    initMobileListeners();
   }, []);
   
   // Add skip link for keyboard accessibility
