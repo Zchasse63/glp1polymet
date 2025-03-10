@@ -16,20 +16,7 @@ import MedicationEffectivenessChart from "@/components/medication/MedicationEffe
 import { useMedications } from "@/hooks/useMedications";
 import { Spinner } from "@/components/ui/spinner";
 import { ErrorLogger } from "@/utils/errorHandling";
-
-// Define the medication type
-export interface Medication {
-  id: string;
-  name: string;
-  dose: string;
-  frequency: string;
-  lastTaken: string;
-  nextDose: string;
-  level: number;
-  totalDose?: number;
-  unit?: string;
-  color: string;
-}
+import { Medication } from "@/types/medication";
 
 const generateRandomColor = () => {
   const colors = ["#4f46e5", "#0ea5e9", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899"];

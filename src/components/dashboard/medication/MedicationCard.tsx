@@ -27,6 +27,9 @@ export const MedicationCard = ({
   const totalAmountValue = med.totalAmount ? 
     (typeof med.totalAmount === 'string' ? parseFloat(med.totalAmount) : med.totalAmount) : 
     100;
+    
+  // Calculate the percentage value for the progress bar
+  const progressValue = Math.min(100, Math.max(0, (levelValue / totalAmountValue) * 100));
 
   return (
     <Card
@@ -54,7 +57,7 @@ export const MedicationCard = ({
 
           <div className="flex-1 mx-6 max-w-xs">
             <Progress
-              value={(levelValue / totalAmountValue) * 100}
+              value={progressValue}
               className="h-2 mb-1 rounded-full"
               style={
                 {
