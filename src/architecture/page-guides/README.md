@@ -11,6 +11,8 @@ The page buildout documentation is organized into these focused guides:
 - [Implementation Patterns](./ImplementationPatterns.md) - Code patterns for different page types
 - [Testing Standards](./TestingStandards.md) - Quality assurance checklist for pages
 - [Component Structure](./ComponentStructureGuide.md) - Organization of page-specific components
+- [Component Patterns](./ComponentPatterns.md) - Reusable component composition patterns
+- [Directory Organization](./DirectoryOrganization.md) - File organization standards for pages
 
 Each document provides detailed guidelines and code examples to follow when developing new pages or refactoring existing ones.
 
