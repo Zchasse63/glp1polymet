@@ -1,5 +1,5 @@
 
-import { User } from "@/contexts/AuthContext";
+import { AuthUser } from "@/contexts/AuthContext";
 import { generateId } from "@/lib/utils";
 
 /**
@@ -41,7 +41,7 @@ export interface RegistrationData {
  */
 class AuthService {
   // Store the user in memory for the session
-  private currentUser: User | null = null;
+  private currentUser: AuthUser | null = null;
   
   constructor() {
     // Initialize by checking localStorage on service instantiation
@@ -67,14 +67,14 @@ class AuthService {
   /**
    * Login with email and password
    */
-  async login(credentials: AuthCredentials): Promise<ServiceResponse<User>> {
+  async login(credentials: AuthCredentials): Promise<ServiceResponse<AuthUser>> {
     try {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 500));
       
       // Mock authentication logic for demonstration
       if (credentials.email.includes("test") && credentials.password === "password") {
-        const user: User = {
+        const user: AuthUser = {
           id: generateId(),
           username: credentials.email.split("@")[0],
           email: credentials.email,
@@ -98,14 +98,14 @@ class AuthService {
   /**
    * Login with SSO provider
    */
-  async loginWithSSO(provider: string): Promise<ServiceResponse<User>> {
+  async loginWithSSO(provider: string): Promise<ServiceResponse<AuthUser>> {
     try {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 500));
       
       // Mock SSO authentication for demonstration
       const mockEmail = `user_${generateId()}@example.com`;
-      const user: User = {
+      const user: AuthUser = {
         id: generateId(),
         username: `user_${generateId()}`,
         email: mockEmail,
@@ -127,13 +127,13 @@ class AuthService {
   /**
    * Register a new user
    */
-  async register(data: RegistrationData): Promise<ServiceResponse<User>> {
+  async register(data: RegistrationData): Promise<ServiceResponse<AuthUser>> {
     try {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 500));
       
       // Mock registration logic for demonstration
-      const user: User = {
+      const user: AuthUser = {
         id: generateId(),
         username: data.username,
         email: data.email,
@@ -162,7 +162,7 @@ class AuthService {
   /**
    * Get the current authenticated user
    */
-  getCurrentUser(): User | null {
+  getCurrentUser(): AuthUser | null {
     return this.currentUser;
   }
   
