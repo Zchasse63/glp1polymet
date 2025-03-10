@@ -26,7 +26,7 @@ export const MedicationCard = ({
     <Card
       key={med.id}
       className={cn(
-        "w-full overflow-hidden border-0 shadow-md opacity-0 cursor-pointer transform transition-all duration-200 hover:shadow-lg hover:scale-[1.02]",
+        "w-full overflow-hidden card-hover opacity-0 cursor-pointer transform transition-all duration-200 hover:shadow-md hover:scale-[1.02]",
         isLoaded ? "animate-scale-in opacity-100" : ""
       )}
       style={{ 
