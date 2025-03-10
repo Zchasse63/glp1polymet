@@ -69,7 +69,7 @@ const MedicationCard = memo(({
             />
             <div className="flex justify-between text-xs">
               <span className="text-muted-foreground">
-                {med.level} / {med.totalDose || 100}
+                {med.level} {med.totalDose || 100}
               </span>
             </div>
           </div>
