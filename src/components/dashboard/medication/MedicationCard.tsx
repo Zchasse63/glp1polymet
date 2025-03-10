@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ClockIcon, PillIcon, HeartPulseIcon, BrainIcon, ActivityIcon, TabletIcon } from "lucide-react";
+import { ClockIcon } from "lucide-react";
 import { Medication } from "@/types/medication";
 
 interface MedicationCardProps {
@@ -21,43 +21,6 @@ export const MedicationCard = ({
   // Animation delay utility
   const getAnimationDelay = (index: number) => `${index * 0.05}s`;
 
-  // Function to generate a gradient background based on medication color
-  const generateGradientStyle = (color: string) => {
-    return {
-      background: `linear-gradient(135deg, ${color}30, ${color}60)`,
-      borderRadius: '50%',
-      padding: '12px',
-      boxShadow: `0 4px 10px ${color}40`,
-    };
-  };
-
-  // Function to generate icon style
-  const generateIconStyle = (color: string) => {
-    return {
-      color: color,
-      filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2))',
-    };
-  };
-
-  // Function to get appropriate icon based on medication ID
-  const getMedicationIcon = (medicationId: string) => {
-    // Use different icons based on the first character of medication ID for demo variation
-    const firstChar = medicationId.charAt(0).toLowerCase();
-    
-    switch(true) {
-      case firstChar <= 'd':
-        return <PillIcon className="h-5 w-5 transition-all animate-pulse-subtle" />;
-      case firstChar <= 'h':
-        return <HeartPulseIcon className="h-5 w-5 transition-all animate-pulse-subtle" />;
-      case firstChar <= 'l':
-        return <BrainIcon className="h-5 w-5 transition-all animate-pulse-subtle" />;
-      case firstChar <= 'p':
-        return <TabletIcon className="h-5 w-5 transition-all animate-pulse-subtle" />;
-      default:
-        return <ActivityIcon className="h-5 w-5 transition-all animate-pulse-subtle" />;
-    }
-  };
-
   return (
     <Card
       key={med.id}
@@ -73,12 +36,6 @@ export const MedicationCard = ({
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <div className="w-12 h-12 mr-4 flex items-center justify-center"
-              style={generateGradientStyle(med.color)}>
-              {React.cloneElement(getMedicationIcon(med.id), {
-                style: generateIconStyle(med.color)
-              })}
-            </div>
             <div>
               <h3 className="text-base font-semibold text-foreground">
                 {med.name}
