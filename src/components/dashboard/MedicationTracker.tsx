@@ -60,7 +60,7 @@ export const MedicationTracker = ({ medications, isLoaded, onViewAll }: Medicati
         </Button>
       </div>
 
-      <div className="grid grid-cols-4 gap-2">
+      <div className="flex flex-col space-y-2">
         {filteredMedications.length > 0 ? (
           filteredMedications.map((med, index) => (
             <Card
@@ -73,49 +73,56 @@ export const MedicationTracker = ({ medications, isLoaded, onViewAll }: Medicati
               }}
               onClick={() => setSelectedMedication(med)}
             >
-              <CardContent className="p-2">
-                <div className="flex items-center mb-1.5">
-                  <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center mr-1.5"
-                    style={{ backgroundColor: `${med.color}15` }}
-                  >
-                    <PillIcon
-                      className="h-3 w-3"
-                      style={{ color: med.color }}
+              <CardContent className="p-2 py-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center flex-1">
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center mr-3"
+                      style={{ backgroundColor: `${med.color}15` }}
+                    >
+                      <PillIcon
+                        className="h-4 w-4"
+                        style={{ color: med.color }}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-sm font-medium">
+                        {med.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        {med.dose}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 mx-4">
+                    <Progress
+                      value={(parseFloat(med.level) / parseFloat(med.totalAmount)) * 100}
+                      className="h-1.5 mb-1"
+                      style={
+                        {
+                          backgroundColor: `${med.color}20`,
+                          "--progress-background": med.color,
+                        } as React.CSSProperties
+                      }
                     />
+                    <div className="flex justify-between text-[10px]">
+                      <span className="text-muted-foreground">
+                        {med.level} / {med.totalAmount}
+                      </span>
+                    </div>
                   </div>
-                  <div className="overflow-hidden">
-                    <h3 className="text-xs font-medium truncate">
-                      {med.name}
-                    </h3>
-                    <p className="text-[10px] text-muted-foreground truncate">
-                      {med.dose}
-                    </p>
-                  </div>
-                </div>
 
-                <Progress
-                  value={(parseFloat(med.level) / parseFloat(med.totalAmount)) * 100}
-                  className="h-1 mb-1.5"
-                  style={
-                    {
-                      backgroundColor: `${med.color}20`,
-                      "--progress-background": med.color,
-                    } as React.CSSProperties
-                  }
-                />
-
-                <div className="flex justify-between text-[10px]">
-                  <div className="flex items-center text-muted-foreground">
-                    <ClockIcon className="h-2.5 w-2.5 mr-0.5" />
-                    <span className="truncate">Next: {med.nextDose}</span>
+                  <div className="flex items-center text-xs text-muted-foreground">
+                    <ClockIcon className="h-3 w-3 mr-1" />
+                    <span>Next: {med.nextDose}</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
           ))
         ) : (
-          <div className="text-center col-span-4 text-muted-foreground p-4">
+          <div className="text-center text-muted-foreground p-4">
             No medications selected for dashboard. Configure in App Settings.
           </div>
         )}
