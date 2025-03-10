@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import MedicationDetailChart from "../MedicationDetailChart";
 import { Medication } from "@/types/medication";
-import MedicationIcon from "./MedicationIcon";
+import { PillIcon, HeartPulseIcon, BrainIcon, ActivityIcon, TabletIcon } from "lucide-react";
 
 interface MedicationDetailDialogProps {
   selectedMedication: Medication | null;
@@ -19,6 +19,43 @@ const MedicationDetailDialog = ({
   selectedMedication, 
   onOpenChange 
 }: MedicationDetailDialogProps) => {
+  // Function to generate a gradient background based on medication color
+  const generateGradientStyle = (color: string) => {
+    return {
+      background: `linear-gradient(135deg, ${color}30, ${color}60)`,
+      borderRadius: '50%',
+      padding: '12px',
+      boxShadow: `0 4px 10px ${color}40`,
+    };
+  };
+
+  // Function to generate icon style
+  const generateIconStyle = (color: string) => {
+    return {
+      color: color,
+      filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2))',
+    };
+  };
+
+  // Function to get appropriate icon based on medication ID
+  const getMedicationIcon = (medicationId: string) => {
+    // Use different icons based on the first character of medication ID for demo variation
+    const firstChar = medicationId.charAt(0).toLowerCase();
+    
+    switch(true) {
+      case firstChar <= 'd':
+        return <PillIcon className="h-5 w-5 transition-all animate-pulse-subtle" />;
+      case firstChar <= 'h':
+        return <HeartPulseIcon className="h-5 w-5 transition-all animate-pulse-subtle" />;
+      case firstChar <= 'l':
+        return <BrainIcon className="h-5 w-5 transition-all animate-pulse-subtle" />;
+      case firstChar <= 'p':
+        return <TabletIcon className="h-5 w-5 transition-all animate-pulse-subtle" />;
+      default:
+        return <ActivityIcon className="h-5 w-5 transition-all animate-pulse-subtle" />;
+    }
+  };
+
   return (
     <Dialog open={!!selectedMedication} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -26,12 +63,13 @@ const MedicationDetailDialog = ({
           <DialogTitle className="flex items-center">
             {selectedMedication && (
               <>
-                <div className="w-10 h-10 mr-2">
-                  <MedicationIcon 
-                    medicationId={selectedMedication.id} 
-                    color={selectedMedication.color}
-                    size={5}
-                  />
+                <div 
+                  className="w-10 h-10 mr-2 flex items-center justify-center"
+                  style={generateGradientStyle(selectedMedication.color)}
+                >
+                  {React.cloneElement(getMedicationIcon(selectedMedication.id), {
+                    style: generateIconStyle(selectedMedication.color)
+                  })}
                 </div>
                 {selectedMedication.name}
               </>
