@@ -29,6 +29,7 @@ The codebase is structured around these key personas:
 - Personalized recommendations
 - Comprehensive accessibility support
 - Robust error handling and logging
+- Universal page buildout standards
 
 ## Technology Stack
 
@@ -40,6 +41,7 @@ This project is built with:
 - **Charting**: Recharts
 - **Authentication**: Supabase Auth
 - **Data Storage**: Supabase PostgreSQL
+- **Mobile**: Capacitor for iOS/Android
 
 ## Project Structure
 
@@ -86,6 +88,7 @@ For more details about the application architecture, refer to:
 - [Accessibility Guidelines](./src/architecture/AccessibilityGuidelines.md)
 - [Component Patterns](./src/architecture/component-patterns/README.md)
 - [Architectural Decision Records](./src/architecture/ADR.md)
+- [Universal Page Buildout Guide](./src/architecture/PageBuildoutGuide.md)
 
 ## Error Handling Framework
 
@@ -106,6 +109,15 @@ We prioritize accessibility through:
 - Screen reader compatibility
 - Reduced motion accommodations
 - High contrast mode support
+
+## Mobile Support
+
+The application includes mobile support via Capacitor:
+
+- Native iOS and Android builds
+- Mobile-specific event listeners
+- Responsive UI optimized for mobile
+- Device information detection
 
 ## Deployment
 
