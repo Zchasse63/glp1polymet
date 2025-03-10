@@ -10,10 +10,14 @@ export const useMedications = () => {
   const [medications, setMedications] = useState<Medication[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [isFetched, setIsFetched] = useState(false); // Add a flag to track if data has been fetched
   const { user } = useAuth();
 
   // Use useCallback to prevent unnecessary recreation of this function
   const fetchMedications = useCallback(async () => {
+    // Skip fetching if we've already fetched the data once
+    if (isFetched) return;
+    
     try {
       setIsLoading(true);
       
@@ -22,19 +26,44 @@ export const useMedications = () => {
         const demoMedications = getDemoMedications();
         setMedications(demoMedications);
         setError(null);
-        return;
+      } else {
+        const data = await medicationService.fetchMedications(user.id);
+        setMedications(data);
+        setError(null);
       }
-
-      const data = await medicationService.fetchMedications(user.id);
-      setMedications(data);
-      setError(null);
+      
+      // Mark data as fetched
+      setIsFetched(true);
     } catch (err) {
       console.error('Error fetching medications:', err);
       setError(err instanceof Error ? err : new Error('Failed to fetch medications'));
     } finally {
       setIsLoading(false);
     }
-  }, [user]); // Only depend on user changes
+  }, [user, isFetched]); // Include isFetched in the dependencies
+
+  // Force refetch function that bypasses the isFetched check
+  const refetch = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      
+      // For demo purposes, if there's no authenticated user, return demo data
+      if (!user) {
+        const demoMedications = getDemoMedications();
+        setMedications(demoMedications);
+        setError(null);
+      } else {
+        const data = await medicationService.fetchMedications(user.id);
+        setMedications(data);
+        setError(null);
+      }
+    } catch (err) {
+      console.error('Error fetching medications:', err);
+      setError(err instanceof Error ? err : new Error('Failed to fetch medications'));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
 
   // Add a new medication
   const addMedication = async (medication: Omit<Medication, 'id'>) => {
@@ -127,20 +156,18 @@ export const useMedications = () => {
 
   // Show a notification when in demo mode - only once when component mounts
   useEffect(() => {
-    if (!user && !isLoading) {
+    if (!user && !isLoading && medications.length > 0) {
       toast({
         title: "Demo Mode",
         description: "You're viewing demo medications. Sign in to manage your own medications.",
       });
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, medications.length]);
 
   // Fetch medications ONLY when user changes or component mounts
-  // This prevents continuous refetching
   useEffect(() => {
     fetchMedications();
-    // No dependency on fetchMedications which would cause an infinite loop
-  }, [user]);
+  }, [fetchMedications]);
 
   return {
     medications,
@@ -149,6 +176,6 @@ export const useMedications = () => {
     addMedication,
     deleteMedication,
     updateMedication,
-    refetch: fetchMedications
+    refetch
   };
 };

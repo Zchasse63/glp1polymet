@@ -46,6 +46,12 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     }
   };
 
+  const useDemoAccount = () => {
+    form.setValue("email", "test@example.com");
+    form.setValue("password", "password");
+    form.handleSubmit(onSubmit)();
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-2 text-center">
@@ -114,6 +120,15 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
           <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? "Logging in..." : "Login"}
+          </Button>
+          
+          <Button 
+            type="button" 
+            variant="outline" 
+            className="w-full" 
+            onClick={useDemoAccount}
+          >
+            Use Demo Account
           </Button>
         </form>
       </Form>
