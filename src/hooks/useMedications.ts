@@ -25,7 +25,7 @@ export const useMedications = () => {
         return;
       }
 
-      const data = await medicationService.fetchMedications();
+      const data = await medicationService.fetchMedications(user.id);
       setMedications(data);
       setError(null);
     } catch (err) {
@@ -49,7 +49,7 @@ export const useMedications = () => {
         return newMedication;
       }
 
-      const newMedication = await medicationService.addMedication(medication, user?.id);
+      const newMedication = await medicationService.addMedication(medication, user.id);
 
       // Update the local state
       setMedications((prevMedications) => [newMedication, ...prevMedications]);
@@ -92,6 +92,48 @@ export const useMedications = () => {
       throw err;
     }
   };
+  
+  // Update a medication
+  const updateMedication = async (id: string, medicationUpdates: Partial<Omit<Medication, 'id'>>) => {
+    try {
+      // For demo purposes, if there's no authenticated user, update local state only
+      if (!user) {
+        setMedications((prevMedications) => 
+          prevMedications.map(med => 
+            med.id === id ? { ...med, ...medicationUpdates } : med
+          )
+        );
+        return;
+      }
+
+      const updatedMedication = await medicationService.updateMedication(id, medicationUpdates);
+
+      // Update the local state
+      setMedications((prevMedications) => 
+        prevMedications.map(med => 
+          med.id === id ? updatedMedication : med
+        )
+      );
+    } catch (err) {
+      console.error('Error updating medication:', err);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update medication. Please try again.",
+      });
+      throw err;
+    }
+  };
+
+  // Show a notification when in demo mode
+  useEffect(() => {
+    if (!user && !isLoading) {
+      toast({
+        title: "Demo Mode",
+        description: "You're viewing demo medications. Sign in to manage your own medications.",
+      });
+    }
+  }, [user, isLoading]);
 
   // Fetch medications on mount and when user changes
   useEffect(() => {
@@ -104,6 +146,7 @@ export const useMedications = () => {
     error,
     addMedication,
     deleteMedication,
+    updateMedication,
     refetch: fetchMedications
   };
 };

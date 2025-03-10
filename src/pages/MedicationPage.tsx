@@ -16,7 +16,10 @@ import MedicationEffectivenessChart from "@/components/medication/MedicationEffe
 import { useMedications } from "@/hooks/useMedications";
 import { Spinner } from "@/components/ui/spinner";
 import { ErrorLogger } from "@/utils/errorHandling";
-import { Medication } from "@/types/medication"; // Import from the correct type definition
+import { Medication } from "@/types/medication"; 
+import { useAuth } from "@/contexts/AuthContext";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 const generateRandomColor = () => {
   const colors = ["#4f46e5", "#0ea5e9", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899"];
@@ -27,6 +30,7 @@ const MedicationPage = () => {
   const [currentPage, setCurrentPage] = useState("medication");
   const [isAddingMedication, setIsAddingMedication] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
   const { 
     medications, 
     isLoading, 
@@ -127,6 +131,16 @@ const MedicationPage = () => {
     <Layout currentPage={currentPage} setCurrentPage={setCurrentPage}>
       <div className="p-5 space-y-5 animate-fade-in">
         <MedicationHeader onAddClick={() => setIsAddingMedication(true)} />
+        
+        {!user && !isLoading && (
+          <Alert className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+            <InfoIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <AlertTitle className="text-blue-600 dark:text-blue-400">Demo Mode</AlertTitle>
+            <AlertDescription className="text-blue-600/80 dark:text-blue-400/80">
+              You're viewing demo medications. Sign in to manage your own medications.
+            </AlertDescription>
+          </Alert>
+        )}
         
         {isLoading ? (
           <div className="flex justify-center items-center py-16">

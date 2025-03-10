@@ -28,7 +28,7 @@ export const transformMedicationForDb = (medication: Omit<Medication, 'id'>, use
   frequency: medication.frequency,
   last_taken: medication.lastTaken,
   next_dose: medication.nextDose,
-  level: medication.level,
+  level: typeof medication.level === 'string' ? parseInt(medication.level as string) : medication.level,
   total_dose: medication.totalDose,
   unit: medication.unit,
   color: medication.color,
@@ -42,12 +42,16 @@ export const medicationService = {
   /**
    * Fetch all medications for a user
    */
-  fetchMedications: async () => {
+  fetchMedications: async (userId?: string) => {
     try {
-      const { data, error } = await supabase
-        .from('medications')
-        .select('*')
-        .order('created_at', { ascending: false });
+      let query = supabase.from('medications').select('*');
+      
+      // If userId is provided, filter by user_id
+      if (userId) {
+        query = query.eq('user_id', userId);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
 
@@ -99,6 +103,45 @@ export const medicationService = {
     } catch (err) {
       console.error('Error deleting medication:', err);
       ErrorLogger.error('Failed to delete medication', 'DELETE_MEDICATION_ERROR', { component: 'medicationService', medicationId: id }, err);
+      throw err;
+    }
+  },
+  
+  /**
+   * Update a medication
+   */
+  updateMedication: async (id: string, medication: Partial<Omit<Medication, 'id'>>) => {
+    try {
+      // Convert from application format to database format
+      const updates: any = {};
+      
+      if (medication.name) updates.name = medication.name;
+      if (medication.dose) updates.dose = medication.dose;
+      if (medication.frequency) updates.frequency = medication.frequency;
+      if (medication.lastTaken) updates.last_taken = medication.lastTaken;
+      if (medication.nextDose) updates.next_dose = medication.nextDose;
+      if (medication.level !== undefined) {
+        updates.level = typeof medication.level === 'string' 
+          ? parseInt(medication.level as string) 
+          : medication.level;
+      }
+      if (medication.totalDose !== undefined) updates.total_dose = medication.totalDose;
+      if (medication.unit) updates.unit = medication.unit;
+      if (medication.color) updates.color = medication.color;
+      
+      const { data, error } = await supabase
+        .from('medications')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return transformMedicationData(data);
+    } catch (err) {
+      console.error('Error updating medication:', err);
+      ErrorLogger.error('Failed to update medication', 'UPDATE_MEDICATION_ERROR', { component: 'medicationService', medicationId: id }, err);
       throw err;
     }
   }
