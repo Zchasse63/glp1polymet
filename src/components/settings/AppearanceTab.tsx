@@ -7,11 +7,14 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useToast } from "@/hooks/use-toast";
 
 export const AppearanceTab: React.FC = () => {
-  const { theme, setTheme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const { toast } = useToast();
 
   const handleThemeChange = (value: string) => {
-    setTheme(value);
+    if ((value === "dark" && theme === "light") || (value === "light" && theme === "dark")) {
+      toggleTheme();
+    }
+    
     toast({
       title: "Theme changed",
       description: `The application theme has been changed to ${value}.`,
@@ -41,13 +44,10 @@ export const AppearanceTab: React.FC = () => {
               <RadioGroupItem value="dark" id="dark" />
               <Label htmlFor="dark">Dark Theme</Label>
             </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="system" id="system" />
-              <Label htmlFor="system">System Theme</Label>
-            </div>
           </RadioGroup>
         </CardContent>
       </Card>
     </div>
   );
 };
+
