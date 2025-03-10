@@ -45,6 +45,51 @@ export type Database = {
           },
         ]
       }
+      medications: {
+        Row: {
+          color: string
+          created_at: string
+          dose: string
+          frequency: string
+          id: string
+          last_taken: string | null
+          level: number | null
+          name: string
+          next_dose: string | null
+          total_dose: number | null
+          unit: string | null
+          user_id: string | null
+        }
+        Insert: {
+          color: string
+          created_at?: string
+          dose: string
+          frequency: string
+          id?: string
+          last_taken?: string | null
+          level?: number | null
+          name: string
+          next_dose?: string | null
+          total_dose?: number | null
+          unit?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          dose?: string
+          frequency?: string
+          id?: string
+          last_taken?: string | null
+          level?: number | null
+          name?: string
+          next_dose?: string | null
+          total_dose?: number | null
+          unit?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

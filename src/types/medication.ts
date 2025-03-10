@@ -6,7 +6,9 @@ export type Medication = {
   frequency: string;
   lastTaken: string;
   nextDose: string;
-  level: string;
-  totalAmount: string;
+  level: string | number;
+  totalAmount?: string;
+  totalDose?: number;
+  unit?: string;
   color: string;
 };

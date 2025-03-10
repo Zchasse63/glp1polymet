@@ -42,6 +42,7 @@ export const Spinner = ({
           isReducedMotion ? "animate-pulse" : "animate-spin", 
           colorClass, 
           sizeClass, 
+          "transition-all duration-300",
           className
         )} 
       />

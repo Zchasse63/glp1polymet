@@ -10,6 +10,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { MedicationFormValues } from "@/schemas/medicationSchema";
+import { Spinner } from "@/components/ui/spinner";
 
 interface DoseInputProps {
   form: UseFormReturn<MedicationFormValues>;
@@ -24,14 +25,21 @@ export function DoseInput({ form, isLoading = false }: DoseInputProps) {
       render={({ field }) => (
         <FormItem className="space-y-2 animate-fade-in">
           <FormLabel className="text-sm font-medium">Dose</FormLabel>
-          <FormControl>
-            <Input 
-              placeholder="e.g. 500mg" 
-              className="border-input focus-visible:ring-primary/70"
-              isLoading={isLoading}
-              {...field} 
-            />
-          </FormControl>
+          <div className="relative">
+            <FormControl>
+              <Input 
+                placeholder="e.g. 500mg" 
+                className="border-input focus-visible:ring-primary/70 pr-8"
+                disabled={isLoading}
+                {...field} 
+              />
+            </FormControl>
+            {isLoading && (
+              <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                <Spinner size="xs" color="muted" />
+              </div>
+            )}
+          </div>
           <FormMessage className="text-xs" />
         </FormItem>
       )}

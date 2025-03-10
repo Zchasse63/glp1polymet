@@ -31,6 +31,7 @@ export function Toaster() {
             action={action}
             // Set assertive for high priority toasts like errors
             assertive={props.variant === "destructive"}
+            className="transition-all duration-300 ease-in-out animate-slide-in-right"
             {...props}
           />
         );
