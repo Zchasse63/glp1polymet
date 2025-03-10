@@ -1,10 +1,12 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ChevronRightIcon, PillIcon, CalendarIcon, ClockIcon } from "lucide-react";
+import { ChevronRightIcon, PillIcon, CalendarIcon, ClockIcon, BarChart2Icon } from "lucide-react";
 import { useMedicationPreferences } from "@/hooks/useMedicationPreferences";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import MedicationDetailChart from "./MedicationDetailChart";
 
 type Medication = {
   id: string;
@@ -35,13 +37,16 @@ export const MedicationTracker = ({ medications, isLoaded, onViewAll }: Medicati
   const filteredMedications = medications.filter(medication => 
     selectedMedications.includes(medication.id)
   );
+  
+  // State for tracking which medication details to show
+  const [selectedMedication, setSelectedMedication] = useState<Medication | null>(null);
 
   return (
     <section 
-      className={`space-y-5 opacity-0 ${isLoaded ? "animate-slide-up opacity-100" : ""}`}
+      className={`space-y-3 opacity-0 ${isLoaded ? "animate-slide-up opacity-100" : ""}`}
       style={{ animationDelay: "0.2s", animationFillMode: "forwards" }}
     >
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-1">
         <h2 className="text-xl font-semibold">
           Medication Tracker
         </h2>
@@ -55,52 +60,50 @@ export const MedicationTracker = ({ medications, isLoaded, onViewAll }: Medicati
         </Button>
       </div>
 
-      <div className="grid gap-5">
+      <div className="grid grid-cols-2 gap-3">
         {filteredMedications.length > 0 ? (
           filteredMedications.map((med, index) => (
             <Card
               key={med.id}
-              className={`overflow-hidden border-l-4 card-hover opacity-0 ${isLoaded ? "animate-scale-in opacity-100" : ""}`}
+              className={`overflow-hidden border-l-2 card-hover opacity-0 cursor-pointer ${isLoaded ? "animate-scale-in opacity-100" : ""}`}
               style={{ 
                 borderLeftColor: med.color, 
                 animationDelay: getAnimationDelay(index),
                 animationFillMode: "forwards"
               }}
+              onClick={() => setSelectedMedication(med)}
             >
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between mb-4">
+              <CardContent className="p-3">
+                <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center">
                     <div
-                      className="w-12 h-12 rounded-full flex items-center justify-center mr-4"
+                      className="w-8 h-8 rounded-full flex items-center justify-center mr-2"
                       style={{ backgroundColor: `${med.color}15` }}
                     >
                       <PillIcon
-                        className="h-6 w-6"
+                        className="h-4 w-4"
                         style={{ color: med.color }}
                       />
                     </div>
                     <div>
-                      <h3 className="text-lg font-medium">
+                      <h3 className="text-sm font-medium">
                         {med.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {med.dose} • {med.frequency}
+                      <p className="text-xs text-muted-foreground">
+                        {med.dose}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-lg font-medium">
+                    <div className="text-sm font-medium">
                       {med.level}
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      Remaining amount
-                    </p>
                   </div>
                 </div>
 
                 <Progress
                   value={(parseFloat(med.level) / parseFloat(med.totalAmount)) * 100}
-                  className="h-2 mb-4"
+                  className="h-1.5 mb-2"
                   style={
                     {
                       backgroundColor: `${med.color}20`,
@@ -109,25 +112,70 @@ export const MedicationTracker = ({ medications, isLoaded, onViewAll }: Medicati
                   }
                 />
 
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-xs">
                   <div className="flex items-center text-muted-foreground">
-                    <CalendarIcon className="h-4 w-4 mr-2" />
-                    Last taken: {med.lastTaken}
+                    <ClockIcon className="h-3 w-3 mr-1" />
+                    Next: {med.nextDose}
                   </div>
                   <div className="flex items-center text-muted-foreground">
-                    <ClockIcon className="h-4 w-4 mr-2" />
-                    Next dose: {med.nextDose}
+                    <BarChart2Icon className="h-3 w-3 mr-1" />
+                    <span>Details</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
           ))
         ) : (
-          <div className="text-center text-muted-foreground p-4">
+          <div className="text-center col-span-2 text-muted-foreground p-4">
             No medications selected for dashboard. Configure in App Settings.
           </div>
         )}
       </div>
+
+      {/* Medication Detail Dialog */}
+      <Dialog open={!!selectedMedication} onOpenChange={(open) => !open && setSelectedMedication(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center mr-2"
+                style={{ backgroundColor: selectedMedication ? `${selectedMedication.color}15` : '' }}
+              >
+                <PillIcon
+                  className="h-4 w-4"
+                  style={{ color: selectedMedication?.color }}
+                />
+              </div>
+              {selectedMedication?.name} Details
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedMedication && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="flex flex-col">
+                  <span className="text-muted-foreground">Dose</span>
+                  <span className="font-medium">{selectedMedication.dose}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-muted-foreground">Frequency</span>
+                  <span className="font-medium">{selectedMedication.frequency}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-muted-foreground">Last Taken</span>
+                  <span className="font-medium">{selectedMedication.lastTaken}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-muted-foreground">Next Dose</span>
+                  <span className="font-medium">{selectedMedication.nextDose}</span>
+                </div>
+              </div>
+              
+              <MedicationDetailChart medication={selectedMedication} />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
