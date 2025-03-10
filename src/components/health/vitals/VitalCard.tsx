@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface VitalCardProps {
   title: string;
@@ -12,6 +12,8 @@ interface VitalCardProps {
   trend?: string;
   trendIcon?: React.ReactNode;
   trendColor?: string;
+  isAnimated?: boolean;
+  delay?: number;
 }
 
 export const VitalCard = ({
@@ -23,9 +25,17 @@ export const VitalCard = ({
   trend,
   trendIcon,
   trendColor,
+  isAnimated = false,
+  delay = 0,
 }: VitalCardProps) => {
   return (
-    <Card className="overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800">
+    <Card 
+      className={cn(
+        "overflow-hidden card-hover shadow-sm border border-slate-200 dark:border-slate-800 transition-all duration-200",
+        isAnimated && "opacity-0 animate-scale-in"
+      )}
+      style={isAnimated ? { animationDelay: `${delay * 0.05}s`, animationFillMode: "forwards" } : {}}
+    >
       <CardContent className="p-3">
         <div className="flex justify-between items-start mb-1.5">
           <p className="text-xs font-medium text-muted-foreground truncate mr-2">{title}</p>

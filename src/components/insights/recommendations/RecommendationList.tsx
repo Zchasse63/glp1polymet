@@ -8,7 +8,6 @@ import { ErrorLogger } from "@/utils/errorHandling";
 import { useComponentPerformance } from "@/utils/performance";
 import { AccessibleIcon } from "@/utils/accessibility";
 import { Bookmark, BookmarkCheck } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 
 interface RecommendationListProps {
   recommendations: Recommendation[];
@@ -37,9 +36,6 @@ const RecommendationList: React.FC<RecommendationListProps> = ({ recommendations
   const handleRecommendationClick = async (recommendationId: string, title: string) => {
     try {
       console.log(`Recommendation viewed: ${recommendationId}`);
-      
-      // In a full implementation, we would log this to Supabase as well
-      // For now, just show a toast notification
       
       toast({
         title: title,
@@ -86,7 +82,7 @@ const RecommendationList: React.FC<RecommendationListProps> = ({ recommendations
   };
 
   return (
-    <>
+    <div className="space-y-3 animate-fade-in">
       {recommendations.map((recommendation, index) => {
         const bookmarked = isBookmarked(recommendation.id);
         
@@ -115,7 +111,7 @@ const RecommendationList: React.FC<RecommendationListProps> = ({ recommendations
           />
         );
       })}
-    </>
+    </div>
   );
 };
 

@@ -110,7 +110,7 @@ const CorrelationContent: React.FC<CorrelationContentProps> = ({
   };
 
   return (
-    <div>
+    <div className="animate-fade-in">
       <ScreenReaderAnnouncement message={getScreenReaderMessage()} />
       
       <CorrelationInsight insight={insight} />

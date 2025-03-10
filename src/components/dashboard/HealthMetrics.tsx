@@ -141,7 +141,7 @@ export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsPro
             />
           ))
         ) : (
-          <div className="col-span-2 p-4 text-center text-muted-foreground border rounded-md">
+          <div className="col-span-2 p-4 text-center text-muted-foreground border rounded-md border-dashed border-muted hover:border-muted-foreground/50 transition-colors">
             No metrics selected for dashboard. Configure in App Settings.
           </div>
         )}

@@ -52,6 +52,7 @@ export function Layout({
                   size="icon"
                   onClick={toggleTheme}
                   className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                  aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
                 >
                   {theme === "light" ? (
                     <MoonIcon className="h-5 w-5" />
@@ -63,10 +64,12 @@ export function Layout({
                   variant="ghost"
                   size="icon"
                   className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 relative"
+                  aria-label="Notifications"
                 >
                   <BellIcon className="h-5 w-5" />
                   <span
                     className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"
+                    aria-hidden="true"
                   ></span>
                 </Button>
                 {isAuthenticated && (
@@ -75,6 +78,7 @@ export function Layout({
                     size="icon"
                     onClick={handleLogout}
                     className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                    aria-label="Log out"
                   >
                     <LogOutIcon className="h-5 w-5" />
                   </Button>
@@ -83,13 +87,14 @@ export function Layout({
                   variant="ghost"
                   size="icon"
                   className="rounded-full bg-blue-50 dark:bg-blue-900 hover:bg-blue-100 dark:hover:bg-blue-800 text-blue-600 dark:text-blue-400"
+                  aria-label="Add new"
                 >
                   <PlusIcon className="h-5 w-5" />
                 </Button>
               </div>
             </header>
 
-            <main className="flex-1 overflow-y-auto pb-16 animate-fade-in">
+            <main className="flex-1 overflow-y-auto pb-16 animate-fade-in custom-scrollbar">
               {children}
             </main>
 

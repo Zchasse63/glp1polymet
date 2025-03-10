@@ -1,5 +1,5 @@
 
-import React, { useRef, useCallback } from "react";
+import React, { useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Correlation } from "@/utils/insights/types";
 import { useIntersectionObserver } from "@/utils/performanceUtils";
@@ -43,7 +43,7 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
   });
 
   return (
-    <Card ref={cardRef} className="shadow-md">
+    <Card ref={cardRef} className="shadow-md card-hover">
       <CardHeader>
         <CardTitle className="text-xl">Weight Loss Correlations</CardTitle>
         <CardDescription>

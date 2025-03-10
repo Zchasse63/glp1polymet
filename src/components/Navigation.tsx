@@ -25,17 +25,19 @@ export function Navigation({ currentPage, setCurrentPage }: NavigationProps) {
             to={item.path}
             className={`flex flex-col items-center justify-center py-3 px-4 flex-1 transition-colors duration-200 ${
               currentPage === item.id
-                ? "text-blue-600 dark:text-blue-400"
+                ? "text-primary dark:text-primary"
                 : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
             }`}
             onClick={() => setCurrentPage(item.id)}
+            aria-current={currentPage === item.id ? "page" : undefined}
           >
             <item.icon
               className={`h-6 w-6 ${
                 currentPage === item.id
-                  ? "text-blue-600 dark:text-blue-400"
+                  ? "text-primary dark:text-primary"
                   : "text-gray-500 dark:text-gray-400"
               }`}
+              aria-hidden="true"
             />
             <span className="text-xs mt-1 font-medium">
               {item.label}
