@@ -29,15 +29,6 @@ interface CorrelationContentProps {
   handleExportData: () => void;
 }
 
-/**
- * CorrelationContent Component
- * 
- * Displays correlation data with appropriate loading, error, and empty states.
- * Following CodeFarm principles:
- * - Error Handling: Comprehensive error states
- * - Accessibility: Screen reader announcements
- * - User-Centric Design: Meaningful empty states
- */
 const CorrelationContent: React.FC<CorrelationContentProps> = ({
   isLoading,
   error,
@@ -54,11 +45,9 @@ const CorrelationContent: React.FC<CorrelationContentProps> = ({
   const isReducedMotion = useReducedMotion();
   const [errorAnnounced, setErrorAnnounced] = React.useState(false);
   
-  // Announce errors to screen readers
   React.useEffect(() => {
     if (error && !errorAnnounced) {
       setErrorAnnounced(true);
-      // Track unhandled errors
       trackError(error, { component: "CorrelationContent" });
     } else if (!error) {
       setErrorAnnounced(false);
@@ -99,34 +88,33 @@ const CorrelationContent: React.FC<CorrelationContentProps> = ({
     );
   }
 
-  // Prepare screen reader message for correlations
-  const getScreenReaderMessage = () => {
-    if (!hasSignificantCorrelations) {
-      return "No significant correlations were found in your data.";
-    }
-    
-    const topCorrelation = sortedCorrelations[0];
-    return `Found ${sortedCorrelations.length} correlations. The strongest correlation is ${topCorrelation.factor} with a correlation value of ${topCorrelation.correlation.toFixed(2)}.`;
-  };
-
   return (
-    <div className="animate-fade-in">
-      <ScreenReaderAnnouncement message={getScreenReaderMessage()} />
+    <div className={cn(
+      "space-y-6 transition-all duration-300",
+      !isReducedMotion && "animate-fade-in"
+    )}>
+      <ScreenReaderAnnouncement 
+        message={hasSignificantCorrelations 
+          ? `Found ${sortedCorrelations.length} correlations. The strongest correlation is ${sortedCorrelations[0].factor} with a correlation value of ${sortedCorrelations[0].correlation.toFixed(2)}.`
+          : "No significant correlations were found in your data."
+        } 
+      />
       
       <CorrelationInsight insight={insight} />
       
       <div className={cn(
-        "h-[300px]", 
+        "h-[300px] transition-opacity duration-300",
         !hasSignificantCorrelations && "opacity-80"
       )}>
         <CorrelationBarChart 
           data={displayedCorrelations} 
+          animate={!isReducedMotion}
         />
       </div>
       
       {!hasSignificantCorrelations && <NoSignificantCorrelations />}
       
-      <div className="mt-4 flex flex-col space-y-2">
+      <div className="mt-4 space-y-4">
         <CorrelationLegend />
         
         <CorrelationActions 

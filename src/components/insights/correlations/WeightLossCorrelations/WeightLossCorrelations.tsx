@@ -5,6 +5,9 @@ import { Correlation } from "@/utils/insights/types";
 import { useIntersectionObserver } from "@/utils/performanceUtils";
 import useCorrelationDisplay from "./hooks/useCorrelationDisplay";
 import CorrelationContent from "./CorrelationContent";
+import { AccessibleIcon } from "@/utils/accessibility/AccessibleIcon";
+import { ChartIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface WeightLossCorrelationsProps {
   correlations: Correlation[] | undefined;
@@ -14,7 +17,6 @@ interface WeightLossCorrelationsProps {
   onRetry?: () => void;
 }
 
-// Use React.memo to prevent unnecessary re-renders
 const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo(({
   correlations,
   isLoading,
@@ -22,11 +24,9 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
   insight,
   onRetry
 }) => {
-  // Use a ref to track when the component is visible
   const cardRef = useRef<HTMLDivElement>(null);
   const isVisible = useIntersectionObserver(cardRef, { threshold: 0.1 });
   
-  // Use custom hook for correlation display logic
   const {
     sortedCorrelations,
     displayedCorrelations,
@@ -43,12 +43,30 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
   });
 
   return (
-    <Card ref={cardRef} className="shadow-md card-hover">
-      <CardHeader>
-        <CardTitle className="text-xl">Weight Loss Correlations</CardTitle>
-        <CardDescription>
-          See which factors have the strongest relationship with your weight loss
-        </CardDescription>
+    <Card 
+      ref={cardRef} 
+      className={cn(
+        "shadow-md transition-all duration-300 ease-in-out",
+        "hover:shadow-lg border border-border/50",
+        "dark:bg-card dark:border-border/20",
+        "opacity-0 animate-fade-in",
+        isVisible && "opacity-100"
+      )}
+    >
+      <CardHeader className="flex flex-row items-center gap-4">
+        <AccessibleIcon
+          icon={<ChartIcon className="h-6 w-6 text-primary" />}
+          label="Weight Loss Correlations"
+          role="presentation"
+        />
+        <div>
+          <CardTitle className="text-xl font-semibold">
+            Weight Loss Correlations
+          </CardTitle>
+          <CardDescription className="text-sm text-muted-foreground">
+            See which factors have the strongest relationship with your weight loss
+          </CardDescription>
+        </div>
       </CardHeader>
       <CardContent>
         <CorrelationContent 
@@ -69,7 +87,6 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
   );
 });
 
-// Add display name for debugging
 WeightLossCorrelations.displayName = "WeightLossCorrelations";
 
 export default WeightLossCorrelations;
