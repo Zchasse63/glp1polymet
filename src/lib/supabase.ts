@@ -16,6 +16,7 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
+      flowType: 'pkce', // Use PKCE flow for more secure authentication
     },
   }
 );
@@ -52,7 +53,6 @@ export const isAuthenticated = async () => {
 export const checkProviderEnabled = async (provider: string): Promise<boolean> => {
   try {
     // This is a simple check that will catch most issues but not all
-    // A full check would require accessing Supabase admin settings
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: provider as any,
       options: {
@@ -66,3 +66,32 @@ export const checkProviderEnabled = async (provider: string): Promise<boolean> =
     return false;
   }
 };
+
+// Listen for auth events from external auth providers
+export const setupAuthListener = () => {
+  // Check for auth redirect after returning from external provider
+  const checkAuthRedirect = async () => {
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      
+      // If we have a session and there's a redirect path saved, redirect to it
+      if (data?.session && !error) {
+        const redirectPath = localStorage.getItem("authRedirectPath") || "/";
+        localStorage.removeItem("authRedirectPath"); // Clean up
+        
+        if (window.location.pathname.includes('/auth')) {
+          window.location.href = redirectPath;
+        }
+      }
+    } catch (err) {
+      console.error("Error handling auth redirect:", err);
+    }
+  };
+  
+  // Check immediately and whenever hash changes
+  checkAuthRedirect();
+  window.addEventListener('hashchange', checkAuthRedirect);
+};
+
+// Initialize the auth listener
+setupAuthListener();

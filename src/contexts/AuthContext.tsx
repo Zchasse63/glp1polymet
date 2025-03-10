@@ -140,7 +140,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: provider as any,
         options: {
-          redirectTo: window.location.origin + '/auth/callback'
+          redirectTo: window.location.origin + '/auth/callback',
+          skipBrowserRedirect: false // Let Supabase handle the redirect
         }
       });
       
@@ -152,8 +153,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error("No redirect URL returned from authentication provider");
       }
       
-      // Redirect to the OAuth provider's login page
-      window.location.href = data.url;
+      // Open provider URL in current window - this will navigate away from the app
+      window.open(data.url, '_self');
       
       // Just for type safety, create a placeholder
       const placeholder: AuthUser = {

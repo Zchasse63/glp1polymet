@@ -1,10 +1,11 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
 import { Github, Mail, Loader2 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { checkProviderEnabled } from "@/lib/supabase";
 
 /**
  * SSO Buttons Component
@@ -16,29 +17,62 @@ export function SSOButtons() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [enabledProviders, setEnabledProviders] = useState<Record<string, boolean>>({
+    github: true,
+    google: true
+  });
   
   // Get the intended destination from location state, if any
   const from = location.state?.from?.pathname || "/";
+
+  // Check which providers are enabled
+  useEffect(() => {
+    const checkProviders = async () => {
+      const githubEnabled = await checkProviderEnabled("github");
+      const googleEnabled = await checkProviderEnabled("google");
+      
+      setEnabledProviders({
+        github: githubEnabled,
+        google: googleEnabled
+      });
+    };
+    
+    checkProviders();
+  }, []);
 
   const handleSSOLogin = async (provider: string) => {
     try {
       setIsLoading(provider);
       
-      await loginWithSSO(provider);
+      // Check if provider is enabled before attempting login
+      if (!enabledProviders[provider]) {
+        throw new Error(`${provider} login is not configured. Please check Supabase provider settings.`);
+      }
       
-      toast({
-        title: "Login successful",
-        description: `Logged in with ${provider}`,
-      });
-      
-      // Navigate to the intended destination
-      navigate(from, { replace: true });
+      // For GitHub, open a new window for authentication to avoid X-Frame-Options issues
+      if (provider === "github") {
+        // Store the return URL in localStorage to redirect after auth
+        localStorage.setItem("authRedirectPath", from);
+        await loginWithSSO(provider);
+      } else {
+        await loginWithSSO(provider);
+        
+        toast({
+          title: "Login successful",
+          description: `Logged in with ${provider}`,
+        });
+        
+        // Navigate to the intended destination
+        navigate(from, { replace: true });
+      }
     } catch (err) {
       let errorMessage = error || `Failed to login with ${provider}`;
       
       // Provide specific feedback for provider not enabled error
-      if (err instanceof Error && err.message.includes("not enabled")) {
-        errorMessage = `${provider} login is not configured. Please check Supabase provider settings.`;
+      if (err instanceof Error) {
+        if (err.message.includes("not enabled") || err.message.includes("not configured")) {
+          errorMessage = err.message;
+        }
       }
       
       toast({
@@ -71,7 +105,11 @@ export function SSOButtons() {
       
       {isDemoMode && (
         <div className="text-xs text-amber-600 my-1 text-center">
-          Note: For social logins to work, providers must be enabled in Supabase
+          {!enabledProviders.github && !enabledProviders.google ? (
+            "Social logins are not configured in Supabase"
+          ) : (
+            "For social logins to work, providers must be enabled in Supabase"
+          )}
         </div>
       )}
       
@@ -80,7 +118,7 @@ export function SSOButtons() {
           variant="outline" 
           onClick={() => handleSSOLogin("github")}
           className="w-full"
-          disabled={isLoading !== null}
+          disabled={isLoading !== null || !enabledProviders.github}
         >
           {isLoading === "github" ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -88,12 +126,13 @@ export function SSOButtons() {
             <Github className="mr-2 h-4 w-4" />
           )}
           GitHub
+          {!enabledProviders.github && isDemoMode && " (Disabled)"}
         </Button>
         <Button 
           variant="outline" 
           onClick={() => handleSSOLogin("google")}
           className="w-full"
-          disabled={isLoading !== null}
+          disabled={isLoading !== null || !enabledProviders.google}
         >
           {isLoading === "google" ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -110,6 +149,7 @@ export function SSOButtons() {
             </svg>
           )}
           Google
+          {!enabledProviders.google && isDemoMode && " (Disabled)"}
         </Button>
       </div>
     </div>
