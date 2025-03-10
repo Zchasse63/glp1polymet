@@ -1,29 +1,11 @@
 
-# Universal Page Buildout Guide
+# Page Implementation Patterns
 
-This guide provides a standardized approach to building new pages in our application, aligned with the CodeFarm Development Methodology.
+This guide provides standard implementation patterns for different page types in our application, following the CodeFarm Development Methodology.
 
-## Architectural Alignment
+## Common Page Implementation
 
-When building new pages, follow these foundational principles from our CodeFarm methodology:
-
-- **Holistic Development**: Combine technical excellence with strategic thinking
-- **User-Centric Design**: Prioritize end-user experience in every development stage
-- **Sustainable Code**: Create maintainable, scalable, and efficient software solutions
-- **Continuous Learning**: Embrace emerging technologies and methodologies
-
-## Page Development Workflow
-
-### 1. Page Planning
-
-- Define the page's purpose and user goals
-- Identify required data and API integrations
-- Map user journeys and interaction flows
-- Determine necessary components and layouts
-
-### 2. Page Structure Implementation
-
-#### Common Page Layout
+### Basic Page Structure with Data Fetching
 
 ```tsx
 const PageName = () => {
@@ -41,14 +23,12 @@ const PageName = () => {
   
   return (
     <Layout currentPage={currentPage} setCurrentPage={setCurrentPage}>
-      {/* Page Header Section */}
       <PageHeader 
         title="Page Title" 
         description="Optional page description"
         actions={[/* Primary/secondary actions */]} 
       />
       
-      {/* Content Wrapper */}
       <div className="p-4 space-y-4">
         {/* Loading State */}
         {isLoading && <LoadingComponent />}
@@ -73,65 +53,7 @@ const PageName = () => {
     </Layout>
   );
 };
-
-export default PageName;
 ```
-
-### 3. Component Organization
-
-For each new page, follow this recommended file structure:
-
-```
-src/pages/
-└── PageName/
-    ├── index.tsx              # Main page component
-    ├── components/            # Page-specific components
-    │   ├── PageHeader.tsx
-    │   ├── MainContent.tsx
-    │   └── [other components]
-    ├── hooks/                 # Page-specific hooks
-    │   └── usePageData.ts
-    └── utils/                 # Page-specific utilities
-        └── pageHelpers.ts
-```
-
-### 4. Responsive Design Standards
-
-All pages must be responsive, following these guidelines:
-
-- Mobile-first implementation with progressive enhancement
-- Consistent breakpoints: sm (640px), md (768px), lg (1024px), xl (1280px)
-- Single column layout for mobile, multi-column where appropriate for larger screens
-- Touch-friendly targets (min 44px) for mobile interfaces
-
-### 5. Accessibility Requirements
-
-Every page must meet these accessibility standards:
-
-- Semantic HTML structure with proper heading hierarchy
-- ARIA attributes for interactive components
-- Keyboard navigation support
-- Color contrast ratio of at least 4.5:1 for text
-- Focus states for all interactive elements
-- Screen reader announcements for dynamic content
-
-### 6. Error Handling Standards
-
-Implement comprehensive error handling on all pages:
-
-- Use the application's `ErrorBoundary` component
-- Implement appropriate error states for API failures
-- Use the `ErrorLogger` for consistent error tracking
-- Provide user-friendly error messages with recovery options
-
-### 7. Performance Guidelines
-
-Optimize page performance by following these practices:
-
-- Use React Query for efficient data fetching and caching
-- Implement proper loading states
-- Lazy-load off-screen content and heavy components
-- Apply the `useComponentPerformance` hook for performance tracking
 
 ## Page Type Templates
 
@@ -273,63 +195,51 @@ const FormPage = () => {
 };
 ```
 
-## Testing Checklist
+### Error Handling Implementation
 
-Before finalizing any page, ensure it meets these requirements:
+```tsx
+// Error handling for API calls
+const handleApiCall = async () => {
+  try {
+    await apiFunction();
+    // Success handling
+  } catch (error) {
+    // Use centralized error handling
+    const formattedError = formatApiError(error);
+    toast({
+      title: "Operation Failed",
+      description: formattedError.message,
+      variant: "destructive",
+    });
+    
+    // Log error for monitoring
+    ErrorLogger.logError(error, {
+      context: "PageName",
+      operation: "apiFunction",
+      severity: "error"
+    });
+  }
+};
+```
 
-### Functional Testing
-- [ ] All features work with valid inputs
-- [ ] Edge cases are handled appropriately
-- [ ] All interactions provide feedback
-- [ ] Page integrates correctly with the rest of the app
+### Performance Optimization Techniques
 
-### Responsive Testing
-- [ ] Layout works at all screen sizes
-- [ ] Content is accessible on mobile
-- [ ] Touch targets are properly sized
-- [ ] Layout adjusts when browser is resized
+```tsx
+// Memoize expensive components
+const MemoizedComponent = React.memo(ExpensiveComponent);
 
-### Accessibility Testing
-- [ ] Page is navigable by keyboard
-- [ ] Screen readers can access all content
-- [ ] Color contrast meets WCAG standards
-- [ ] Focus states are clearly visible
+// Memoize callback functions
+const handleClick = useCallback(() => {
+  // Function logic
+}, [dependencies]);
 
-### Performance Testing
-- [ ] Page loads efficiently
-- [ ] Interactions remain responsive
-- [ ] Animations are smooth
-- [ ] Memory usage remains stable
+// Memoize computed values
+const computedValue = useMemo(() => {
+  return expensiveCalculation(data);
+}, [data]);
 
-## Implementation Process
+// Track component performance
+useComponentPerformance('ComponentName');
+```
 
-Follow this process for all new pages:
-
-1. **Planning**
-   - Review requirements
-   - Identify components and data needs
-   - Plan page structure
-
-2. **Component Development**
-   - Create/reuse components
-   - Follow established patterns
-   - Test components in isolation
-
-3. **Page Integration**
-   - Implement routing
-   - Connect to APIs
-   - Add state management
-   - Implement error handling
-
-4. **Testing & Refinement**
-   - Verify functionality
-   - Test edge cases
-   - Optimize performance
-   - Refine interactions
-
-5. **Documentation**
-   - Add code comments
-   - Update documentation
-   - Document limitations
-
-By following this guide, we ensure consistent, high-quality pages that align with our CodeFarm methodology and provide excellent user experiences.
+By following these implementation patterns, we ensure consistent, high-quality pages with proper error handling and performance optimization.

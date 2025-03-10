@@ -28,6 +28,7 @@ We've implemented significant improvements across several key areas:
 - Documented architecture decisions
 - Added accessibility guidelines
 - Improved inline code documentation
+- Refactored page buildout documentation into focused guides
 
 ### Testing
 - Added testing utilities for component testing
@@ -87,7 +88,20 @@ src/
 ├── services/           # Service integrations
 ├── schemas/            # Validation schemas
 └── architecture/       # Architecture documentation
+    ├── page-guides/    # Page buildout guidelines
+    └── component-patterns/ # Component patterns
 ```
+
+## Architecture Documentation
+
+For more details about the application architecture, refer to:
+
+- [Core Architecture](./CoreArchitecture.md)
+- [Quality Standards](./QualityStandards.md)
+- [Accessibility Guidelines](./AccessibilityGuidelines.md)
+- [Component Patterns](./component-patterns/README.md)
+- [Architectural Decision Records](./ADR.md)
+- [Universal Page Buildout Guide](./page-guides/README.md)
 
 ## Best Practices
 
