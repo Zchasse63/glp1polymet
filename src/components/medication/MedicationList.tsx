@@ -20,9 +20,12 @@ interface MedicationListProps {
 
 const MedicationList = ({ medications, onDelete, onAdd }: MedicationListProps) => {
   // Get level percentage for progress bar
-  const getLevelPercentage = (level: number, totalDose?: number) => {
-    if (!totalDose) return level;
-    return (level / totalDose) * 100;
+  const getLevelPercentage = (level: string | number, totalDose?: number) => {
+    // Convert level to number if it's a string
+    const numericLevel = typeof level === 'string' ? parseFloat(level) : level;
+    
+    if (!totalDose) return numericLevel;
+    return (numericLevel / totalDose) * 100;
   };
 
   return (
