@@ -22,6 +22,12 @@ export const MedicationCard = ({
   // Animation delay utility
   const getAnimationDelay = (index: number) => `${index * 0.05}s`;
 
+  // Convert level and totalAmount to numbers to ensure proper calculation
+  const levelValue = typeof med.level === 'string' ? parseFloat(med.level) : med.level;
+  const totalAmountValue = med.totalAmount ? 
+    (typeof med.totalAmount === 'string' ? parseFloat(med.totalAmount) : med.totalAmount) : 
+    100;
+
   return (
     <Card
       key={med.id}
@@ -48,7 +54,7 @@ export const MedicationCard = ({
 
           <div className="flex-1 mx-6 max-w-xs">
             <Progress
-              value={(parseFloat(med.level) / parseFloat(med.totalAmount)) * 100}
+              value={(levelValue / totalAmountValue) * 100}
               className="h-2 mb-1 rounded-full"
               style={
                 {
