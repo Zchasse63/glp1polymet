@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ChevronRightIcon, PillIcon, CalendarIcon, ClockIcon, BarChart2Icon } from "lucide-react";
+import { ChevronRightIcon, PillIcon, ClockIcon, BarChart2Icon } from "lucide-react";
 import { useMedicationPreferences } from "@/hooks/useMedicationPreferences";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import MedicationDetailChart from "./MedicationDetailChart";
@@ -60,7 +60,7 @@ export const MedicationTracker = ({ medications, isLoaded, onViewAll }: Medicati
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-4 gap-2">
         {filteredMedications.length > 0 ? (
           filteredMedications.map((med, index) => (
             <Card
@@ -73,37 +73,30 @@ export const MedicationTracker = ({ medications, isLoaded, onViewAll }: Medicati
               }}
               onClick={() => setSelectedMedication(med)}
             >
-              <CardContent className="p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center">
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center mr-2"
-                      style={{ backgroundColor: `${med.color}15` }}
-                    >
-                      <PillIcon
-                        className="h-4 w-4"
-                        style={{ color: med.color }}
-                      />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium">
-                        {med.name}
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        {med.dose}
-                      </p>
-                    </div>
+              <CardContent className="p-2">
+                <div className="flex items-center mb-1.5">
+                  <div
+                    className="w-6 h-6 rounded-full flex items-center justify-center mr-1.5"
+                    style={{ backgroundColor: `${med.color}15` }}
+                  >
+                    <PillIcon
+                      className="h-3 w-3"
+                      style={{ color: med.color }}
+                    />
                   </div>
-                  <div className="text-right">
-                    <div className="text-sm font-medium">
-                      {med.level}
-                    </div>
+                  <div className="overflow-hidden">
+                    <h3 className="text-xs font-medium truncate">
+                      {med.name}
+                    </h3>
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      {med.dose}
+                    </p>
                   </div>
                 </div>
 
                 <Progress
                   value={(parseFloat(med.level) / parseFloat(med.totalAmount)) * 100}
-                  className="h-1.5 mb-2"
+                  className="h-1 mb-1.5"
                   style={
                     {
                       backgroundColor: `${med.color}20`,
@@ -112,21 +105,17 @@ export const MedicationTracker = ({ medications, isLoaded, onViewAll }: Medicati
                   }
                 />
 
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between text-[10px]">
                   <div className="flex items-center text-muted-foreground">
-                    <ClockIcon className="h-3 w-3 mr-1" />
-                    Next: {med.nextDose}
-                  </div>
-                  <div className="flex items-center text-muted-foreground">
-                    <BarChart2Icon className="h-3 w-3 mr-1" />
-                    <span>Details</span>
+                    <ClockIcon className="h-2.5 w-2.5 mr-0.5" />
+                    <span className="truncate">Next: {med.nextDose}</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
           ))
         ) : (
-          <div className="text-center col-span-2 text-muted-foreground p-4">
+          <div className="text-center col-span-4 text-muted-foreground p-4">
             No medications selected for dashboard. Configure in App Settings.
           </div>
         )}
@@ -146,7 +135,7 @@ export const MedicationTracker = ({ medications, isLoaded, onViewAll }: Medicati
                   style={{ color: selectedMedication?.color }}
                 />
               </div>
-              {selectedMedication?.name} Details
+              {selectedMedication?.name}
             </DialogTitle>
           </DialogHeader>
           
