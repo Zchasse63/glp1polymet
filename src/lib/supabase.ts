@@ -7,23 +7,62 @@ import { Database } from '@/types/supabase';
 const supabaseUrl = 'https://xngupqmwtbncjkegbhys.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhuZ3VwcW13dGJuY2prZWdiaHlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDExMTUwNTEsImV4cCI6MjA1NjY5MTA1MX0.pziqAse7yC0cFl-8B1LUUpwdZY5xO-wAMDTMrCTHC3A';
 
-// Create a single supabase client for interacting with your database
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+// Create Supabase client with custom error handling
+export const supabase = createClient<Database>(
+  supabaseUrl, 
+  supabaseAnonKey,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    },
+  }
+);
 
 // Add a helper function to get the current user
 export const getCurrentUser = async () => {
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
-  if (error) {
-    console.error('Error fetching current user:', error);
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (error) {
+      console.error('Error fetching current user:', error);
+      return null;
+    }
+    
+    return user;
+  } catch (err) {
+    console.error('Error in getCurrentUser:', err);
     return null;
   }
-  
-  return user;
 };
 
 // Export a function to check if a user is authenticated
 export const isAuthenticated = async () => {
-  const user = await getCurrentUser();
-  return user !== null;
+  try {
+    const user = await getCurrentUser();
+    return user !== null;
+  } catch (err) {
+    console.error('Error checking authentication:', err);
+    return false;
+  }
+};
+
+// Helper function to check if providers are configured
+export const checkProviderEnabled = async (provider: string): Promise<boolean> => {
+  try {
+    // This is a simple check that will catch most issues but not all
+    // A full check would require accessing Supabase admin settings
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: provider as any,
+      options: {
+        skipBrowserRedirect: true,
+      }
+    });
+    
+    return Boolean(data?.url) && !error;
+  } catch (err) {
+    console.error(`Error checking if ${provider} is enabled:`, err);
+    return false;
+  }
 };

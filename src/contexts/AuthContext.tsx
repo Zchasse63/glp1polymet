@@ -124,7 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     try {
       // For demo purposes, create a mock user
-      if (!supabase.auth) {
+      if (process.env.NODE_ENV === "development" && provider.includes("mock")) {
         const mockUser: AuthUser = {
           id: "demo-user-id",
           username: `user_${Date.now()}`,
@@ -136,17 +136,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return mockUser;
       }
       
-      // In a real implementation, we would use Supabase's OAuth
+      // Use Supabase's OAuth
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: provider as any
+        provider: provider as any,
+        options: {
+          redirectTo: window.location.origin + '/auth/callback'
+        }
       });
       
       if (error) {
         throw new Error(error.message);
       }
       
-      // Note: The actual user will be set by the onAuthStateChange listener
-      // when the OAuth flow completes, so we return a placeholder here
+      if (!data.url) {
+        throw new Error("No redirect URL returned from authentication provider");
+      }
+      
+      // Redirect to the OAuth provider's login page
+      window.location.href = data.url;
       
       // Just for type safety, create a placeholder
       const placeholder: AuthUser = {
@@ -160,7 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "SSO login failed";
       setError(errorMessage);
-      throw new Error(errorMessage);
+      throw err; // Pass the original error for more specific handling
     } finally {
       setIsLoading(false);
     }
@@ -172,7 +179,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     try {
       // For demo purposes, create a mock user
-      if (!supabase.auth) {
+      if (process.env.NODE_ENV === "development" && email.includes("test")) {
         const mockUser: AuthUser = {
           id: "demo-user-id",
           username,

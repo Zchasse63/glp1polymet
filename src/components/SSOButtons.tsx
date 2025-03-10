@@ -34,15 +34,27 @@ export function SSOButtons() {
       // Navigate to the intended destination
       navigate(from, { replace: true });
     } catch (err) {
+      let errorMessage = error || `Failed to login with ${provider}`;
+      
+      // Provide specific feedback for provider not enabled error
+      if (err instanceof Error && err.message.includes("not enabled")) {
+        errorMessage = `${provider} login is not configured. Please check Supabase provider settings.`;
+      }
+      
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: error || `Failed to login with ${provider}`,
+        description: errorMessage,
       });
+      
+      console.error("SSO login error:", err);
     } finally {
       setIsLoading(null);
     }
   };
+
+  // Demo mode notice
+  const isDemoMode = process.env.NODE_ENV === "development";
 
   return (
     <div className="flex flex-col space-y-2 w-full">
@@ -56,6 +68,13 @@ export function SSOButtons() {
           </span>
         </div>
       </div>
+      
+      {isDemoMode && (
+        <div className="text-xs text-amber-600 my-1 text-center">
+          Note: For social logins to work, providers must be enabled in Supabase
+        </div>
+      )}
+      
       <div className="grid grid-cols-2 gap-2 mt-2">
         <Button 
           variant="outline" 
