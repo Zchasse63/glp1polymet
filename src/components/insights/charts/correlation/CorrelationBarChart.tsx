@@ -20,8 +20,8 @@ export const CorrelationBarChart: React.FC<CorrelationBarChartProps> = ({
   data,
   xAxisKey = 'factor',
   correlationKey = 'correlation',
-  barColorPositive = '#82ca9d',
-  barColorNegative = '#e45649',
+  barColorPositive = 'hsl(var(--chart-3))',
+  barColorNegative = 'hsl(var(--chart-4))',
   height = 300,
 }) => {
   const { t } = useI18n();
@@ -31,7 +31,8 @@ export const CorrelationBarChart: React.FC<CorrelationBarChartProps> = ({
     axisColor, 
     tooltipStyle, 
     labelStyle,
-    barStroke 
+    barStroke,
+    animationDuration
   } = useChartConfig();
 
   // Track chart interaction on initial render
@@ -102,6 +103,7 @@ export const CorrelationBarChart: React.FC<CorrelationBarChartProps> = ({
           dataKey={correlationKey}
           radius={[4, 4, 0, 0]}
           isAnimationActive={!isReducedMotion}
+          animationDuration={animationDuration}
           fillOpacity={0.8}
           maxBarSize={60}
           stroke={barStroke}

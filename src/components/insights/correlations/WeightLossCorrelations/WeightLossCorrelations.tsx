@@ -6,7 +6,7 @@ import { useIntersectionObserver } from "@/utils/performanceUtils";
 import useCorrelationDisplay from "./hooks/useCorrelationDisplay";
 import CorrelationContent from "./CorrelationContent";
 import { AccessibleIcon } from "@/utils/accessibility/AccessibleIcon";
-import { ChartIcon } from "lucide-react";
+import { BarChart2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface WeightLossCorrelationsProps {
@@ -55,7 +55,7 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
     >
       <CardHeader className="flex flex-row items-center gap-4">
         <AccessibleIcon
-          icon={<ChartIcon className="h-6 w-6 text-primary" />}
+          icon={<BarChart2 className="h-6 w-6 text-primary" />}
           label="Weight Loss Correlations"
           role="presentation"
         />

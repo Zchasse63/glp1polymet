@@ -1,7 +1,9 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, ChevronDown, ChevronUp } from "lucide-react";
+import { cn } from '@/lib/utils';
+import { AccessibleIcon } from '@/utils/accessibility/AccessibleIcon';
 
 interface CorrelationActionsProps {
   showAllFactors: boolean;
@@ -13,6 +15,9 @@ interface CorrelationActionsProps {
 
 /**
  * Component for correlation chart action buttons
+ * Following CodeFarm Development Methodology:
+ * - User-Centric Design: Clear, accessible actions
+ * - Holistic Development: Consistent with application-wide patterns
  */
 const CorrelationActions: React.FC<CorrelationActionsProps> = ({
   showAllFactors,
@@ -28,8 +33,16 @@ const CorrelationActions: React.FC<CorrelationActionsProps> = ({
           variant="ghost" 
           size="sm" 
           onClick={toggleFactorDisplay}
-          className="text-xs h-8"
+          className={cn(
+            "text-xs h-8 transition-colors",
+            "hover:bg-secondary hover:text-secondary-foreground"
+          )}
         >
+          <AccessibleIcon
+            icon={showAllFactors ? <ChevronUp className="h-3.5 w-3.5 mr-1.5" /> : <ChevronDown className="h-3.5 w-3.5 mr-1.5" />}
+            label={showAllFactors ? "Show fewer factors" : "Show more factors"}
+            role="presentation"
+          />
           {showAllFactors ? "Show top factors only" : "Show all factors"}
         </Button>
       )}
@@ -37,11 +50,19 @@ const CorrelationActions: React.FC<CorrelationActionsProps> = ({
       <Button
         variant="outline"
         size="sm"
-        className="text-xs h-8 ml-auto"
+        className={cn(
+          "text-xs h-8 ml-auto transition-all",
+          "hover:bg-primary/10 dark:hover:bg-primary/20",
+          !hasExportData && "opacity-50 cursor-not-allowed"
+        )}
         onClick={handleExportData}
         disabled={!hasExportData}
       >
-        <Download className="h-3 w-3 mr-1" />
+        <AccessibleIcon
+          icon={<Download className="h-3.5 w-3.5 mr-1.5" />}
+          label="Export correlation data"
+          role="presentation"
+        />
         Export data
       </Button>
     </div>

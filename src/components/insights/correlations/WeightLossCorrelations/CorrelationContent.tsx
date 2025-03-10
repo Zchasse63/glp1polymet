@@ -107,8 +107,7 @@ const CorrelationContent: React.FC<CorrelationContentProps> = ({
         !hasSignificantCorrelations && "opacity-80"
       )}>
         <CorrelationBarChart 
-          data={displayedCorrelations} 
-          animate={!isReducedMotion}
+          data={displayedCorrelations}
         />
       </div>
       

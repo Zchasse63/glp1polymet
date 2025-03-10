@@ -2,6 +2,7 @@
 import React from 'react';
 import { TooltipProps } from 'recharts';
 import { useI18n } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 
 interface CustomTooltipProps extends TooltipProps<number, string> {
   correlationKey?: string;
@@ -43,15 +44,25 @@ export const CustomTooltip: React.FC<CustomTooltipProps> = ({
 
   const strength = getCorrelationStrength(Number(correlationValue));
   const direction = getCorrelationDirection(Number(correlationValue));
+  
+  // Determine color based on correlation direction
+  const directionColor = Number(correlationValue) >= 0 
+    ? 'text-green-600 dark:text-green-500' 
+    : 'text-red-600 dark:text-red-500';
 
   return (
-    <div className="custom-tooltip rounded-md border p-3 shadow-sm" style={tooltipStyle}>
-      <p className="font-medium mb-1" style={labelStyle}>{label}</p>
-      <p className="text-sm">
+    <div 
+      className="custom-tooltip rounded-md border bg-card text-card-foreground shadow-sm p-3" 
+      style={tooltipStyle}
+    >
+      <p className="font-medium mb-1 text-sm" style={labelStyle}>{label}</p>
+      <p className="text-xs mt-1.5">
         {t('correlation')}: <span className="font-medium">{formattedValue}</span>
       </p>
-      <p className="text-sm">
-        {t('strength')}: <span className="font-medium">{strength} {direction}</span>
+      <p className="text-xs mt-0.5">
+        {t('strength')}: <span className={cn("font-medium", directionColor)}>
+          {strength} {direction}
+        </span>
       </p>
     </div>
   );
