@@ -19,6 +19,12 @@ export const useChartConfig = () => {
     theme,
     isReducedMotion,
     // Theme-aware color configurations
+    colors: {
+      positive: 'hsl(var(--chart-3))',
+      negative: 'hsl(var(--chart-4))',
+      grid: isDark ? 'rgba(51, 51, 51, 0.6)' : 'rgba(233, 233, 233, 0.8)',
+      axis: isDark ? 'rgba(180, 180, 180, 0.9)' : 'rgba(75, 75, 75, 0.9)',
+    },
     cartesianGridFill: isDark ? 'rgba(31, 31, 31, 0.4)' : 'rgba(248, 248, 248, 0.6)',
     axisColor: isDark ? 'rgba(160, 160, 160, 0.8)' : 'rgba(102, 102, 102, 0.8)',
     tooltipStyle: {
@@ -45,6 +51,11 @@ export const useChartConfig = () => {
       axis: 12,
       tooltip: 14,
       legend: 13
+    },
+    // Animation timing functions
+    animation: {
+      easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+      delay: isReducedMotion ? 0 : 100,
     }
   };
 };

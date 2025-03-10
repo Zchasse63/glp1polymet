@@ -3,6 +3,7 @@ import React from 'react';
 import { TooltipProps } from 'recharts';
 import { useI18n } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
+import { useChartConfig } from './useChartConfig';
 
 interface CustomTooltipProps extends TooltipProps<number, string> {
   correlationKey?: string;
@@ -15,10 +16,9 @@ export const CustomTooltip: React.FC<CustomTooltipProps> = ({
   payload,
   label,
   correlationKey = 'correlation',
-  tooltipStyle,
-  labelStyle,
 }) => {
   const { t } = useI18n();
+  const { tooltipStyle, labelStyle } = useChartConfig();
 
   if (!active || !payload || !payload.length) {
     return null;
@@ -52,8 +52,10 @@ export const CustomTooltip: React.FC<CustomTooltipProps> = ({
 
   return (
     <div 
-      className="custom-tooltip rounded-md border bg-card text-card-foreground shadow-sm p-3" 
+      className="custom-tooltip rounded-md border bg-card text-card-foreground shadow-sm p-3 animate-fade-in"
       style={tooltipStyle}
+      role="tooltip"
+      aria-label={`${label} correlation: ${formattedValue}, ${strength} ${direction}`}
     >
       <p className="font-medium mb-1 text-sm" style={labelStyle}>{label}</p>
       <p className="text-xs mt-1.5">

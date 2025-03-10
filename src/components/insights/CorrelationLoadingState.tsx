@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const CorrelationLoadingState: React.FC = () => {
   return (
-    <div className="space-y-4" role="status" aria-label="Loading correlation data">
+    <div className="space-y-4 animate-pulse" role="status" aria-label="Loading correlation data">
       <div className="flex items-center space-x-4">
         <Skeleton className="h-4 w-[100px]" />
         <Skeleton className="h-4 w-[250px]" />
@@ -28,7 +28,7 @@ const CorrelationLoadingState: React.FC = () => {
         ))}
       </div>
       
-      <div className="h-[200px]">
+      <div className="h-[200px] rounded-md overflow-hidden">
         <Skeleton className="h-full w-full" />
       </div>
       

@@ -35,7 +35,7 @@ export function Toaster() {
           />
         );
       })}
-      <ToastViewport />
+      <ToastViewport className="gap-2" />
     </ToastProvider>
   );
 }

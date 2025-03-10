@@ -5,6 +5,7 @@ import { ArrowRight, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "@/utils/accessibility/useReducedMotion";
 
 type MetricButtonProps = {
   title: string;
@@ -38,25 +39,29 @@ export const MetricButton = ({
   detailContent
 }: MetricButtonProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const isReducedMotion = useReducedMotion();
 
   return (
     <>
       <Card 
         className={cn(
           "overflow-hidden card-hover opacity-0 cursor-pointer transform transition-all duration-200 hover:shadow-md hover:scale-[1.02]", 
-          isLoaded ? "animate-scale-in opacity-100" : ""
+          isLoaded ? (isReducedMotion ? "opacity-100" : "animate-scale-in opacity-100") : ""
         )}
-        style={{ animationDelay, animationFillMode: "forwards" }}
+        style={{ 
+          animationDelay,
+          animationFillMode: "forwards" 
+        }}
         onClick={() => setIsOpen(true)}
       >
-        <CardContent className="p-3">
+        <CardContent className="p-4">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs font-medium text-muted-foreground mb-1">
                 {title}
               </p>
-              <div className="flex items-baseline mt-1">
-                <span className="text-lg font-bold">
+              <div className="flex items-baseline">
+                <span className="text-xl font-bold">
                   {value}
                 </span>
                 {unit && (
@@ -67,17 +72,17 @@ export const MetricButton = ({
               </div>
             </div>
             <div 
-              className="w-8 h-8 rounded-full flex items-center justify-center"
+              className="w-9 h-9 rounded-full flex items-center justify-center shadow-sm"
               style={{ backgroundColor: iconBgColor }}
             >
               {icon}
             </div>
           </div>
 
-          <div className="mt-2 flex justify-between items-center">
+          <div className="mt-3 flex justify-between items-center">
             <div>
               {trend && trendIcon && (
-                <div className={`flex items-center text-xs ${trendColor}`}>
+                <div className={`flex items-center text-xs font-medium ${trendColor}`}>
                   {trendIcon}
                   {trend}
                 </div>
@@ -94,7 +99,7 @@ export const MetricButton = ({
       </Card>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto custom-scrollbar animate-scale-in">
           <DialogHeader className="flex flex-row items-center justify-between">
             <DialogTitle className="flex items-center gap-2">
               <span 

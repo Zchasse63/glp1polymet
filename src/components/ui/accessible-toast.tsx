@@ -10,6 +10,8 @@ import {
   ToastProps
 } from '@/components/ui/toast';
 import { ScreenReaderAnnouncement } from '@/utils/accessibility';
+import { useReducedMotion } from '@/utils/accessibility/useReducedMotion';
+import { cn } from '@/lib/utils';
 
 interface AccessibleToastProps {
   title?: React.ReactNode;
@@ -36,8 +38,12 @@ export function AccessibleToast({
   description,
   action,
   assertive = false,
+  className,
+  variant = "default",
   ...props
 }: AccessibleToastProps) {
+  const isReducedMotion = useReducedMotion();
+  
   // Prepare message for screen reader
   const screenReaderMessage = `${title ? title + '. ' : ''}${typeof description === 'string' ? description : ''}`;
   
@@ -52,11 +58,22 @@ export function AccessibleToast({
       )}
       
       {/* Render the visual toast */}
-      <Toast {...props as ToastProps}>
+      <Toast 
+        {...props as ToastProps}
+        className={cn(
+          "border-l-4",
+          variant === "destructive" 
+            ? "border-l-destructive" 
+            : "border-l-primary",
+          isReducedMotion ? "animate-fade-in" : "animate-slide-in-right",
+          className
+        )}
+        variant={variant}
+      >
         <div className="grid gap-1">
-          {title && <ToastTitle>{title}</ToastTitle>}
+          {title && <ToastTitle className="font-semibold">{title}</ToastTitle>}
           {description && (
-            <ToastDescription>{description}</ToastDescription>
+            <ToastDescription className="text-sm opacity-90">{description}</ToastDescription>
           )}
         </div>
         {action}

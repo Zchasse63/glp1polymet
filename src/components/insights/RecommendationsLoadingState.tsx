@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
  */
 const RecommendationsLoadingState: React.FC = () => {
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 animate-pulse">
       <div className="flex justify-between items-center">
         <Skeleton className="h-7 w-52" />
         <Skeleton className="h-8 w-24" />

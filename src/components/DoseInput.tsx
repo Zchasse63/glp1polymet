@@ -13,20 +13,26 @@ import { MedicationFormValues } from "@/schemas/medicationSchema";
 
 interface DoseInputProps {
   form: UseFormReturn<MedicationFormValues>;
+  isLoading?: boolean;
 }
 
-export function DoseInput({ form }: DoseInputProps) {
+export function DoseInput({ form, isLoading = false }: DoseInputProps) {
   return (
     <FormField
       control={form.control}
       name="dose"
       render={({ field }) => (
-        <FormItem>
-          <FormLabel>Dose</FormLabel>
+        <FormItem className="space-y-2 animate-fade-in">
+          <FormLabel className="text-sm font-medium">Dose</FormLabel>
           <FormControl>
-            <Input placeholder="e.g. 500mg" {...field} />
+            <Input 
+              placeholder="e.g. 500mg" 
+              className="border-input focus-visible:ring-primary/70"
+              isLoading={isLoading}
+              {...field} 
+            />
           </FormControl>
-          <FormMessage />
+          <FormMessage className="text-xs" />
         </FormItem>
       )}
     />

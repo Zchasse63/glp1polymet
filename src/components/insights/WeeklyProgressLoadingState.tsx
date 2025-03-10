@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const WeeklyProgressLoadingState: React.FC = () => {
   return (
     <Card
-      className="bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-900/10 dark:to-indigo-900/10 border-blue-100/50 dark:border-blue-800/50 overflow-hidden"
+      className="bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-900/10 dark:to-indigo-900/10 border-blue-100/50 dark:border-blue-800/50 overflow-hidden animate-pulse"
     >
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
