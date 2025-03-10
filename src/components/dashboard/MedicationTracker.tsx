@@ -41,6 +41,24 @@ export const MedicationTracker = ({ medications, isLoaded, onViewAll }: Medicati
   // State for tracking which medication details to show
   const [selectedMedication, setSelectedMedication] = useState<Medication | null>(null);
 
+  // Function to generate a gradient background based on medication color
+  const generateGradientStyle = (color: string) => {
+    return {
+      background: `linear-gradient(135deg, ${color}25, ${color}40)`,
+      borderRadius: '50%',
+      padding: '10px',
+      boxShadow: `0 4px 10px ${color}30`,
+    };
+  };
+
+  // Function to generate pill icon style
+  const generatePillStyle = (color: string) => {
+    return {
+      color: color,
+      filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.1))',
+    };
+  };
+
   return (
     <section 
       className={`space-y-3 opacity-0 ${isLoaded ? "animate-slide-up opacity-100" : ""}`}
@@ -77,12 +95,12 @@ export const MedicationTracker = ({ medications, isLoaded, onViewAll }: Medicati
                 <div className="flex items-center justify-between">
                   <div className="flex items-center flex-1">
                     <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center mr-3"
-                      style={{ backgroundColor: `${med.color}15` }}
+                      className="w-10 h-10 flex items-center justify-center mr-3"
+                      style={generateGradientStyle(med.color)}
                     >
                       <PillIcon
-                        className="h-4 w-4"
-                        style={{ color: med.color }}
+                        className="h-5 w-5 transition-all animate-pulse-subtle"
+                        style={generatePillStyle(med.color)}
                       />
                     </div>
                     <div className="flex-1">
@@ -98,7 +116,7 @@ export const MedicationTracker = ({ medications, isLoaded, onViewAll }: Medicati
                   <div className="flex-1 mx-4">
                     <Progress
                       value={(parseFloat(med.level) / parseFloat(med.totalAmount)) * 100}
-                      className="h-1.5 mb-1"
+                      className="h-1.5 mb-1 rounded-full"
                       style={
                         {
                           backgroundColor: `${med.color}20`,
@@ -114,7 +132,12 @@ export const MedicationTracker = ({ medications, isLoaded, onViewAll }: Medicati
                   </div>
 
                   <div className="flex items-center text-xs text-muted-foreground">
-                    <ClockIcon className="h-3 w-3 mr-1" />
+                    <div
+                      className="w-6 h-6 rounded-full flex items-center justify-center mr-1"
+                      style={{ backgroundColor: `${med.color}15` }}
+                    >
+                      <ClockIcon className="h-3.5 w-3.5" style={{ color: med.color }} />
+                    </div>
                     <span>Next: {med.nextDose}</span>
                   </div>
                 </div>
@@ -134,12 +157,12 @@ export const MedicationTracker = ({ medications, isLoaded, onViewAll }: Medicati
           <DialogHeader>
             <DialogTitle className="flex items-center">
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center mr-2"
-                style={{ backgroundColor: selectedMedication ? `${selectedMedication.color}15` : '' }}
+                className="w-10 h-10 flex items-center justify-center mr-2"
+                style={selectedMedication ? generateGradientStyle(selectedMedication.color) : {}}
               >
                 <PillIcon
-                  className="h-4 w-4"
-                  style={{ color: selectedMedication?.color }}
+                  className="h-5 w-5"
+                  style={selectedMedication ? generatePillStyle(selectedMedication.color) : {}}
                 />
               </div>
               {selectedMedication?.name}
