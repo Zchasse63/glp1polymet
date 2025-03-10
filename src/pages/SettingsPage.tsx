@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { PageHeader, Breadcrumb } from "@/components/page";
@@ -19,7 +18,7 @@ import { z } from "zod";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { BellIcon, BellOffIcon, DeviceIcon, GlobeIcon, UserIcon } from "lucide-react";
+import { BellIcon, BellOffIcon, Smartphone, GlobeIcon, UserIcon } from "lucide-react";
 
 /**
  * SettingsPage Component
@@ -121,7 +120,7 @@ const SettingsPage = () => {
               <span className="hidden sm:inline">Notifications</span>
             </TabsTrigger>
             <TabsTrigger value="devices" className="flex items-center gap-2">
-              <DeviceIcon className="h-4 w-4" />
+              <Smartphone className="h-4 w-4" />
               <span className="hidden sm:inline">Devices</span>
             </TabsTrigger>
           </TabsList>
@@ -382,7 +381,7 @@ const SettingsPage = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded-full">
-                          <DeviceIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                          <Smartphone className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                         </div>
                         <div>
                           <p className="font-medium">iPhone 13</p>
@@ -399,7 +398,7 @@ const SettingsPage = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded-full">
-                          <DeviceIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                          <Smartphone className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                         </div>
                         <div>
                           <p className="font-medium">MacBook Pro</p>
