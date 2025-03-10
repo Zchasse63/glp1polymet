@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Medication } from "@/pages/MedicationPage";
+import { Medication } from "@/types/medication";
 import { PillIcon, Clock9Icon, AlertCircleIcon, EditIcon, TrashIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";

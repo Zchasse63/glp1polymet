@@ -1,10 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
 import { Medication } from '@/types/medication';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { ErrorLogger } from '@/utils/errorHandling';
+import { medicationService } from '@/services/medicationService';
+import { getDemoMedications } from '@/data/mockMedications';
 
 export const useMedications = () => {
   const [medications, setMedications] = useState<Medication[]>([]);
@@ -12,83 +12,25 @@ export const useMedications = () => {
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
 
-  // Fetch medications from Supabase
+  // Fetch medications from Supabase or use demo data
   const fetchMedications = async () => {
     try {
       setIsLoading(true);
       
       // For demo purposes, if there's no authenticated user, return demo data
       if (!user) {
-        const demoMedications: Medication[] = [
-          {
-            id: "00000000-0000-0000-0000-000000000001",
-            name: "Ozempic",
-            dose: "0.5mg",
-            frequency: "Once weekly",
-            lastTaken: "Today",
-            nextDose: "In 7 days",
-            level: 95,
-            totalDose: 0.5,
-            unit: "mg",
-            color: "#4f46e5",
-          },
-          {
-            id: "00000000-0000-0000-0000-000000000002",
-            name: "Metformin",
-            dose: "500mg",
-            frequency: "Twice daily",
-            lastTaken: "4 hours ago",
-            nextDose: "In 8 hours",
-            level: 80,
-            totalDose: 500,
-            unit: "mg",
-            color: "#0ea5e9",
-          },
-          {
-            id: "00000000-0000-0000-0000-000000000003",
-            name: "Vitamin D",
-            dose: "2000 IU",
-            frequency: "Once daily",
-            lastTaken: "Yesterday",
-            nextDose: "Today",
-            level: 60,
-            totalDose: 2000,
-            unit: "IU",
-            color: "#f59e0b",
-          },
-        ];
+        const demoMedications = getDemoMedications();
         setMedications(demoMedications);
-        setIsLoading(false);
+        setError(null);
         return;
       }
 
-      const { data, error } = await supabase
-        .from('medications')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      // Convert data from database format to application format
-      const formattedData = data?.map(item => ({
-        id: item.id,
-        name: item.name,
-        dose: item.dose,
-        frequency: item.frequency,
-        lastTaken: item.last_taken,
-        nextDose: item.next_dose,
-        level: item.level,
-        totalDose: item.total_dose,
-        unit: item.unit,
-        color: item.color
-      })) || [];
-
-      setMedications(formattedData);
+      const data = await medicationService.fetchMedications();
+      setMedications(data);
       setError(null);
     } catch (err) {
       console.error('Error fetching medications:', err);
       setError(err instanceof Error ? err : new Error('Failed to fetch medications'));
-      ErrorLogger.error('Failed to fetch medications', 'FETCH_MEDICATIONS_ERROR', { component: 'useMedications' }, err);
     } finally {
       setIsLoading(false);
     }
@@ -97,20 +39,6 @@ export const useMedications = () => {
   // Add a new medication
   const addMedication = async (medication: Omit<Medication, 'id'>) => {
     try {
-      // Format the medication data for database storage
-      const dbMedication = {
-        name: medication.name,
-        dose: medication.dose,
-        frequency: medication.frequency,
-        last_taken: medication.lastTaken,
-        next_dose: medication.nextDose,
-        level: medication.level,
-        total_dose: medication.totalDose,
-        unit: medication.unit,
-        color: medication.color,
-        user_id: user?.id
-      };
-
       // For demo purposes, if there's no authenticated user, update local state only
       if (!user) {
         const newMedication = {
@@ -121,34 +49,13 @@ export const useMedications = () => {
         return newMedication;
       }
 
-      const { data, error } = await supabase
-        .from('medications')
-        .insert(dbMedication)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Convert the returned data to application format
-      const newMedication: Medication = {
-        id: data.id,
-        name: data.name,
-        dose: data.dose,
-        frequency: data.frequency,
-        lastTaken: data.last_taken,
-        nextDose: data.next_dose,
-        level: data.level,
-        totalDose: data.total_dose,
-        unit: data.unit,
-        color: data.color
-      };
+      const newMedication = await medicationService.addMedication(medication, user?.id);
 
       // Update the local state
       setMedications((prevMedications) => [newMedication, ...prevMedications]);
       return newMedication;
     } catch (err) {
       console.error('Error adding medication:', err);
-      ErrorLogger.error('Failed to add medication', 'ADD_MEDICATION_ERROR', { component: 'useMedications' }, err);
       toast({
         variant: "destructive",
         title: "Error",
@@ -169,12 +76,7 @@ export const useMedications = () => {
         return;
       }
 
-      const { error } = await supabase
-        .from('medications')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      await medicationService.deleteMedication(id);
 
       // Update the local state
       setMedications((prevMedications) => 
@@ -182,7 +84,6 @@ export const useMedications = () => {
       );
     } catch (err) {
       console.error('Error deleting medication:', err);
-      ErrorLogger.error('Failed to delete medication', 'DELETE_MEDICATION_ERROR', { component: 'useMedications', medicationId: id }, err);
       toast({
         variant: "destructive",
         title: "Error",
