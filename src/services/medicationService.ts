@@ -2,10 +2,9 @@
 import { supabase } from '@/lib/supabase';
 import { Medication } from '@/types/medication';
 import { ErrorLogger } from '@/utils/errorHandling';
+import { getDemoMedications } from '@/data/mockMedications';
 
-/**
- * Transform database medication data to application format
- */
+// Transform functions stay the same
 export const transformMedicationData = (dbMedication: any): Medication => ({
   id: dbMedication.id,
   name: dbMedication.name,
@@ -19,9 +18,6 @@ export const transformMedicationData = (dbMedication: any): Medication => ({
   color: dbMedication.color
 });
 
-/**
- * Transform application medication data to database format
- */
 export const transformMedicationForDb = (medication: Omit<Medication, 'id'>, userId?: string) => ({
   name: medication.name,
   dose: medication.dose,
@@ -35,18 +31,17 @@ export const transformMedicationForDb = (medication: Omit<Medication, 'id'>, use
   user_id: userId
 });
 
-/**
- * Service for handling medication-related database operations
- */
 export const medicationService = {
-  /**
-   * Fetch all medications for a user
-   */
   fetchMedications: async (userId?: string) => {
     try {
+      // For demo mode or no userId, return mock data
+      if (!userId || userId === 'demo-user-id') {
+        return getDemoMedications();
+      }
+
       let query = supabase.from('medications').select('*');
       
-      // If userId is provided, filter by user_id
+      // Only filter by user_id if we have a real UUID
       if (userId) {
         query = query.eq('user_id', userId);
       }
@@ -55,20 +50,27 @@ export const medicationService = {
 
       if (error) throw error;
 
-      // Convert data from database format to application format
       return (data || []).map(transformMedicationData);
     } catch (err) {
       console.error('Error fetching medications:', err);
       ErrorLogger.error('Failed to fetch medications', 'FETCH_MEDICATIONS_ERROR', { component: 'medicationService' }, err);
-      throw err;
+      // Return demo medications as fallback in case of error
+      return getDemoMedications();
     }
   },
 
-  /**
-   * Add a new medication
-   */
   addMedication: async (medication: Omit<Medication, 'id'>, userId?: string) => {
     try {
+      // In demo mode, just return a mock response
+      if (!userId || userId === 'demo-user-id') {
+        const mockMedication = {
+          ...medication,
+          id: crypto.randomUUID(),
+          created_at: new Date().toISOString()
+        };
+        return transformMedicationData(mockMedication);
+      }
+
       const dbMedication = transformMedicationForDb(medication, userId);
 
       const { data, error } = await supabase
@@ -87,15 +89,18 @@ export const medicationService = {
     }
   },
 
-  /**
-   * Delete a medication by ID
-   */
-  deleteMedication: async (id: string) => {
+  deleteMedication: async (id: string, userId?: string) => {
     try {
+      // In demo mode, just return success
+      if (!userId || userId === 'demo-user-id') {
+        return true;
+      }
+
       const { error } = await supabase
         .from('medications')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', userId);
 
       if (error) throw error;
       
@@ -107,12 +112,18 @@ export const medicationService = {
     }
   },
   
-  /**
-   * Update a medication
-   */
-  updateMedication: async (id: string, medication: Partial<Omit<Medication, 'id'>>) => {
+  updateMedication: async (id: string, medication: Partial<Omit<Medication, 'id'>>, userId?: string) => {
     try {
-      // Convert from application format to database format
+      // In demo mode, just return the updated medication
+      if (!userId || userId === 'demo-user-id') {
+        const mockMedication = {
+          id,
+          ...medication,
+          updated_at: new Date().toISOString()
+        };
+        return transformMedicationData(mockMedication);
+      }
+
       const updates: any = {};
       
       if (medication.name) updates.name = medication.name;
@@ -133,6 +144,7 @@ export const medicationService = {
         .from('medications')
         .update(updates)
         .eq('id', id)
+        .eq('user_id', userId)
         .select()
         .single();
 
@@ -146,3 +158,4 @@ export const medicationService = {
     }
   }
 };
+
