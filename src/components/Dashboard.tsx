@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardHeader from "./dashboard/DashboardHeader";
@@ -16,11 +15,13 @@ const Dashboard = () => {
     healthMetrics 
   } = useDashboardData();
   
-  // Use preferences hooks for metrics and medications
-  const { selectedMetrics } = useMetricPreferences();
-  const { selectedMedications } = useMedicationPreferences();
+  const { 
+    selectedMetrics 
+  } = useMetricPreferences();
+  const { 
+    selectedMedications 
+  } = useMedicationPreferences();
   
-  // Transform the health metrics to include the JSX elements
   const transformedHealthMetrics = healthMetrics.map(metric => {
     const Icon = metric.icon;
     const TrendIcon = metric.trendIcon;
@@ -34,7 +35,6 @@ const Dashboard = () => {
     };
   });
   
-  // Filter medications based on user preferences
   const filteredMedications = medications.filter(medication => 
     selectedMedications.includes(medication.id)
   );
@@ -43,7 +43,6 @@ const Dashboard = () => {
     setIsLoaded(true);
   }, []);
   
-  // Handle navigation
   const handleNavigateToMedications = () => {
     navigate("/medications");
   };
@@ -54,20 +53,17 @@ const Dashboard = () => {
 
   return (
     <div className="px-4 py-8 md:px-8 lg:px-10 max-w-7xl mx-auto space-y-8">
-      {/* Dashboard Header */}
       <DashboardHeader 
         userName="Eric" 
         isLoaded={isLoaded} 
       />
 
-      {/* Today's Metrics */}
       <HealthMetrics 
         metrics={transformedHealthMetrics} 
         isLoaded={isLoaded} 
         onViewAll={handleNavigateToHealth} 
       />
 
-      {/* Medication Overview */}
       <MedicationTracker 
         medications={filteredMedications} 
         isLoaded={isLoaded} 
