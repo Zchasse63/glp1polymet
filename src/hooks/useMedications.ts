@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Medication } from '@/pages/MedicationPage';
+import { Medication } from '@/types/medication';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { ErrorLogger } from '@/utils/errorHandling';
@@ -21,7 +21,7 @@ export const useMedications = () => {
       if (!user) {
         const demoMedications: Medication[] = [
           {
-            id: "med1",
+            id: "00000000-0000-0000-0000-000000000001",
             name: "Ozempic",
             dose: "0.5mg",
             frequency: "Once weekly",
@@ -33,7 +33,7 @@ export const useMedications = () => {
             color: "#4f46e5",
           },
           {
-            id: "med2",
+            id: "00000000-0000-0000-0000-000000000002",
             name: "Metformin",
             dose: "500mg",
             frequency: "Twice daily",
@@ -45,7 +45,7 @@ export const useMedications = () => {
             color: "#0ea5e9",
           },
           {
-            id: "med3",
+            id: "00000000-0000-0000-0000-000000000003",
             name: "Vitamin D",
             dose: "2000 IU",
             frequency: "Once daily",
@@ -88,14 +88,7 @@ export const useMedications = () => {
     } catch (err) {
       console.error('Error fetching medications:', err);
       setError(err instanceof Error ? err : new Error('Failed to fetch medications'));
-      
-      // Log the error to our error tracking system
-      ErrorLogger.error(
-        'Failed to fetch medications', 
-        'FETCH_MEDICATIONS_ERROR',
-        { component: 'useMedications' },
-        err
-      );
+      ErrorLogger.error('Failed to fetch medications', 'FETCH_MEDICATIONS_ERROR', { component: 'useMedications' }, err);
     } finally {
       setIsLoading(false);
     }
@@ -155,15 +148,7 @@ export const useMedications = () => {
       return newMedication;
     } catch (err) {
       console.error('Error adding medication:', err);
-      
-      // Log the error to our error tracking system
-      ErrorLogger.error(
-        'Failed to add medication', 
-        'ADD_MEDICATION_ERROR',
-        { component: 'useMedications' },
-        err
-      );
-      
+      ErrorLogger.error('Failed to add medication', 'ADD_MEDICATION_ERROR', { component: 'useMedications' }, err);
       toast({
         variant: "destructive",
         title: "Error",
@@ -197,15 +182,7 @@ export const useMedications = () => {
       );
     } catch (err) {
       console.error('Error deleting medication:', err);
-      
-      // Log the error to our error tracking system
-      ErrorLogger.error(
-        'Failed to delete medication', 
-        'DELETE_MEDICATION_ERROR',
-        { component: 'useMedications', medicationId: id },
-        err
-      );
-      
+      ErrorLogger.error('Failed to delete medication', 'DELETE_MEDICATION_ERROR', { component: 'useMedications', medicationId: id }, err);
       toast({
         variant: "destructive",
         title: "Error",
