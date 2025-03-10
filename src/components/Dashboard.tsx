@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import DashboardHeader from "./dashboard/DashboardHeader";
 import MedicationTracker from "./dashboard/MedicationTracker";
 import HealthMetrics from "./dashboard/HealthMetrics";
-import WeightProgress from "./dashboard/WeightProgress";
 import { useDashboardData } from "../hooks/useDashboardData";
 import { useMetricPreferences } from "@/hooks/useMetricPreferences";
 import { useMedicationPreferences } from "@/hooks/useMedicationPreferences";
@@ -13,7 +12,6 @@ const Dashboard = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const navigate = useNavigate();
   const { 
-    weightData, 
     medications, 
     healthMetrics 
   } = useDashboardData();
@@ -53,14 +51,6 @@ const Dashboard = () => {
   const handleNavigateToHealth = () => {
     navigate("/health");
   };
-  
-  const handleNavigateToSettings = () => {
-    navigate("/settings");
-  };
-  
-  const handleViewDetails = () => {
-    navigate("/health");
-  };
 
   return (
     <div className="px-4 py-8 md:px-8 lg:px-10 max-w-7xl mx-auto space-y-8">
@@ -82,13 +72,6 @@ const Dashboard = () => {
         medications={filteredMedications} 
         isLoaded={isLoaded} 
         onViewAll={handleNavigateToMedications} 
-      />
-
-      {/* Weight Progress */}
-      <WeightProgress 
-        weightData={weightData} 
-        isLoaded={isLoaded} 
-        onViewDetails={handleViewDetails} 
       />
     </div>
   );
