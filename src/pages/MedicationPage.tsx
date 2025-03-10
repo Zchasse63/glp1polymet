@@ -16,7 +16,7 @@ import MedicationEffectivenessChart from "@/components/medication/MedicationEffe
 import { useMedications } from "@/hooks/useMedications";
 import { Spinner } from "@/components/ui/spinner";
 import { ErrorLogger } from "@/utils/errorHandling";
-import { Medication } from "@/types/medication";
+import { Medication } from "@/types/medication"; // Import from the correct type definition
 
 const generateRandomColor = () => {
   const colors = ["#4f46e5", "#0ea5e9", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899"];
@@ -67,7 +67,7 @@ const MedicationPage = () => {
 
   const handleAddMedication = async (data: { name: string; dose: string; frequency: string; unit?: string; totalDose?: number }) => {
     try {
-      const newMedication = {
+      const newMedication: Omit<Medication, 'id'> = {
         name: data.name,
         dose: data.dose,
         frequency: data.frequency,
