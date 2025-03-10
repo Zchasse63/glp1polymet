@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ClockIcon } from "lucide-react";
 import { Medication } from "@/types/medication";
+import { cn } from "@/lib/utils";
 
 interface MedicationCardProps {
   medication: Medication;
@@ -24,10 +25,11 @@ export const MedicationCard = ({
   return (
     <Card
       key={med.id}
-      className={`w-full overflow-hidden border-0 shadow-md opacity-0 cursor-pointer ${isLoaded ? "animate-scale-in opacity-100" : ""}`}
+      className={cn(
+        "w-full overflow-hidden border-0 shadow-md opacity-0 cursor-pointer transform transition-all duration-200 hover:shadow-lg hover:scale-[1.02]",
+        isLoaded ? "animate-scale-in opacity-100" : ""
+      )}
       style={{ 
-        background: `linear-gradient(to right, ${med.color}15, transparent)`,
-        borderRadius: '12px',
         animationDelay: getAnimationDelay(index),
         animationFillMode: "forwards"
       }}
@@ -35,15 +37,13 @@ export const MedicationCard = ({
     >
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div>
-              <h3 className="text-base font-semibold text-foreground">
-                {med.name}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {med.dose} • {med.frequency}
-              </p>
-            </div>
+          <div className="flex flex-col">
+            <h3 className="text-base font-semibold text-foreground">
+              {med.name}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {med.dose} • {med.frequency}
+            </p>
           </div>
 
           <div className="flex-1 mx-6 max-w-xs">

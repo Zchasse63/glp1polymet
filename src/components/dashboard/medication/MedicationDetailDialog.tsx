@@ -4,11 +4,13 @@ import {
   Dialog, 
   DialogContent, 
   DialogHeader, 
-  DialogTitle 
+  DialogTitle,
+  DialogClose
 } from "@/components/ui/dialog";
 import MedicationDetailChart from "../MedicationDetailChart";
 import { Medication } from "@/types/medication";
-import { PillIcon, HeartPulseIcon, BrainIcon, ActivityIcon, TabletIcon } from "lucide-react";
+import { PillIcon, HeartPulseIcon, BrainIcon, ActivityIcon, TabletIcon, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface MedicationDetailDialogProps {
   selectedMedication: Medication | null;
@@ -19,24 +21,6 @@ const MedicationDetailDialog = ({
   selectedMedication, 
   onOpenChange 
 }: MedicationDetailDialogProps) => {
-  // Function to generate a gradient background based on medication color
-  const generateGradientStyle = (color: string) => {
-    return {
-      background: `linear-gradient(135deg, ${color}30, ${color}60)`,
-      borderRadius: '50%',
-      padding: '12px',
-      boxShadow: `0 4px 10px ${color}40`,
-    };
-  };
-
-  // Function to generate icon style
-  const generateIconStyle = (color: string) => {
-    return {
-      color: color,
-      filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2))',
-    };
-  };
-
   // Function to get appropriate icon based on medication ID
   const getMedicationIcon = (medicationId: string) => {
     // Use different icons based on the first character of medication ID for demo variation
@@ -44,41 +28,48 @@ const MedicationDetailDialog = ({
     
     switch(true) {
       case firstChar <= 'd':
-        return <PillIcon className="h-5 w-5 transition-all animate-pulse-subtle" />;
+        return <PillIcon className="h-5 w-5" />;
       case firstChar <= 'h':
-        return <HeartPulseIcon className="h-5 w-5 transition-all animate-pulse-subtle" />;
+        return <HeartPulseIcon className="h-5 w-5" />;
       case firstChar <= 'l':
-        return <BrainIcon className="h-5 w-5 transition-all animate-pulse-subtle" />;
+        return <BrainIcon className="h-5 w-5" />;
       case firstChar <= 'p':
-        return <TabletIcon className="h-5 w-5 transition-all animate-pulse-subtle" />;
+        return <TabletIcon className="h-5 w-5" />;
       default:
-        return <ActivityIcon className="h-5 w-5 transition-all animate-pulse-subtle" />;
+        return <ActivityIcon className="h-5 w-5" />;
     }
   };
 
   return (
     <Dialog open={!!selectedMedication} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="flex flex-row items-center justify-between">
+          <DialogTitle className="flex items-center gap-2">
             {selectedMedication && (
               <>
-                <div 
-                  className="w-10 h-10 mr-2 flex items-center justify-center"
-                  style={generateGradientStyle(selectedMedication.color)}
+                <span 
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ 
+                    backgroundColor: `${selectedMedication.color}20`,
+                  }}
                 >
                   {React.cloneElement(getMedicationIcon(selectedMedication.id), {
-                    style: generateIconStyle(selectedMedication.color)
+                    style: { color: selectedMedication.color }
                   })}
-                </div>
+                </span>
                 {selectedMedication.name}
               </>
             )}
           </DialogTitle>
+          <DialogClose asChild>
+            <Button variant="ghost" size="icon" className="h-6 w-6">
+              <X className="h-4 w-4" />
+            </Button>
+          </DialogClose>
         </DialogHeader>
         
         {selectedMedication && (
-          <div className="space-y-4">
+          <div className="space-y-4 p-1">
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="flex flex-col">
                 <span className="text-muted-foreground">Dose</span>
