@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { memo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ClockIcon } from "lucide-react";
@@ -13,7 +13,8 @@ interface MedicationCardProps {
   isLoaded: boolean;
 }
 
-export const MedicationCard = ({ 
+// Use React.memo to prevent unnecessary re-renders
+const MedicationCard = memo(({ 
   medication: med, 
   onClick, 
   index, 
@@ -24,8 +25,8 @@ export const MedicationCard = ({
 
   // Convert level and totalAmount to numbers to ensure proper calculation
   const levelValue = typeof med.level === 'string' ? parseFloat(med.level) : med.level;
-  const totalAmountValue = med.totalAmount ? 
-    (typeof med.totalAmount === 'string' ? parseFloat(med.totalAmount) : med.totalAmount) : 
+  const totalAmountValue = med.totalDose ? 
+    (typeof med.totalDose === 'string' ? parseFloat(med.totalDose) : med.totalDose) : 
     100;
     
   // Calculate the percentage value for the progress bar
@@ -68,7 +69,7 @@ export const MedicationCard = ({
             />
             <div className="flex justify-between text-xs">
               <span className="text-muted-foreground">
-                {med.level} / {med.totalAmount}
+                {med.level} / {med.totalDose || 100}
               </span>
             </div>
           </div>
@@ -86,6 +87,9 @@ export const MedicationCard = ({
       </CardContent>
     </Card>
   );
-};
+});
+
+// Add displayName for better debugging
+MedicationCard.displayName = "MedicationCard";
 
 export default MedicationCard;

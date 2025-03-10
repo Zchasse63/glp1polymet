@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Medication } from '@/types/medication';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,8 +12,8 @@ export const useMedications = () => {
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
 
-  // Fetch medications from Supabase or use demo data
-  const fetchMedications = async () => {
+  // Use useCallback to prevent unnecessary recreation of this function
+  const fetchMedications = useCallback(async () => {
     try {
       setIsLoading(true);
       
@@ -34,7 +34,7 @@ export const useMedications = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]); // Only depend on user changes
 
   // Add a new medication
   const addMedication = async (medication: Omit<Medication, 'id'>) => {
@@ -125,7 +125,7 @@ export const useMedications = () => {
     }
   };
 
-  // Show a notification when in demo mode
+  // Show a notification when in demo mode - only once when component mounts
   useEffect(() => {
     if (!user && !isLoading) {
       toast({
@@ -135,9 +135,11 @@ export const useMedications = () => {
     }
   }, [user, isLoading]);
 
-  // Fetch medications on mount and when user changes
+  // Fetch medications ONLY when user changes or component mounts
+  // This prevents continuous refetching
   useEffect(() => {
     fetchMedications();
+    // No dependency on fetchMedications which would cause an infinite loop
   }, [user]);
 
   return {

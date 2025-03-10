@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Layout } from "@/components/Layout";
 import { useToast } from "@/components/ui/use-toast";
 import { 
@@ -40,12 +39,6 @@ const MedicationPage = () => {
     refetch 
   } = useMedications();
 
-  // Fetch medications on mount
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
-
-  // Log any errors to our centralized error logger
   useEffect(() => {
     if (error) {
       ErrorLogger.error(
@@ -57,7 +50,6 @@ const MedicationPage = () => {
     }
   }, [error]);
 
-  // Sample trend data for medication effectiveness chart
   const trendData = [
     { date: "Week 1", weight: 210, medication: 80 },
     { date: "Week 2", weight: 208, medication: 85 },
@@ -69,7 +61,7 @@ const MedicationPage = () => {
     { date: "Week 8", weight: 195, medication: 95 },
   ];
 
-  const handleAddMedication = async (data: { name: string; dose: string; frequency: string; unit?: string; totalDose?: number }) => {
+  const handleAddMedication = useCallback(async (data: { name: string; dose: string; frequency: string; unit?: string; totalDose?: number }) => {
     try {
       const newMedication: Omit<Medication, 'id'> = {
         name: data.name,
@@ -98,9 +90,9 @@ const MedicationPage = () => {
         description: "Failed to add medication. Please try again.",
       });
     }
-  };
+  }, [addMedication, toast]);
 
-  const handleDeleteMedication = async (id: string) => {
+  const handleDeleteMedication = useCallback(async (id: string) => {
     try {
       const medicationToDelete = medications.find(med => med.id === id);
       await deleteMedication(id);
@@ -117,15 +109,15 @@ const MedicationPage = () => {
         description: "Failed to remove medication. Please try again.",
       });
     }
-  };
+  }, [deleteMedication, medications, toast]);
 
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     refetch();
     toast({
       title: "Retrying",
       description: "Attempting to reload medications.",
     });
-  };
+  }, [refetch, toast]);
 
   return (
     <Layout currentPage={currentPage} setCurrentPage={setCurrentPage}>
