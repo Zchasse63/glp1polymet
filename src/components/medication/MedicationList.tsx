@@ -21,9 +21,7 @@ interface MedicationListProps {
 const MedicationList = ({ medications, onDelete, onAdd }: MedicationListProps) => {
   // Get level percentage for progress bar
   const getLevelPercentage = (level: string | number, totalDose?: number) => {
-    // Convert level to number if it's a string
     const numericLevel = typeof level === 'string' ? parseFloat(level) : level;
-    
     if (!totalDose) return numericLevel;
     return (numericLevel / totalDose) * 100;
   };
@@ -33,19 +31,24 @@ const MedicationList = ({ medications, onDelete, onAdd }: MedicationListProps) =
       <div className="grid gap-4">
         {medications.length > 0 ? (
           medications.map((medication) => (
-            <Card key={medication.id} className="overflow-hidden border-l-4" style={{ borderLeftColor: medication.color }}>
+            <Card 
+              key={medication.id} 
+              className="overflow-hidden transition-all duration-200 hover:shadow-lg border-l-4 animate-scale-in" 
+              style={{ borderLeftColor: medication.color }}
+            >
               <CardContent className="p-0">
                 <div className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div
-                        className="w-10 h-10 rounded-full flex items-center justify-center"
+                        className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
                         style={{ backgroundColor: `${medication.color}15` }}
                       >
                         <PillIcon className="h-5 w-5" style={{ color: medication.color }} />
                       </div>
                       <div>
-                        <h3 className="font-medium">{medication.name}</h3>
+                        <h3 className="font-medium text 
+-lg">{medication.name}</h3>
                         <p className="text-sm text-muted-foreground">
                           {medication.dose} • {medication.frequency}
                         </p>
@@ -53,7 +56,7 @@ const MedicationList = ({ medications, onDelete, onAdd }: MedicationListProps) =
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted/50">
                           <svg 
                             xmlns="http://www.w3.org/2000/svg" 
                             width="16" 
@@ -71,7 +74,7 @@ const MedicationList = ({ medications, onDelete, onAdd }: MedicationListProps) =
                           </svg>
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="end" className="w-40">
                         <DropdownMenuItem className="cursor-pointer flex items-center">
                           <EditIcon className="mr-2 h-4 w-4" />
                           <span>Edit</span>
@@ -97,7 +100,7 @@ const MedicationList = ({ medications, onDelete, onAdd }: MedicationListProps) =
                   } as React.CSSProperties}
                 />
 
-                <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 grid grid-cols-2 gap-4 text-sm">
+                <div className="px-4 py-3 bg-muted/10 grid grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center">
                     <Clock9Icon className="h-4 w-4 mr-2 text-muted-foreground" />
                     <div>
