@@ -65,7 +65,8 @@ export function AccessibleToast({
           variant === "destructive" 
             ? "border-l-destructive" 
             : "border-l-primary",
-          isReducedMotion ? "animate-fade-in" : "animate-slide-in-right",
+          isReducedMotion ? "animate-fade-in" : "animate-fade-slide-right",
+          "will-change-transform",
           className
         )}
         variant={variant}

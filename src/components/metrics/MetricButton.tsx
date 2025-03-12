@@ -45,12 +45,13 @@ export const MetricButton = ({
     <>
       <Card 
         className={cn(
-          "overflow-hidden card-hover opacity-0 cursor-pointer transform transition-all duration-200 hover:shadow-md hover:scale-[1.02]", 
-          isLoaded ? (isReducedMotion ? "opacity-100" : "animate-scale-in opacity-100") : ""
+          "overflow-hidden card-hover cursor-pointer transform transition-all duration-200 hover:shadow-md hover:scale-[1.02]", 
+          isLoaded ? "opacity-100" : "opacity-0"
         )}
         style={{ 
-          animationDelay,
-          animationFillMode: "forwards" 
+          transform: isLoaded ? 'translateY(0)' : 'translateY(15px)',
+          transitionDelay: animationDelay,
+          transition: 'opacity 250ms ease-out, transform 250ms ease-out'
         }}
         onClick={() => setIsOpen(true)}
       >
@@ -116,7 +117,9 @@ export const MetricButton = ({
               </Button>
             </DialogClose>
           </DialogHeader>
-          {detailContent}
+          <div className="animate-fade-slide-up">
+            {detailContent}
+          </div>
         </DialogContent>
       </Dialog>
     </>

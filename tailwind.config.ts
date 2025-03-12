@@ -82,7 +82,7 @@ export default {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.85' }
 				},
-				// Updated animations for consistent modern feel
+				// Modern fade-slide animations
 				'fade-slide-up': {
 					'0%': { opacity: '0', transform: 'translateY(15px)' },
 					'100%': { opacity: '1', transform: 'translateY(0)' }
@@ -108,21 +108,12 @@ export default {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite',
-				// Updated animation durations to 250ms
+				// Modern animation durations to 250ms
 				'fade-slide-up': 'fade-slide-up 250ms ease-out forwards',
 				'fade-slide-right': 'fade-slide-right 250ms ease-out forwards',
 				'fade-slide-down': 'fade-slide-down 250ms ease-out forwards',
 				'fade-slide-left': 'fade-slide-left 250ms ease-out forwards',
 				'fade-scale': 'fade-scale 250ms ease-out forwards',
-				// Staggered variants
-				'fade-slide-up-1': 'fade-slide-up 250ms 50ms ease-out forwards',
-				'fade-slide-up-2': 'fade-slide-up 250ms 100ms ease-out forwards',
-				'fade-slide-up-3': 'fade-slide-up 250ms 150ms ease-out forwards',
-				'fade-slide-up-4': 'fade-slide-up 250ms 200ms ease-out forwards',
-				'fade-slide-left-1': 'fade-slide-left 250ms 50ms ease-out forwards',
-				'fade-slide-left-2': 'fade-slide-left 250ms 100ms ease-out forwards',
-				'fade-slide-left-3': 'fade-slide-left 250ms 150ms ease-out forwards',
-				'fade-slide-left-4': 'fade-slide-left 250ms 200ms ease-out forwards',
 			}
 		}
 	},

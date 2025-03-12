@@ -30,10 +30,9 @@ const MedicationList = ({ medications, onAdd, onDelete }: MedicationListProps) =
             <Card 
               key={medication.id} 
               className={cn(
-                "w-full overflow-hidden card-hover cursor-pointer transform transition-all duration-200 hover:shadow-md hover:scale-[1.02]",
-                getAnimationClass('fade-slide-up')
+                "w-full overflow-hidden card-hover cursor-pointer transform transition-all duration-200 hover:shadow-md hover:scale-[1.02]"
               )}
-              style={getAnimationStyle(index)}
+              style={getAnimationStyle(true, 'up', index)}
             >
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -77,7 +76,7 @@ const MedicationList = ({ medications, onAdd, onDelete }: MedicationListProps) =
                           </svg>
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-40">
+                      <DropdownMenuContent align="end" className="w-40 animate-fade-scale">
                         <DropdownMenuItem className="cursor-pointer flex items-center">
                           <EditIcon className="mr-2 h-4 w-4" />
                           <span>Edit</span>
@@ -97,7 +96,7 @@ const MedicationList = ({ medications, onAdd, onDelete }: MedicationListProps) =
             </Card>
           ))
         ) : (
-          <div className={cn("text-center py-8", getAnimationClass('fade-scale'))}>
+          <div className="text-center py-8 animate-fade-scale">
             <PillIcon className="h-12 w-12 mx-auto text-muted-foreground opacity-50" />
             <h3 className="mt-4 text-lg font-medium">No medications found</h3>
             <p className="mt-1 text-sm text-muted-foreground">

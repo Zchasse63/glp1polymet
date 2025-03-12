@@ -32,14 +32,14 @@ export const Spinner = ({
   }[color];
   
   const animationClass = isReducedMotion 
-    ? "animate-pulse" 
+    ? "animate-pulse-subtle" 
     : "animate-spin";
   
   return (
     <div
       role="status"
       aria-label={ariaLabel}
-      className="inline-flex items-center justify-center"
+      className="inline-flex items-center justify-center animate-fade-scale"
     >
       <Loader2 
         className={cn(

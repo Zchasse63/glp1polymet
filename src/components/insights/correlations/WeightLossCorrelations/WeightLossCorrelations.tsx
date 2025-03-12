@@ -27,7 +27,7 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const isVisible = useIntersectionObserver(cardRef, { threshold: 0.1 });
-  const { getAnimationClass, getLoadedStyle } = useAnimationTransition();
+  const { getAnimationClass, getAnimationStyle } = useAnimationTransition();
   
   const {
     sortedCorrelations,
@@ -50,10 +50,9 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
       className={cn(
         "shadow-md transition-all duration-250 ease-out",
         "hover:shadow-lg border border-border/50",
-        "dark:bg-card dark:border-border/20",
-        getAnimationClass('fade-slide-up')
+        "dark:bg-card dark:border-border/20"
       )}
-      style={getLoadedStyle(isVisible, 0)}
+      style={getAnimationStyle(isVisible, 'up', 0)}
     >
       <CardHeader className="flex flex-row items-center gap-4">
         <AccessibleIcon

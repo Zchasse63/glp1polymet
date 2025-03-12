@@ -24,15 +24,15 @@ const RecommendationContainer: React.FC<RecommendationContainerProps> = ({
   activeFilter,
   setActiveFilter
 }) => {
-  const { getAnimationClass, getLoadedStyle } = useAnimationTransition();
+  const { getAnimationClass, getAnimationStyle } = useAnimationTransition();
   
   return (
     <div 
       className={cn(
         "grid gap-3",
-        getAnimationClass('fade-slide-up')
+        getAnimationClass('up')
       )}
-      style={getLoadedStyle(true, 0)}
+      style={getAnimationStyle(true, 'up', 0)}
     >
       {noFilteredResults ? (
         <NoRecommendationsState 

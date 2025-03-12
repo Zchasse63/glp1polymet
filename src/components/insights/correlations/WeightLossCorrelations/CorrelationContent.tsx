@@ -44,7 +44,7 @@ const CorrelationContent: React.FC<CorrelationContentProps> = ({
   handleExportData
 }) => {
   const isReducedMotion = useReducedMotion();
-  const { getAnimationClass, getLoadedStyle } = useAnimationTransition();
+  const { getAnimationClass, getAnimationStyle } = useAnimationTransition();
   const [errorAnnounced, setErrorAnnounced] = React.useState(false);
   
   React.useEffect(() => {
@@ -60,10 +60,7 @@ const CorrelationContent: React.FC<CorrelationContentProps> = ({
     return (
       <>
         <ScreenReaderAnnouncement message="Loading correlation data" />
-        <div 
-          className={getAnimationClass('fade-slide-up')}
-          style={getLoadedStyle(true, 0)}
-        >
+        <div className="animate-fade-slide-up">
           <CorrelationLoadingState />
         </div>
       </>
@@ -77,10 +74,7 @@ const CorrelationContent: React.FC<CorrelationContentProps> = ({
           message={`Error loading correlations: ${error.message}`} 
           assertive={true}
         />
-        <div 
-          className={getAnimationClass('fade-slide-up')}
-          style={getLoadedStyle(true, 0)}
-        >
+        <div className="animate-fade-slide-up">
           <CorrelationErrorState 
             error={error}
             onRetry={handleRetry}
@@ -95,10 +89,7 @@ const CorrelationContent: React.FC<CorrelationContentProps> = ({
     return (
       <>
         <ScreenReaderAnnouncement message="No correlation data available" />
-        <div 
-          className={getAnimationClass('fade-slide-up')}
-          style={getLoadedStyle(true, 0)}
-        >
+        <div className="animate-fade-slide-up">
           <NoCorrelationsState />
         </div>
       </>
@@ -106,13 +97,7 @@ const CorrelationContent: React.FC<CorrelationContentProps> = ({
   }
 
   return (
-    <div 
-      className={cn(
-        "space-y-6",
-        getAnimationClass('fade-slide-up')
-      )}
-      style={getLoadedStyle(true, 0)}
-    >
+    <div className="space-y-6 animate-fade-slide-up">
       <ScreenReaderAnnouncement 
         message={hasSignificantCorrelations 
           ? `Found ${sortedCorrelations.length} correlations. The strongest correlation is ${sortedCorrelations[0].factor} with a correlation value of ${sortedCorrelations[0].correlation.toFixed(2)}.`

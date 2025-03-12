@@ -37,7 +37,7 @@ type HealthMetricsProps = {
 export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsProps) => {
   const navigate = useNavigate();
   const { selectedMetrics } = useMetricPreferences();
-  const { getAnimationClass, getLoadedStyle } = useAnimationTransition();
+  const { getAnimationClass, getAnimationStyle } = useAnimationTransition();
   
   const getDetailContent = (metric: { id: string; title: string; value: string; unit?: string }) => {
     switch (metric.id) {
@@ -115,9 +115,9 @@ export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsPro
     <section 
       className={cn(
         "space-y-5",
-        getAnimationClass('fade-slide-up')
+        getAnimationClass('up')
       )}
-      style={getLoadedStyle(isLoaded, 1)}
+      style={getAnimationStyle(isLoaded, 'up', 1)}
     >
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">
@@ -141,7 +141,7 @@ export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsPro
             <MetricButton
               key={metric.id}
               {...metric}
-              animationDelay={`${0.35 + index * 0.05}s`}
+              animationDelay={`${index * 50}ms`}
               isLoaded={isLoaded}
               detailContent={getDetailContent(metric)}
             />
@@ -149,9 +149,9 @@ export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsPro
         ) : (
           <div className={cn(
             "col-span-2 p-4 text-center text-muted-foreground border rounded-md border-dashed border-muted hover:border-muted-foreground/50 transition-colors",
-            getAnimationClass('fade-scale')
+            getAnimationClass('scale')
           )}
-          style={getLoadedStyle(isLoaded, 0)}>
+          style={getAnimationStyle(isLoaded, 'scale', 0)}>
             No metrics selected for dashboard. Configure in App Settings.
           </div>
         )}

@@ -6,94 +6,97 @@ type AnimationType =
   | 'fade-slide-right'
   | 'fade-slide-down'
   | 'fade-slide-left'
-  | 'fade-scale'
-  | 'fade-slide-up-1'
-  | 'fade-slide-up-2'
-  | 'fade-slide-up-3'
-  | 'fade-slide-up-4'
-  | 'fade-slide-left-1'
-  | 'fade-slide-left-2'
-  | 'fade-slide-left-3'
-  | 'fade-slide-left-4';
+  | 'fade-scale';
 
-interface AnimationOptions {
-  duration?: number;
-  delay?: number;
-}
+type AnimationDirection = 'up' | 'right' | 'down' | 'left' | 'scale';
 
 /**
- * Hook to get appropriate animation classes that respect user's reduced motion preference
+ * Hook to provide consistent animation transitions that respect user's motion preferences
+ * 
+ * Following CodeFarm Development Methodology:
+ * - User-Centric Design: Respects reduced motion preferences
+ * - Holistic Development: Provides consistent animations across the app
  */
 export function useAnimationTransition() {
   const prefersReducedMotion = useReducedMotion();
 
   /**
-   * Get animation classes based on animation type and user preferences
+   * Get animation classes based on direction and user preferences
    */
-  const getAnimationClass = (
-    animationType: AnimationType,
-    options?: AnimationOptions
-  ): string => {
-    // Return just opacity transition if user prefers reduced motion
-    if (prefersReducedMotion) {
-      return "transition-opacity duration-250 ease-out";
-    }
-
-    // Default animation with hardware acceleration
-    return `will-change-transform transition-all duration-250 ease-out`;
+  const getAnimationClass = (direction: AnimationDirection = 'up'): string => {
+    // Return base transition classes
+    return "will-change-transform transition-all duration-250 ease-out";
   };
 
   /**
-   * Get inline style for animation delays and transforms
+   * Get initial animation style for an element before it appears
    */
-  const getAnimationStyle = (index: number = 0, baseDelay: number = 0): React.CSSProperties => {
-    // Base style that works for all users
-    const baseStyle: React.CSSProperties = {
-      opacity: 0,
-      transition: `opacity 250ms ease-out, transform 250ms ease-out`
-    };
-    
+  const getInitialStyle = (direction: AnimationDirection = 'up', index: number = 0, baseDelay: number = 0): React.CSSProperties => {
     // Calculate delay with staggered effect
     const delayMs = baseDelay + (index * 50);
     
-    // Different styles based on motion preferences
-    if (prefersReducedMotion) {
-      return {
-        ...baseStyle,
-        transitionDelay: `${delayMs}ms`,
-      };
-    }
-    
-    return {
-      ...baseStyle,
-      transform: 'translateY(15px)',
+    // Base style for all elements
+    const baseStyle: React.CSSProperties = {
+      opacity: 0,
+      transition: `opacity 250ms ease-out, transform 250ms ease-out`,
       transitionDelay: `${delayMs}ms`,
     };
+    
+    // If user prefers reduced motion, only fade without translation
+    if (prefersReducedMotion) {
+      return baseStyle;
+    }
+    
+    // Add direction-specific transform
+    switch (direction) {
+      case 'up':
+        return { ...baseStyle, transform: 'translateY(15px)' };
+      case 'right':
+        return { ...baseStyle, transform: 'translateX(-15px)' };
+      case 'down':
+        return { ...baseStyle, transform: 'translateY(-15px)' };
+      case 'left':
+        return { ...baseStyle, transform: 'translateX(15px)' };
+      case 'scale':
+        return { ...baseStyle, transform: 'scale(0.95)' };
+      default:
+        return { ...baseStyle, transform: 'translateY(15px)' };
+    }
   };
   
   /**
-   * Apply loaded state styles when element should be visible
+   * Get the animation style for loaded/visible state
    */
-  const getLoadedStyle = (isLoaded: boolean, index: number = 0, baseDelay: number = 0): React.CSSProperties => {
-    if (!isLoaded) {
-      return getAnimationStyle(index, baseDelay);
-    }
-    
-    // When loaded, elements become visible and move to their final position
+  const getFinalStyle = (index: number = 0, baseDelay: number = 0): React.CSSProperties => {
     const delayMs = baseDelay + (index * 50);
     
     return {
       opacity: 1,
-      transform: 'translateY(0px)',
+      transform: 'translate3d(0,0,0)', // Use translate3d for hardware acceleration
       transitionDelay: `${delayMs}ms`,
       transition: `opacity 250ms ease-out, transform 250ms ease-out`
     };
   };
+  
+  /**
+   * Toggle between initial and final animation styles based on isLoaded state
+   */
+  const getAnimationStyle = (
+    isLoaded: boolean, 
+    direction: AnimationDirection = 'up', 
+    index: number = 0, 
+    baseDelay: number = 0
+  ): React.CSSProperties => {
+    return isLoaded 
+      ? getFinalStyle(index, baseDelay)
+      : getInitialStyle(direction, index, baseDelay);
+  };
 
   return {
     getAnimationClass,
+    getInitialStyle,
+    getFinalStyle,
     getAnimationStyle,
-    getLoadedStyle,
     prefersReducedMotion
   };
 }

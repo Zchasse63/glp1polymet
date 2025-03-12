@@ -50,6 +50,11 @@
     --chart-3: 142 71% 45%;
     --chart-4: 329 86% 56%;
     --chart-5: 32 95% 58%;
+    
+    /* Animation variables */
+    --animation-duration: 250ms;
+    --animation-timing: ease-out;
+    --animation-stagger: 50ms;
   }
 
   .dark {
@@ -110,16 +115,68 @@
   }
 }
 
-/* Global transition styles */
+/* Basic transition animations */
+.animate-in {
+  animation: fade-in var(--animation-duration) var(--animation-timing);
+}
+
+.animate-out {
+  animation: fade-out var(--animation-duration) var(--animation-timing);
+}
+
+/* Fade animations with slide */
+.fade-slide-up {
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity var(--animation-duration) var(--animation-timing),
+              transform var(--animation-duration) var(--animation-timing);
+}
+
+.fade-slide-right {
+  opacity: 0;
+  transform: translateX(-15px);
+  transition: opacity var(--animation-duration) var(--animation-timing),
+              transform var(--animation-duration) var(--animation-timing);
+}
+
+.fade-slide-down {
+  opacity: 0;
+  transform: translateY(-15px);
+  transition: opacity var(--animation-duration) var(--animation-timing),
+              transform var(--animation-duration) var(--animation-timing);
+}
+
+.fade-slide-left {
+  opacity: 0;
+  transform: translateX(15px);
+  transition: opacity var(--animation-duration) var(--animation-timing),
+              transform var(--animation-duration) var(--animation-timing);
+}
+
+.fade-scale {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity var(--animation-duration) var(--animation-timing),
+              transform var(--animation-duration) var(--animation-timing);
+}
+
+/* When loaded/visible state is applied */
+.loaded {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Page transitions */
 .page-transition {
-  transition: opacity 250ms ease-out, transform 250ms ease-out;
+  transition: opacity var(--animation-duration) var(--animation-timing), 
+              transform var(--animation-duration) var(--animation-timing);
   will-change: opacity, transform;
 }
 
-/* Updated hover animations for cards */
+/* Card hover animations */
 .card-hover {
-  transition: transform 250ms ease-out, 
-              box-shadow 250ms ease-out;
+  transition: transform 250ms var(--animation-timing), 
+              box-shadow 250ms var(--animation-timing);
   will-change: transform, box-shadow;
 }
 
@@ -128,6 +185,7 @@
   box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
 }
 
+/* Scrollbar styling */
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -149,7 +207,7 @@
 /* Hardware accelerated transitions for all elements */
 * {
   transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
-  transition-timing-function: ease-out;
+  transition-timing-function: var(--animation-timing);
   transition-duration: 250ms;
 }
 
@@ -169,4 +227,34 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+/* Animation keyframes */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(15px); }
+}
+
+/* Modal scale animation */
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Animation classes that use the keyframes */
+.animate-fade-in {
+  animation: fade-in var(--animation-duration) var(--animation-timing) forwards;
+}
+
+.animate-fade-out {
+  animation: fade-out var(--animation-duration) var(--animation-timing) forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in var(--animation-duration) var(--animation-timing) forwards;
 }

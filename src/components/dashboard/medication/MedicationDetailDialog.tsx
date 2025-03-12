@@ -46,10 +46,7 @@ const MedicationDetailDialog = ({
 
   return (
     <Dialog open={!!selectedMedication} onOpenChange={onOpenChange}>
-      <DialogContent className={cn(
-        "sm:max-w-[600px] max-h-[90vh] overflow-y-auto custom-scrollbar",
-        getAnimationClass('fade-scale')
-      )}>
+      <DialogContent className="animate-scale-in sm:max-w-[600px] max-h-[90vh] overflow-y-auto custom-scrollbar">
         <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle className="flex items-center gap-2">
             {selectedMedication && (
@@ -77,7 +74,7 @@ const MedicationDetailDialog = ({
         
         {selectedMedication && (
           <div className="space-y-4 p-1">
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-2 gap-4 text-sm animate-fade-slide-up" style={{ animationDelay: '50ms' }}>
               <div className="flex flex-col">
                 <span className="text-muted-foreground">Dose</span>
                 <span className="font-medium">{selectedMedication.dose}</span>
@@ -96,7 +93,9 @@ const MedicationDetailDialog = ({
               </div>
             </div>
             
-            <MedicationDetailChart medication={selectedMedication} />
+            <div className="animate-fade-slide-up" style={{ animationDelay: '100ms' }}>
+              <MedicationDetailChart medication={selectedMedication} />
+            </div>
           </div>
         )}
       </DialogContent>

@@ -120,6 +120,7 @@ const RecommendationCard = ({
     <div
       role="region"
       aria-label={`Recommendation: ${recommendation.title}`}
+      className="transform transition-all duration-250 ease-out will-change-transform"
     >
       <Card
         className={`overflow-hidden border-l-4 ${colors.border} hover:shadow-md transition-shadow will-change-transform`}
@@ -140,7 +141,7 @@ const RecommendationCard = ({
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={() => onBookmarkToggle(recommendation.id)}
-                    className="cursor-pointer"
+                    className="cursor-pointer transition-transform duration-250 ease-out active:scale-90"
                     aria-label={isBookmarked ? "Remove bookmark" : "Bookmark recommendation"}
                     aria-pressed={isBookmarked}
                   >
@@ -159,7 +160,7 @@ const RecommendationCard = ({
               <div className="flex justify-between items-center mt-3">
                 <Button
                   variant="link"
-                  className={`p-0 h-auto ${colors.text} flex items-center`}
+                  className={`p-0 h-auto ${colors.text} flex items-center transition-transform duration-250 ease-out active:scale-95`}
                   onClick={onActionClick}
                   aria-label={`${recommendation.actionLabel} about ${recommendation.title}`}
                 >

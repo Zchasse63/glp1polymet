@@ -83,28 +83,19 @@ const RecommendationList: React.FC<RecommendationListProps> = ({ recommendations
     }
   };
 
-  // Create appropriate motion props based on user preferences
-  const transitionClasses = prefersReducedMotion 
-    ? "transition-opacity duration-250 ease-out"
-    : "transition-all duration-250 ease-out transform";
-
   return (
     <div className="space-y-3">
       {recommendations.map((recommendation, index) => {
         const bookmarked = isBookmarked(recommendation.id);
         
-        // Calculate transition delay for staggered animation
-        const delay = `${index * 50}ms`;
+        // Apply transition delay based on index
+        const transitionDelay = `${index * 50}ms`;
         
         return (
           <div
             key={recommendation.id}
-            className={transitionClasses}
-            style={{
-              opacity: 1,
-              transform: 'translateY(0)',
-              transitionDelay: delay
-            }}
+            className="animate-fade-slide-up"
+            style={{ animationDelay: transitionDelay }}
           >
             <RecommendationCard
               recommendation={recommendation}

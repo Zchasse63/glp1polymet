@@ -9,7 +9,7 @@ type DashboardHeaderProps = {
 };
 
 export const DashboardHeader = ({ userName, isLoaded }: DashboardHeaderProps) => {
-  const { getAnimationClass, getLoadedStyle } = useAnimationTransition();
+  const { getAnimationClass, getAnimationStyle } = useAnimationTransition();
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -22,9 +22,9 @@ export const DashboardHeader = ({ userName, isLoaded }: DashboardHeaderProps) =>
     <header 
       className={cn(
         "space-y-2",
-        getAnimationClass('fade-slide-up')
+        getAnimationClass('up')
       )}
-      style={getLoadedStyle(isLoaded, 0)}
+      style={getAnimationStyle(isLoaded, 'up', 0)}
     >
       <h1 className="text-3xl font-bold tracking-tight">
         {getGreeting()},{" "}
