@@ -1,9 +1,7 @@
-
 import React from "react";
 import { Medication } from "@/types/medication";
 import { PillIcon, Clock9Icon, EditIcon, TrashIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -20,13 +18,6 @@ interface MedicationListProps {
 }
 
 const MedicationList = ({ medications, onDelete, onAdd }: MedicationListProps) => {
-  // Get level percentage for progress bar
-  const getLevelPercentage = (level: string | number, totalDose?: number) => {
-    const numericLevel = typeof level === 'string' ? parseFloat(level) : level;
-    if (!totalDose) return numericLevel;
-    return (numericLevel / totalDose) * 100;
-  };
-
   return (
     <div className="space-y-4">
       <div className="grid gap-4">
@@ -52,20 +43,6 @@ const MedicationList = ({ medications, onDelete, onAdd }: MedicationListProps) =
                     <p className="text-sm text-muted-foreground">
                       {medication.dose} • {medication.frequency}
                     </p>
-                  </div>
-
-                  <div className="flex-1 mx-6 max-w-xs">
-                    <Progress
-                      value={getLevelPercentage(medication.level, medication.totalDose)}
-                      className="h-2 mb-1 rounded-full"
-                      style={
-                        {
-                          backgroundColor: `${medication.color}20`,
-                          "--progress-background": medication.color,
-                        } as React.CSSProperties
-                      }
-                    />
-                    {/* Removed the span that showed medication level and totalDose */}
                   </div>
 
                   <div className="flex items-center">
