@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -86,6 +87,7 @@ export function MedicationCard({ medication }: MedicationProps) {
               } as React.CSSProperties
             }
           />
+          {/* Removed the span showing medication level and total dose */}
 
           <div className="flex justify-between text-xs">
             <div
