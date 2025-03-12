@@ -29,15 +29,15 @@ export const VitalCard = ({
   isAnimated = false,
   delay = 0,
 }: VitalCardProps) => {
-  const { getAnimationClass, getAnimationStyle } = useAnimationTransition();
+  const { getAnimationClass, getLoadedStyle } = useAnimationTransition();
 
   return (
     <Card 
       className={cn(
         "overflow-hidden card-hover shadow-sm border border-slate-200 dark:border-slate-800 transition-all duration-200",
-        isAnimated ? getAnimationClass('fade-slide-up') : "opacity-0"
+        getAnimationClass('fade-slide-up')
       )}
-      style={isAnimated ? getAnimationStyle(delay) : {}}
+      style={getLoadedStyle(isAnimated, delay)}
     >
       <CardContent className="p-3">
         <div className="flex justify-between items-start mb-1.5">

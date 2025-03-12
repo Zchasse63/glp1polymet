@@ -8,6 +8,7 @@ import { ErrorLogger } from "@/utils/errorHandling";
 import { useComponentPerformance } from "@/utils/performance";
 import { AccessibleIcon } from "@/utils/accessibility";
 import { Bookmark, BookmarkCheck } from "lucide-react";
+import { useAnimationTransition } from "@/hooks/useAnimationTransition";
 
 interface RecommendationListProps {
   recommendations: Recommendation[];
@@ -25,6 +26,7 @@ interface RecommendationListProps {
 const RecommendationList: React.FC<RecommendationListProps> = ({ recommendations }) => {
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const performance = useComponentPerformance('RecommendationList');
+  const { prefersReducedMotion } = useAnimationTransition();
   
   // Track component mount time
   React.useEffect(() => {
@@ -81,34 +83,51 @@ const RecommendationList: React.FC<RecommendationListProps> = ({ recommendations
     }
   };
 
+  // Create appropriate motion props based on user preferences
+  const transitionClasses = prefersReducedMotion 
+    ? "transition-opacity duration-250 ease-out"
+    : "transition-all duration-250 ease-out transform";
+
   return (
-    <div className="space-y-3 animate-fade-in">
+    <div className="space-y-3">
       {recommendations.map((recommendation, index) => {
         const bookmarked = isBookmarked(recommendation.id);
         
+        // Calculate transition delay for staggered animation
+        const delay = `${index * 50}ms`;
+        
         return (
-          <RecommendationCard
+          <div
             key={recommendation.id}
-            recommendation={recommendation}
-            onActionClick={() => handleRecommendationClick(recommendation.id, recommendation.title)}
-            index={index}
-            isBookmarked={bookmarked}
-            onBookmarkToggle={() => handleBookmarkToggle(recommendation.id)}
-            bookmarkIcon={
-              <AccessibleIcon 
-                icon={<Bookmark className="h-5 w-5" />}
-                label={bookmarked ? "Remove bookmark" : "Bookmark recommendation"}
-                role="button"
-              />
-            }
-            bookmarkFilledIcon={
-              <AccessibleIcon 
-                icon={<BookmarkCheck className="h-5 w-5 text-yellow-500" />}
-                label="Remove bookmark"
-                role="button"
-              />
-            }
-          />
+            className={transitionClasses}
+            style={{
+              opacity: 1,
+              transform: 'translateY(0)',
+              transitionDelay: delay
+            }}
+          >
+            <RecommendationCard
+              recommendation={recommendation}
+              onActionClick={() => handleRecommendationClick(recommendation.id, recommendation.title)}
+              index={index}
+              isBookmarked={bookmarked}
+              onBookmarkToggle={() => handleBookmarkToggle(recommendation.id)}
+              bookmarkIcon={
+                <AccessibleIcon 
+                  icon={<Bookmark className="h-5 w-5" />}
+                  label={bookmarked ? "Remove bookmark" : "Bookmark recommendation"}
+                  role="button"
+                />
+              }
+              bookmarkFilledIcon={
+                <AccessibleIcon 
+                  icon={<BookmarkCheck className="h-5 w-5 text-yellow-500" />}
+                  label="Remove bookmark"
+                  role="button"
+                />
+              }
+            />
+          </div>
         );
       })}
     </div>

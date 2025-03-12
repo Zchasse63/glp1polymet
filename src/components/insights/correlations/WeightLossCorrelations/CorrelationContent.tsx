@@ -14,6 +14,7 @@ import NoCorrelationsState from "../NoCorrelationsState";
 import { useReducedMotion } from "@/utils/accessibility/useReducedMotion";
 import { ScreenReaderAnnouncement } from "@/utils/accessibility/ScreenReaderAnnouncement";
 import { trackError } from "@/utils/eventTracking";
+import { useAnimationTransition } from "@/hooks/useAnimationTransition";
 
 interface CorrelationContentProps {
   isLoading: boolean;
@@ -43,6 +44,7 @@ const CorrelationContent: React.FC<CorrelationContentProps> = ({
   handleExportData
 }) => {
   const isReducedMotion = useReducedMotion();
+  const { getAnimationClass, getLoadedStyle } = useAnimationTransition();
   const [errorAnnounced, setErrorAnnounced] = React.useState(false);
   
   React.useEffect(() => {
@@ -58,7 +60,12 @@ const CorrelationContent: React.FC<CorrelationContentProps> = ({
     return (
       <>
         <ScreenReaderAnnouncement message="Loading correlation data" />
-        <CorrelationLoadingState />
+        <div 
+          className={getAnimationClass('fade-slide-up')}
+          style={getLoadedStyle(true, 0)}
+        >
+          <CorrelationLoadingState />
+        </div>
       </>
     );
   }
@@ -70,11 +77,16 @@ const CorrelationContent: React.FC<CorrelationContentProps> = ({
           message={`Error loading correlations: ${error.message}`} 
           assertive={true}
         />
-        <CorrelationErrorState 
-          error={error}
-          onRetry={handleRetry}
-          severity={getErrorSeverity(error)}
-        />
+        <div 
+          className={getAnimationClass('fade-slide-up')}
+          style={getLoadedStyle(true, 0)}
+        >
+          <CorrelationErrorState 
+            error={error}
+            onRetry={handleRetry}
+            severity={getErrorSeverity(error)}
+          />
+        </div>
       </>
     );
   }
@@ -83,16 +95,24 @@ const CorrelationContent: React.FC<CorrelationContentProps> = ({
     return (
       <>
         <ScreenReaderAnnouncement message="No correlation data available" />
-        <NoCorrelationsState />
+        <div 
+          className={getAnimationClass('fade-slide-up')}
+          style={getLoadedStyle(true, 0)}
+        >
+          <NoCorrelationsState />
+        </div>
       </>
     );
   }
 
   return (
-    <div className={cn(
-      "space-y-6 transition-all duration-300",
-      !isReducedMotion && "animate-fade-in"
-    )}>
+    <div 
+      className={cn(
+        "space-y-6",
+        getAnimationClass('fade-slide-up')
+      )}
+      style={getLoadedStyle(true, 0)}
+    >
       <ScreenReaderAnnouncement 
         message={hasSignificantCorrelations 
           ? `Found ${sortedCorrelations.length} correlations. The strongest correlation is ${sortedCorrelations[0].factor} with a correlation value of ${sortedCorrelations[0].correlation.toFixed(2)}.`

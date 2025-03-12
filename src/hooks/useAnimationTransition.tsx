@@ -34,33 +34,66 @@ export function useAnimationTransition() {
     animationType: AnimationType,
     options?: AnimationOptions
   ): string => {
-    // Return empty string if user prefers reduced motion
+    // Return just opacity transition if user prefers reduced motion
     if (prefersReducedMotion) {
-      return "opacity-0 transition-opacity duration-200 ease-out opacity-100";
+      return "transition-opacity duration-250 ease-out";
     }
 
     // Default animation with hardware acceleration
-    return `opacity-0 will-change-transform animate-${animationType}`;
+    return `will-change-transform transition-all duration-250 ease-out`;
   };
 
   /**
-   * Get inline style for animation delays when not using predefined variants
+   * Get inline style for animation delays and transforms
    */
   const getAnimationStyle = (index: number = 0, baseDelay: number = 0): React.CSSProperties => {
+    // Base style that works for all users
+    const baseStyle: React.CSSProperties = {
+      opacity: 0,
+      transition: `opacity 250ms ease-out, transform 250ms ease-out`
+    };
+    
+    // Calculate delay with staggered effect
+    const delayMs = baseDelay + (index * 50);
+    
+    // Different styles based on motion preferences
     if (prefersReducedMotion) {
-      return {};
+      return {
+        ...baseStyle,
+        transitionDelay: `${delayMs}ms`,
+      };
     }
     
-    const delayMs = baseDelay + (index * 50);
     return {
-      animationDelay: `${delayMs}ms`,
-      animationFillMode: 'forwards'
+      ...baseStyle,
+      transform: 'translateY(15px)',
+      transitionDelay: `${delayMs}ms`,
+    };
+  };
+  
+  /**
+   * Apply loaded state styles when element should be visible
+   */
+  const getLoadedStyle = (isLoaded: boolean, index: number = 0, baseDelay: number = 0): React.CSSProperties => {
+    if (!isLoaded) {
+      return getAnimationStyle(index, baseDelay);
+    }
+    
+    // When loaded, elements become visible and move to their final position
+    const delayMs = baseDelay + (index * 50);
+    
+    return {
+      opacity: 1,
+      transform: 'translateY(0px)',
+      transitionDelay: `${delayMs}ms`,
+      transition: `opacity 250ms ease-out, transform 250ms ease-out`
     };
   };
 
   return {
     getAnimationClass,
     getAnimationStyle,
+    getLoadedStyle,
     prefersReducedMotion
   };
 }

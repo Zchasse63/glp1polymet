@@ -20,16 +20,16 @@ const MedicationCard = memo(({
   index, 
   isLoaded 
 }: MedicationCardProps) => {
-  const { getAnimationClass, getAnimationStyle } = useAnimationTransition();
+  const { getAnimationClass, getLoadedStyle } = useAnimationTransition();
 
   return (
     <Card
       key={med.id}
       className={cn(
         "w-full overflow-hidden card-hover cursor-pointer transform transition-all duration-200 hover:shadow-md hover:scale-[1.02]",
-        isLoaded ? getAnimationClass('fade-slide-up') : "opacity-0"
+        getAnimationClass('fade-slide-up')
       )}
-      style={isLoaded ? getAnimationStyle(index) : {}}
+      style={getLoadedStyle(isLoaded, index)}
       onClick={() => onClick(med)}
     >
       <CardContent className="p-4">

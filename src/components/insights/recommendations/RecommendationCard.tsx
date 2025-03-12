@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRightIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Recommendation, RecommendationIconType, ImpactLevel } from "@/types/insightTypes";
-import { motion } from "framer-motion";
 import { 
   UserIcon, 
   PillIcon, 
@@ -117,23 +116,13 @@ const RecommendationCard = ({
   const impactStyle = impactLevelMap[recommendation.impact];
   const prefersReducedMotion = useReducedMotion();
 
-  // Create appropriate motion props based on user preferences
-  const motionProps = prefersReducedMotion 
-    ? { initial: { opacity: 1 }, animate: { opacity: 1 } }
-    : { 
-        initial: { opacity: 0, y: 20 },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.3, delay: index * 0.1 }
-      };
-
   return (
-    <motion.div
-      {...motionProps}
+    <div
       role="region"
       aria-label={`Recommendation: ${recommendation.title}`}
     >
       <Card
-        className={`overflow-hidden border-l-4 ${colors.border} hover:shadow-md transition-shadow`}
+        className={`overflow-hidden border-l-4 ${colors.border} hover:shadow-md transition-shadow will-change-transform`}
       >
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
@@ -189,7 +178,7 @@ const RecommendationCard = ({
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 };
 

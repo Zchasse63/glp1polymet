@@ -8,6 +8,7 @@ import CorrelationContent from "./CorrelationContent";
 import { AccessibleIcon } from "@/utils/accessibility/AccessibleIcon";
 import { BarChart2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAnimationTransition } from "@/hooks/useAnimationTransition";
 
 interface WeightLossCorrelationsProps {
   correlations: Correlation[] | undefined;
@@ -26,6 +27,7 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const isVisible = useIntersectionObserver(cardRef, { threshold: 0.1 });
+  const { getAnimationClass, getLoadedStyle } = useAnimationTransition();
   
   const {
     sortedCorrelations,
@@ -46,12 +48,12 @@ const WeightLossCorrelations: React.FC<WeightLossCorrelationsProps> = React.memo
     <Card 
       ref={cardRef} 
       className={cn(
-        "shadow-md transition-all duration-300 ease-in-out",
+        "shadow-md transition-all duration-250 ease-out",
         "hover:shadow-lg border border-border/50",
         "dark:bg-card dark:border-border/20",
-        "opacity-0 animate-fade-in",
-        isVisible && "opacity-100"
+        getAnimationClass('fade-slide-up')
       )}
+      style={getLoadedStyle(isVisible, 0)}
     >
       <CardHeader className="flex flex-row items-center gap-4">
         <AccessibleIcon

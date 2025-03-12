@@ -31,6 +31,10 @@ export const Spinner = ({
     muted: "text-muted-foreground"
   }[color];
   
+  const animationClass = isReducedMotion 
+    ? "animate-pulse" 
+    : "animate-spin";
+  
   return (
     <div
       role="status"
@@ -39,10 +43,10 @@ export const Spinner = ({
     >
       <Loader2 
         className={cn(
-          isReducedMotion ? "animate-pulse" : "animate-spin", 
+          animationClass, 
           colorClass, 
           sizeClass, 
-          "transition-all duration-300",
+          "will-change-transform transition-all duration-250",
           className
         )} 
       />
