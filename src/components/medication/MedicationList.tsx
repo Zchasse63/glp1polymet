@@ -67,7 +67,7 @@ const MedicationList = ({ medications, onDelete, onAdd }: MedicationListProps) =
                     />
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">
-                        {medication.level} of {medication.totalDose || 100}
+                        {medication.level} {medication.totalDose || 100}
                       </span>
                     </div>
                   </div>
