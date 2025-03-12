@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { useAnimationTransition } from "@/hooks/useAnimationTransition";
 
 interface MedicationListProps {
   medications: Medication[];
@@ -19,6 +20,8 @@ interface MedicationListProps {
 }
 
 const MedicationList = ({ medications, onAdd, onDelete }: MedicationListProps) => {
+  const { getAnimationClass, getAnimationStyle } = useAnimationTransition();
+
   return (
     <div className="space-y-4">
       <div className="grid gap-4">
@@ -28,12 +31,9 @@ const MedicationList = ({ medications, onAdd, onDelete }: MedicationListProps) =
               key={medication.id} 
               className={cn(
                 "w-full overflow-hidden card-hover cursor-pointer transform transition-all duration-200 hover:shadow-md hover:scale-[1.02]",
-                "opacity-0 animate-scale-in opacity-100"
+                getAnimationClass('fade-slide-up')
               )}
-              style={{ 
-                animationDelay: `${index * 0.05}s`,
-                animationFillMode: "forwards"
-              }}
+              style={getAnimationStyle(index)}
             >
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -97,7 +97,7 @@ const MedicationList = ({ medications, onAdd, onDelete }: MedicationListProps) =
             </Card>
           ))
         ) : (
-          <div className="text-center py-8">
+          <div className={cn("text-center py-8", getAnimationClass('fade-scale'))}>
             <PillIcon className="h-12 w-12 mx-auto text-muted-foreground opacity-50" />
             <h3 className="mt-4 text-lg font-medium">No medications found</h3>
             <p className="mt-1 text-sm text-muted-foreground">

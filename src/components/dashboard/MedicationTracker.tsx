@@ -7,6 +7,8 @@ import { Medication } from "@/types/medication";
 import MedicationCard from "./medication/MedicationCard";
 import MedicationEmptyState from "./medication/MedicationEmptyState";
 import MedicationDetailDialog from "./medication/MedicationDetailDialog";
+import { useAnimationTransition } from "@/hooks/useAnimationTransition";
+import { cn } from "@/lib/utils";
 
 type MedicationTrackerProps = {
   medications: Medication[];
@@ -17,6 +19,7 @@ type MedicationTrackerProps = {
 export const MedicationTracker = ({ medications, isLoaded, onViewAll }: MedicationTrackerProps) => {
   // Get selected medications
   const { selectedMedications } = useMedicationPreferences();
+  const { getAnimationClass, getAnimationStyle } = useAnimationTransition();
   
   // Filter medications based on preferences
   const filteredMedications = medications.filter(medication => 
@@ -38,8 +41,11 @@ export const MedicationTracker = ({ medications, isLoaded, onViewAll }: Medicati
 
   return (
     <section 
-      className={`space-y-3 opacity-0 ${isLoaded ? "animate-slide-up opacity-100" : ""}`}
-      style={{ animationDelay: "0.2s", animationFillMode: "forwards" }}
+      className={cn(
+        "space-y-3",
+        isLoaded ? getAnimationClass('fade-slide-up') : "opacity-0"
+      )}
+      style={isLoaded ? getAnimationStyle(2) : {}}
     >
       <div className="flex justify-between items-center mb-1">
         <h2 className="text-xl font-semibold">

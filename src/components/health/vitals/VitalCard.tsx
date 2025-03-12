@@ -2,6 +2,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useAnimationTransition } from "@/hooks/useAnimationTransition";
 
 interface VitalCardProps {
   title: string;
@@ -28,13 +29,15 @@ export const VitalCard = ({
   isAnimated = false,
   delay = 0,
 }: VitalCardProps) => {
+  const { getAnimationClass, getAnimationStyle } = useAnimationTransition();
+
   return (
     <Card 
       className={cn(
         "overflow-hidden card-hover shadow-sm border border-slate-200 dark:border-slate-800 transition-all duration-200",
-        isAnimated && "opacity-0 animate-scale-in"
+        isAnimated ? getAnimationClass('fade-slide-up') : "opacity-0"
       )}
-      style={isAnimated ? { animationDelay: `${delay * 0.05}s`, animationFillMode: "forwards" } : {}}
+      style={isAnimated ? getAnimationStyle(delay) : {}}
     >
       <CardContent className="p-3">
         <div className="flex justify-between items-start mb-1.5">

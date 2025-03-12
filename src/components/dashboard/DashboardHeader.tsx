@@ -1,5 +1,7 @@
 
 import React from "react";
+import { useAnimationTransition } from "@/hooks/useAnimationTransition";
+import { cn } from "@/lib/utils";
 
 type DashboardHeaderProps = {
   userName: string;
@@ -7,6 +9,8 @@ type DashboardHeaderProps = {
 };
 
 export const DashboardHeader = ({ userName, isLoaded }: DashboardHeaderProps) => {
+  const { getAnimationClass, getAnimationStyle } = useAnimationTransition();
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";
@@ -16,8 +20,11 @@ export const DashboardHeader = ({ userName, isLoaded }: DashboardHeaderProps) =>
 
   return (
     <header 
-      className={`space-y-2 opacity-0 ${isLoaded ? "animate-slide-up opacity-100" : ""}`}
-      style={{ animationDelay: "0.1s", animationFillMode: "forwards" }}
+      className={cn(
+        "space-y-2",
+        isLoaded ? getAnimationClass('fade-slide-up') : "opacity-0"
+      )}
+      style={isLoaded ? getAnimationStyle(0) : {}}
     >
       <h1 className="text-3xl font-bold tracking-tight">
         {getGreeting()},{" "}

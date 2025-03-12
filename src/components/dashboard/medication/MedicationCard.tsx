@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ClockIcon } from "lucide-react";
 import { Medication } from "@/types/medication";
 import { cn } from "@/lib/utils";
+import { useAnimationTransition } from "@/hooks/useAnimationTransition";
 
 interface MedicationCardProps {
   medication: Medication;
@@ -19,20 +20,16 @@ const MedicationCard = memo(({
   index, 
   isLoaded 
 }: MedicationCardProps) => {
-  // Animation delay utility
-  const getAnimationDelay = (index: number) => `${index * 0.05}s`;
+  const { getAnimationClass, getAnimationStyle } = useAnimationTransition();
 
   return (
     <Card
       key={med.id}
       className={cn(
-        "w-full overflow-hidden card-hover opacity-0 cursor-pointer transform transition-all duration-200 hover:shadow-md hover:scale-[1.02]",
-        isLoaded ? "animate-scale-in opacity-100" : ""
+        "w-full overflow-hidden card-hover cursor-pointer transform transition-all duration-200 hover:shadow-md hover:scale-[1.02]",
+        isLoaded ? getAnimationClass('fade-slide-up') : "opacity-0"
       )}
-      style={{ 
-        animationDelay: getAnimationDelay(index),
-        animationFillMode: "forwards"
-      }}
+      style={isLoaded ? getAnimationStyle(index) : {}}
       onClick={() => onClick(med)}
     >
       <CardContent className="p-4">

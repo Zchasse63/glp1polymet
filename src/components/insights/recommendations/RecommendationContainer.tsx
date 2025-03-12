@@ -1,9 +1,10 @@
 
 import React from "react";
-import { motion } from "framer-motion";
 import { RecommendationFilterType, Recommendation } from "@/types/insightTypes";
 import NoRecommendationsState from "./NoRecommendationsState";
 import RecommendationList from "./RecommendationList";
+import { useAnimationTransition } from "@/hooks/useAnimationTransition";
+import { cn } from "@/lib/utils";
 
 interface RecommendationContainerProps {
   filteredRecommendations: Recommendation[];
@@ -23,12 +24,14 @@ const RecommendationContainer: React.FC<RecommendationContainerProps> = ({
   activeFilter,
   setActiveFilter
 }) => {
+  const { getAnimationClass } = useAnimationTransition();
+  
   return (
-    <motion.div 
-      className="grid gap-3"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+    <div 
+      className={cn(
+        "grid gap-3",
+        getAnimationClass('fade-slide-up')
+      )}
     >
       {noFilteredResults ? (
         <NoRecommendationsState 
@@ -39,7 +42,7 @@ const RecommendationContainer: React.FC<RecommendationContainerProps> = ({
       ) : (
         <RecommendationList recommendations={filteredRecommendations} />
       )}
-    </motion.div>
+    </div>
   );
 };
 

@@ -82,31 +82,47 @@ export default {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.85' }
 				},
-				'slide-up': {
-					'0%': { transform: 'translateY(10px)', opacity: '0' },
-					'100%': { transform: 'translateY(0)', opacity: '1' }
+				// Updated animations for consistent modern feel
+				'fade-slide-up': {
+					'0%': { opacity: '0', transform: 'translateY(15px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' }
 				},
-				'fade-in': {
-					'0%': { opacity: '0' },
-					'100%': { opacity: '1' }
+				'fade-slide-right': {
+					'0%': { opacity: '0', transform: 'translateX(-15px)' },
+					'100%': { opacity: '1', transform: 'translateX(0)' }
 				},
-				'scale-in': {
-					'0%': { transform: 'scale(0.95)', opacity: '0' },
-					'100%': { transform: 'scale(1)', opacity: '1' }
+				'fade-slide-down': {
+					'0%': { opacity: '0', transform: 'translateY(-15px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' }
 				},
-				'slide-in-right': {
-					'0%': { transform: 'translateX(20px)', opacity: '0' },
-					'100%': { transform: 'translateX(0)', opacity: '1' }
+				'fade-slide-left': {
+					'0%': { opacity: '0', transform: 'translateX(15px)' },
+					'100%': { opacity: '1', transform: 'translateX(0)' }
+				},
+				'fade-scale': {
+					'0%': { opacity: '0', transform: 'scale(0.95)' },
+					'100%': { opacity: '1', transform: 'scale(1)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite',
-				'slide-up': 'slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-				'fade-in': 'fade-in 0.6s ease-out',
-				'scale-in': 'scale-in 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-				'slide-in-right': 'slide-in-right 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
+				// Updated animation durations to 250ms
+				'fade-slide-up': 'fade-slide-up 250ms ease-out forwards',
+				'fade-slide-right': 'fade-slide-right 250ms ease-out forwards',
+				'fade-slide-down': 'fade-slide-down 250ms ease-out forwards',
+				'fade-slide-left': 'fade-slide-left 250ms ease-out forwards',
+				'fade-scale': 'fade-scale 250ms ease-out forwards',
+				// Staggered variants
+				'fade-slide-up-1': 'fade-slide-up 250ms 50ms ease-out forwards',
+				'fade-slide-up-2': 'fade-slide-up 250ms 100ms ease-out forwards',
+				'fade-slide-up-3': 'fade-slide-up 250ms 150ms ease-out forwards',
+				'fade-slide-up-4': 'fade-slide-up 250ms 200ms ease-out forwards',
+				'fade-slide-left-1': 'fade-slide-left 250ms 50ms ease-out forwards',
+				'fade-slide-left-2': 'fade-slide-left 250ms 100ms ease-out forwards',
+				'fade-slide-left-3': 'fade-slide-left 250ms 150ms ease-out forwards',
+				'fade-slide-left-4': 'fade-slide-left 250ms 200ms ease-out forwards',
 			}
 		}
 	},

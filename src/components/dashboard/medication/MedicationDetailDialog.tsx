@@ -11,6 +11,8 @@ import MedicationDetailChart from "../MedicationDetailChart";
 import { Medication } from "@/types/medication";
 import { PillIcon, HeartPulseIcon, BrainIcon, ActivityIcon, TabletIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useAnimationTransition } from "@/hooks/useAnimationTransition";
 
 interface MedicationDetailDialogProps {
   selectedMedication: Medication | null;
@@ -21,6 +23,8 @@ const MedicationDetailDialog = ({
   selectedMedication, 
   onOpenChange 
 }: MedicationDetailDialogProps) => {
+  const { getAnimationClass } = useAnimationTransition();
+
   // Function to get appropriate icon based on medication ID
   const getMedicationIcon = (medicationId: string) => {
     // Use different icons based on the first character of medication ID for demo variation
@@ -42,7 +46,10 @@ const MedicationDetailDialog = ({
 
   return (
     <Dialog open={!!selectedMedication} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <DialogContent className={cn(
+        "sm:max-w-[600px] max-h-[90vh] overflow-y-auto custom-scrollbar",
+        getAnimationClass('fade-scale')
+      )}>
         <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle className="flex items-center gap-2">
             {selectedMedication && (

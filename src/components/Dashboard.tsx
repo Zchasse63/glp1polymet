@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardHeader from "./dashboard/DashboardHeader";
@@ -40,7 +41,12 @@ const Dashboard = () => {
   );
 
   useEffect(() => {
-    setIsLoaded(true);
+    // Small delay to ensure the CSS transitions have time to initialize
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 50);
+    
+    return () => clearTimeout(timer);
   }, []);
   
   const handleNavigateToMedications = () => {

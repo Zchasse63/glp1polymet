@@ -110,10 +110,17 @@
   }
 }
 
-/* Custom Animations */
+/* Global transition styles */
+.page-transition {
+  transition: opacity 250ms ease-out, transform 250ms ease-out;
+  will-change: opacity, transform;
+}
+
+/* Updated hover animations for cards */
 .card-hover {
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
-              box-shadow 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 250ms ease-out, 
+              box-shadow 250ms ease-out;
+  will-change: transform, box-shadow;
 }
 
 .card-hover:hover {
@@ -139,9 +146,27 @@
   background-color: rgba(156, 163, 175, 0.4);
 }
 
-/* Smooth transitions for all elements */
+/* Hardware accelerated transitions for all elements */
 * {
   transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+  transition-duration: 250ms;
+}
+
+/* Apply hardware acceleration to all animations */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* For users who prefer reduced motion */
+@media (prefers-reduced-motion) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

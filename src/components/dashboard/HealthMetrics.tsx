@@ -13,6 +13,8 @@ import { CaloriesDetail } from "../metrics/details/CaloriesDetail";
 import { MoodDetail } from "../metrics/details/MoodDetail";
 import { useNavigate } from "react-router-dom";
 import { useMetricPreferences } from "@/hooks/useMetricPreferences";
+import { useAnimationTransition } from "@/hooks/useAnimationTransition";
+import { cn } from "@/lib/utils";
 
 type HealthMetricsProps = {
   metrics: {
@@ -35,6 +37,7 @@ type HealthMetricsProps = {
 export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsProps) => {
   const navigate = useNavigate();
   const { selectedMetrics } = useMetricPreferences();
+  const { getAnimationClass, getAnimationStyle } = useAnimationTransition();
   
   const getDetailContent = (metric: { id: string; title: string; value: string; unit?: string }) => {
     switch (metric.id) {
@@ -110,8 +113,11 @@ export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsPro
 
   return (
     <section 
-      className={`space-y-5 opacity-0 ${isLoaded ? "animate-slide-up opacity-100" : ""}`}
-      style={{ animationDelay: "0.3s", animationFillMode: "forwards" }}
+      className={cn(
+        "space-y-5",
+        isLoaded ? getAnimationClass('fade-slide-up') : "opacity-0"
+      )}
+      style={isLoaded ? getAnimationStyle(1) : {}}
     >
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">
@@ -141,7 +147,10 @@ export const HealthMetrics = ({ metrics, isLoaded, onViewAll }: HealthMetricsPro
             />
           ))
         ) : (
-          <div className="col-span-2 p-4 text-center text-muted-foreground border rounded-md border-dashed border-muted hover:border-muted-foreground/50 transition-colors">
+          <div className={cn(
+            "col-span-2 p-4 text-center text-muted-foreground border rounded-md border-dashed border-muted hover:border-muted-foreground/50 transition-colors",
+            isLoaded ? getAnimationClass('fade-scale') : "opacity-0"
+          )}>
             No metrics selected for dashboard. Configure in App Settings.
           </div>
         )}
