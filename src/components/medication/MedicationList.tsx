@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Medication } from "@/types/medication";
 import { PillIcon, Clock9Icon, EditIcon, TrashIcon } from "lucide-react";
@@ -17,7 +18,7 @@ interface MedicationListProps {
   onAdd: () => void;
 }
 
-const MedicationList = ({ medications, onDelete, onAdd }: MedicationListProps) => {
+const MedicationList = ({ medications, onAdd, onDelete }: MedicationListProps) => {
   return (
     <div className="space-y-4">
       <div className="grid gap-4">
@@ -36,7 +37,7 @@ const MedicationList = ({ medications, onDelete, onAdd }: MedicationListProps) =
             >
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex flex-col">
+                  <div className="flex flex-col space-y-1">
                     <h3 className="text-base font-semibold text-foreground">
                       {medication.name}
                     </h3>
@@ -53,7 +54,7 @@ const MedicationList = ({ medications, onDelete, onAdd }: MedicationListProps) =
                       >
                         <Clock9Icon className="h-4 w-4" style={{ color: medication.color }} />
                       </div>
-                      <span className="font-medium">Next: {medication.nextDose}</span>
+                      <span className="font-medium whitespace-nowrap">Next: {medication.nextDose}</span>
                     </div>
                     
                     <DropdownMenu>

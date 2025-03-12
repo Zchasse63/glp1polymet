@@ -37,7 +37,7 @@ const MedicationCard = memo(({
     >
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
-          <div className="flex flex-col">
+          <div className="flex flex-col space-y-1">
             <h3 className="text-base font-semibold text-foreground">
               {med.name}
             </h3>
@@ -53,7 +53,7 @@ const MedicationCard = memo(({
             >
               <ClockIcon className="h-4 w-4" style={{ color: med.color }} />
             </div>
-            <span className="font-medium">Next: {med.nextDose}</span>
+            <span className="font-medium whitespace-nowrap">Next: {med.nextDose}</span>
           </div>
         </div>
       </CardContent>

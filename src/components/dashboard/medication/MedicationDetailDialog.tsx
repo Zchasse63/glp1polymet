@@ -70,7 +70,7 @@ const MedicationDetailDialog = ({
         
         {selectedMedication && (
           <div className="space-y-4 p-1">
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="flex flex-col">
                 <span className="text-muted-foreground">Dose</span>
                 <span className="font-medium">{selectedMedication.dose}</span>
