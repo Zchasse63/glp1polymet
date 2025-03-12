@@ -46,9 +46,9 @@ const MedicationCard = memo(({
             </p>
           </div>
 
-          <div className="flex items-center text-sm">
+          <div className="flex items-center space-x-2 min-w-[120px] justify-end">
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center mr-2"
+              className="w-8 h-8 rounded-full flex items-center justify-center"
               style={{ backgroundColor: `${med.color}20` }}
             >
               <ClockIcon className="h-4 w-4" style={{ color: med.color }} />

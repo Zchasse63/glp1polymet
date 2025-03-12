@@ -47,9 +47,9 @@ const MedicationList = ({ medications, onAdd, onDelete }: MedicationListProps) =
                   </div>
 
                   <div className="flex items-center">
-                    <div className="flex items-center text-sm mr-4">
+                    <div className="flex items-center space-x-2 min-w-[120px] justify-end mr-2">
                       <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center mr-2"
+                        className="w-8 h-8 rounded-full flex items-center justify-center"
                         style={{ backgroundColor: `${medication.color}20` }}
                       >
                         <Clock9Icon className="h-4 w-4" style={{ color: medication.color }} />
