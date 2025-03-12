@@ -1,8 +1,19 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Line, LineChart, XAxis, CartesianGrid, YAxis, ReferenceLine, ResponsiveContainer } from "recharts";
+import { 
+  Line, 
+  LineChart, 
+  XAxis, 
+  CartesianGrid, 
+  YAxis, 
+  ReferenceLine, 
+  ResponsiveContainer,
+  Tooltip,
+  Area
+} from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { useChartConfig } from "@/components/insights/charts/correlation/useChartConfig";
 
 interface TrendDataPoint {
   date: string;
@@ -15,8 +26,10 @@ interface MedicationEffectivenessChartProps {
 }
 
 const MedicationEffectivenessChart = ({ trendData }: MedicationEffectivenessChartProps) => {
+  const chartConfig = useChartConfig();
+  
   return (
-    <Card className="border border-gray-200 dark:border-gray-700 mt-8 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <Card className="border border-border mt-8 overflow-hidden shadow-sm hover:shadow-md transition-shadow animate-fade-in" style={{ animationDelay: '0.3s' }}>
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-medium">
           Medication Effectiveness
@@ -42,7 +55,7 @@ const MedicationEffectivenessChart = ({ trendData }: MedicationEffectivenessChar
             >
               <ChartTooltip
                 content={<ChartTooltipContent />}
-                animationDuration={200}
+                animationDuration={chartConfig.animationDuration}
               />
               <CartesianGrid
                 strokeDasharray="3 3"
@@ -126,7 +139,7 @@ const MedicationEffectivenessChart = ({ trendData }: MedicationEffectivenessChar
                 </linearGradient>
               </defs>
 
-              <Line
+              <Area
                 type="monotone"
                 dataKey="weight"
                 yAxisId="left"
@@ -141,7 +154,7 @@ const MedicationEffectivenessChart = ({ trendData }: MedicationEffectivenessChar
                 animationEasing="ease-in-out"
               />
 
-              <Line
+              <Area
                 type="monotone"
                 dataKey="medication"
                 yAxisId="right"
@@ -160,10 +173,10 @@ const MedicationEffectivenessChart = ({ trendData }: MedicationEffectivenessChar
         </div>
 
         <div className="mt-6 text-sm bg-primary/5 p-4 rounded-lg border border-primary/10">
-          <p className="font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <p className="font-medium text-foreground mb-1">
             Analysis:
           </p>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-muted-foreground">
             Your weight loss shows a <span className="font-semibold text-green-600 dark:text-green-400">strong correlation (85%)</span> with medication
             levels. Periods with higher medication adherence show accelerated
             weight loss.

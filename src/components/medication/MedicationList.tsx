@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Medication } from "@/types/medication";
-import { PillIcon, Clock9Icon, AlertCircleIcon, EditIcon, TrashIcon } from "lucide-react";
+import { PillIcon, Clock9Icon, EditIcon, TrashIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
@@ -67,7 +67,7 @@ const MedicationList = ({ medications, onDelete, onAdd }: MedicationListProps) =
                     />
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">
-                        {medication.level} {medication.totalDose || 100}
+                        {medication.level} of {medication.totalDose || 100}
                       </span>
                     </div>
                   </div>

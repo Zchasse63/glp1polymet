@@ -13,6 +13,7 @@ import {
   AreaChart
 } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { useChartConfig } from "@/components/insights/charts/correlation/useChartConfig";
 
 // Calculate drug level based on half-life
 const calculateDrugLevels = (medicationId: string) => {
@@ -103,6 +104,7 @@ const MedicationDetailChart = ({ medication }: MedicationDetailChartProps) => {
   const chartData = calculateDrugLevels(medication.id);
   const halfLife = getHalfLifeForMedication(medication.id);
   const dosesPerDay = getDosesPerDay(medication.id);
+  const chartConfig = useChartConfig();
 
   return (
     <Card className="border-t border-muted">
@@ -121,8 +123,8 @@ const MedicationDetailChart = ({ medication }: MedicationDetailChartProps) => {
               effectiveness: {
                 label: "Effectiveness",
                 theme: {
-                  light: "#6366f1",
-                  dark: "#818cf8",
+                  light: "hsl(var(--chart-3))",
+                  dark: "hsl(var(--chart-3))",
                 },
               },
             }}
@@ -131,41 +133,62 @@ const MedicationDetailChart = ({ medication }: MedicationDetailChartProps) => {
               data={chartData}
               margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                vertical={false} 
+                stroke="hsl(var(--muted)/0.15)"
+              />
               <XAxis 
                 dataKey="day" 
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxis 
                 domain={[0, 100]}
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                 axisLine={false}
                 tickLine={false}
                 tickCount={5}
               />
-              <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartTooltip 
+                content={<ChartTooltipContent />} 
+                animationDuration={chartConfig.animationDuration}
+              />
+              <defs>
+                <linearGradient id={`levelGradient-${medication.id}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={medication.color} stopOpacity={0.6}/>
+                  <stop offset="95%" stopColor={medication.color} stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id={`effectivenessGradient-${medication.id}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(var(--chart-3))" stopOpacity={0.6}/>
+                  <stop offset="95%" stopColor="hsl(var(--chart-3))" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
               <Area
                 type="monotone"
                 dataKey="level"
                 stroke={medication.color}
-                fill={`${medication.color}40`}
+                fill={`url(#levelGradient-${medication.id})`}
                 strokeWidth={2}
                 activeDot={{ r: 5 }}
+                animationDuration={chartConfig.isReducedMotion ? 0 : 1200}
+                animationEasing="ease-in-out"
               />
               <Line
                 type="monotone"
                 dataKey="effectiveness"
-                stroke="#6366f1"
+                stroke="hsl(var(--chart-3))"
                 strokeWidth={2}
                 dot={{ r: 3 }}
                 activeDot={{ r: 5 }}
+                animationDuration={chartConfig.isReducedMotion ? 0 : 1200}
+                animationEasing="ease-in-out"
               />
             </AreaChart>
           </ChartContainer>
         </div>
-        <div className="mt-3 text-xs bg-muted p-2 rounded-sm">
+        <div className="mt-3 text-xs bg-muted/60 p-3 rounded-md border border-muted/70">
           <p className="font-medium mb-1">Pharmacokinetics:</p>
           <p className="text-muted-foreground">
             {medication.name} has a half-life of approximately {halfLife.toFixed(1)} hours 
