@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 interface MedicationListProps {
   medications: Medication[];
@@ -30,30 +31,58 @@ const MedicationList = ({ medications, onDelete, onAdd }: MedicationListProps) =
     <div className="space-y-4">
       <div className="grid gap-4">
         {medications.length > 0 ? (
-          medications.map((medication) => (
+          medications.map((medication, index) => (
             <Card 
               key={medication.id} 
-              className="overflow-hidden transition-all duration-200 hover:shadow-lg border-l-4 animate-scale-in" 
-              style={{ borderLeftColor: medication.color }}
+              className={cn(
+                "w-full overflow-hidden card-hover cursor-pointer transform transition-all duration-200 hover:shadow-md hover:scale-[1.02]",
+                "opacity-0 animate-scale-in opacity-100"
+              )}
+              style={{ 
+                animationDelay: `${index * 0.05}s`,
+                animationFillMode: "forwards"
+              }}
             >
-              <CardContent className="p-0">
-                <div className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div
-                        className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                        style={{ backgroundColor: `${medication.color}15` }}
-                      >
-                        <PillIcon className="h-5 w-5" style={{ color: medication.color }} />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text 
--lg">{medication.name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {medication.dose} • {medication.frequency}
-                        </p>
-                      </div>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <h3 className="text-base font-semibold text-foreground">
+                      {medication.name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {medication.dose} • {medication.frequency}
+                    </p>
+                  </div>
+
+                  <div className="flex-1 mx-6 max-w-xs">
+                    <Progress
+                      value={getLevelPercentage(medication.level, medication.totalDose)}
+                      className="h-2 mb-1 rounded-full"
+                      style={
+                        {
+                          backgroundColor: `${medication.color}20`,
+                          "--progress-background": medication.color,
+                        } as React.CSSProperties
+                      }
+                    />
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">
+                        {medication.level} {medication.totalDose || 100}
+                      </span>
                     </div>
+                  </div>
+
+                  <div className="flex items-center">
+                    <div className="flex items-center text-sm mr-4">
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center mr-2"
+                        style={{ backgroundColor: `${medication.color}20` }}
+                      >
+                        <Clock9Icon className="h-4 w-4" style={{ color: medication.color }} />
+                      </div>
+                      <span className="font-medium">Next: {medication.nextDose}</span>
+                    </div>
+                    
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted/50">
@@ -88,32 +117,6 @@ const MedicationList = ({ medications, onDelete, onAdd }: MedicationListProps) =
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </div>
-                </div>
-
-                <Progress
-                  value={getLevelPercentage(medication.level, medication.totalDose)}
-                  className="h-1.5 rounded-none"
-                  style={{
-                    backgroundColor: `${medication.color}20`,
-                    "--progress-background": medication.color,
-                  } as React.CSSProperties}
-                />
-
-                <div className="px-4 py-3 bg-muted/10 grid grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center">
-                    <Clock9Icon className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <div>
-                      <p className="text-muted-foreground">Last Taken</p>
-                      <p className="font-medium">{medication.lastTaken}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <AlertCircleIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <div>
-                      <p className="text-muted-foreground">Next Dose</p>
-                      <p className="font-medium">{medication.nextDose}</p>
-                    </div>
                   </div>
                 </div>
               </CardContent>
