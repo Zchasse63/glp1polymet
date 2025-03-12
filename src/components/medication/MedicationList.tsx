@@ -65,11 +65,7 @@ const MedicationList = ({ medications, onDelete, onAdd }: MedicationListProps) =
                         } as React.CSSProperties
                       }
                     />
-                    <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">
-                        {medication.level} {medication.totalDose || 100}
-                      </span>
-                    </div>
+                    {/* Removed the span that showed medication level and totalDose */}
                   </div>
 
                   <div className="flex items-center">

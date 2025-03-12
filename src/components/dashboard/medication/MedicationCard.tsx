@@ -67,11 +67,7 @@ const MedicationCard = memo(({
                 } as React.CSSProperties
               }
             />
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">
-                {med.level} {med.totalDose || 100}
-              </span>
-            </div>
+            {/* Removed span showing medication level and total dose */}
           </div>
 
           <div className="flex items-center text-sm">
